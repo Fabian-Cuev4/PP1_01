@@ -1,0 +1,54 @@
+# =====================
+# SISTEMA OPERATIVO
+# =====================
+.DS_Store
+Thumbs.db
+
+# =====================
+# IDEs / EDITORES
+# =====================
+.vscode/
+.idea/
+*.swp
+
+# =====================
+# LOGS
+# =====================
+*.log
+
+# =====================
+# VARIABLES DE ENTORNO
+# =====================
+.env
+.env.*
+!.env.example
+
+# =====================
+# BACKEND - PYTHON
+# =====================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+pip-wheel-metadata/
+pytest_cache/
+
+# =====================
+# FRONTEND - REACT
+# =====================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+dist/
+build/
+
+# =====================
+# DOCKER
+# =====================
+*.tar
+docker-data/
