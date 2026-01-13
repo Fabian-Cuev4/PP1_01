@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro de Mantenimiento - SIGLAB</title>
+    <link rel="stylesheet" href="./style_formulario2.css">
+</head>
+<body>
+
+    <div class="modal-overlay">
+        
+        <div class="modal-content">
+            <div class="modal-header">
+                <i class="fa-solid fa-screwdriver-wrench icon-title"></i>
+                <h2 class="modal-title">Registro de mantenimiento</h2>
+            </div>
+            
+            <form>
+                <div class="form-group">
+                    <label>Empresa/ Institución</label>
+                    <input type="text" placeholder="Añade la empresa y especificar el cargo">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Técnico Responsable</label>
+                        <input type="text" placeholder="Ingresa nombres completos">
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de mantenimiento</label>
+                        <select>
+                            <option value="">Selecciona</option>
+                            <option value="preventivo">Preventivo</option>
+                            <option value="correctivo">Correctivo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="width: 50%;">
+                    <label>Fecha de mantenimiento</label>
+                    <input type="text" placeholder="dd/mm/aaaa">
+                </div>
+
+                <div class="form-group">
+                    <label>Observaciones</label>
+                    <input type="text" placeholder="Ingresa un comentario">
+                </div>
+
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="avanzadas">
+                    <label for="avanzadas">Opciones avanzadas</label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-save">Guardar</button>
+                    <button type="button" class="btn-cancel">Cancelar</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+</body>
+</html>

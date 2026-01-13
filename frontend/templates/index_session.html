@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <title>Login - SIGLAB</title>
+        <!-- Importacion del archivo CSS para los estilos de la página -->
+        <link rel="stylesheet" href="style_session.css">
+    </head>
+    <body>
+        <!-- Contenedor principal del formulario de inicio de sesión -->
+        <div class="login-card">
+
+            <!-- Sección donde va el logo -->
+            <div class="logo-section">
+                <img src="../imagenes y logos/Logo.png" alt="SIGLAB Logo" class="logo">
+            </div>
+
+            <!-- Formulario de inicio de sesión -->
+            <form>
+                <!-- Campo para ingresar el usuario -->
+                <div class="input-user">
+                    <label for="usuario">Usuario</label>
+                    <div class="input-information">
+                        <input type="text" id="usuario" placeholder="Ingresar usuario">
+                    </div>
+                </div>
+                <!-- Campo para ingresar la contraseña -->
+                <div class="input-password">
+                    <label for="password">Contraseña</label>
+                    <div class="input-information">
+                        <input type="password" id="password" placeholder="Ingresar contraseña">
+                    </div>
+                </div>
+                <!-- Botón para enviar el formulario -->
+                <button type="submit" class="btn-signin">Iniciar sesión</button>
+            </form>
+
+            <!-- Texto que aparece debajo del formulario para poder registrarse-->
+            <p class="footer-text">
+                ¿No tienes cuenta? <a href="#">Registrarse</a>
+            </p>
+        </div>
+    </body>
+</html>

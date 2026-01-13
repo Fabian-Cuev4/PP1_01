@@ -1,0 +1,136 @@
+/* General */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: white;
+    width: 650px; /* Un poco más ancho para los campos dobles */
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+/* Cabecera del Formulario */
+.modal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.icon-title {
+    color: #ef5b83; /* Color rosado del icono */
+    font-size: 24px;
+}
+
+.modal-title {
+    font-size: 22px;
+    color: #333;
+    font-weight: 700;
+}
+
+/* Estructura del Formulario */
+.form-row {
+    display: flex;
+    gap: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+/* Inputs y Selects */
+input[type="text"], 
+select {
+    background-color: #f1f3f5;
+    border: none;
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+    outline: none;
+    width: 100%;
+}
+
+input::placeholder {
+    color: #b0b5b9;
+}
+
+/* Estilo para el select */
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 15px;
+}
+
+/* Checkbox */
+.checkbox-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.checkbox-group label {
+    margin-bottom: 0;
+    font-size: 13px;
+    color: #444;
+}
+
+/* Acciones */
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 40px;
+}
+
+.btn-save, .btn-cancel {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.btn-save {
+    background-color: #3ca0e7;
+    color: white;
+}
+
+.btn-cancel {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-save:hover, .btn-cancel:hover {
+    filter: brightness(0.9);
+}

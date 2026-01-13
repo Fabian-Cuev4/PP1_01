@@ -1,0 +1,117 @@
+/* Quita los espacios y estilos por defecto del navegador */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* fondo oscuro del modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4); /* hace fondo oscuro */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* caja del formulario */
+.modal-head {
+    background-color: white;
+    width: 500px;
+    padding: 35px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3); /* sombra alrededor */
+}
+
+/* titulo del modal */
+.modal-content-head {
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 25px; /* espacio debajo del titulo */
+    color: #1a1a1a;
+}
+
+
+/* grupo de cada input dentro de la fila */
+.form-content {
+    flex: 1;
+    margin-bottom: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-content label {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 3px;
+    font-weight: 500;
+}
+
+/* inputs y selects */
+input[type="text"], 
+select {
+    background-color: #f1f3f5;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #333;
+    outline: none;
+    margin-top: 3px;
+    margin-bottom: 5px; 
+}
+
+input::placeholder {
+    color: #adb5bd;
+}
+
+/* checkbox */
+.checkbox-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.checkbox-group label {
+    margin-bottom: 0;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+/* botones inferiores */
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 35px;
+}
+
+.btn-save, .btn-cancel {
+    padding: 10px 25px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+    transition: opacity 0.2s;
+}
+
+.btn-save {
+    background-color: #3ca0e7;
+    color: white;
+}
+
+.btn-cancel {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-save:hover, .btn-cancel:hover {
+    opacity: 0.85;
+}
