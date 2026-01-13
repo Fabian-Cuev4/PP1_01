@@ -1,21 +1,33 @@
+/* --- VARIABLES Y RESETEO --- */
+:root {
+    --primary-color: #3ca0e7;  /* Azul principal */
+    --hover-color: #2e86c1;
+    --danger-color: #e74c3c;
+    --success-color: #2ecc71;
+    --bg-body: #eef2f5;        /* Gris suave de fondo */
+    --card-bg: #ffffff;
+    --radius-xl: 20px;         /* Radio MUY redondo (como pediste) */
+    --radius-md: 12px;
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-    background-color: #ffffff;
+    background-color: var(--bg-body);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
-/* Header & Footer compartidos */
+/* --- HEADER Y FOOTER --- */
 .main-header, .main-footer {
-    background-color: #3ca0e7;
-    padding: 10px 40px;
+    background-color: var(--primary-color);
+    padding: 0 40px;
     display: flex;
     align-items: center;
 }
@@ -23,58 +35,85 @@ body {
 .main-header {
     height: 80px;
     justify-content: space-between;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 .main-footer {
-    height: 60px;
+    height: 50px;
     justify-content: flex-end;
     margin-top: auto;
 }
 
+/* Avatar circular */
 .avatar-pink {
     background-color: #ef5b83;
-    width: 55px;
-    height: 55px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
     color: white;
-    font-size: 24px;
-    border: 2px solid white;
+    font-size: 20px;
+    border: 3px solid rgba(255,255,255,0.5);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
+/* BOTÓN CERRAR SESIÓN (BONITO Y TRANSPARENTE) */
 .btn-logout {
-    background: none;
-    border: none;
+    background: rgba(255, 255, 255, 0.2); /* Efecto cristal */
+    border: 1px solid rgba(255, 255, 255, 0.4);
     color: white;
+    padding: 8px 20px;
+    border-radius: var(--radius-md);
     cursor: pointer;
-    text-align: center;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
 }
 
-.btn-logout i { font-size: 22px; }
-.btn-logout span { display: block; font-size: 10px; font-weight: bold; margin-top: 3px; }
+.btn-logout:hover {
+    background: white;
+    color: var(--primary-color);
+    transform: translateY(-2px);
+}
 
-/* Barra de Acciones */
-.content { padding: 30px 50px; }
+.btn-logout span {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+/* --- BARRA DE ACCIONES SUPERIOR --- */
+.content { padding: 40px 60px; }
 
 .action-bar {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
 }
 
 .btn-blue {
-    background-color: #3ca0e7;
+    background-color: var(--primary-color);
     color: white;
     border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
+    padding: 12px 25px;
+    border-radius: var(--radius-md);
     margin-right: 15px;
-    font-weight: bold;
+    font-weight: 600;
     cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 4px 6px rgba(60, 160, 231, 0.2);
 }
 
+.btn-blue:hover {
+    background-color: var(--hover-color);
+    transform: translateY(-2px);
+}
+
+/* Buscador moderno */
 .search-container {
     position: relative;
     display: flex;
@@ -83,34 +122,85 @@ body {
 
 .search-container i {
     position: absolute;
-    left: 10px;
-    color: #ccc;
+    left: 15px;
+    color: #999;
 }
 
 .search-container input {
-    padding: 8px 10px 8px 35px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    width: 250px;
+    padding: 12px 15px 12px 40px;
+    border: 1px solid #ddd;
+    border-radius: var(--radius-md);
+    width: 300px;
+    outline: none;
+    transition: 0.3s;
 }
 
-/* Contenedor de Detalle */
+.search-container input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(60, 160, 231, 0.1);
+}
+
+/* --- CONTENEDOR PRINCIPAL (LAYOUT) --- */
 .detail-container {
     display: flex;
-    gap: 15px;
+    gap: 25px;
+    align-items: stretch; /* Estira los elementos a la misma altura */
 }
 
-.info-card {
-    background-color: #d9dee3;
+/* --- TARJETA ESTILO "VENTANA 1" (LA MAGIA) --- */
+.info-card-modern {
     flex: 1;
-    padding: 30px;
-    border-radius: 2px;
+    background-color: var(--card-bg);
+    border-radius: var(--radius-xl); /* Esquinas MUY redondas (20px) */
+    display: flex;
+    overflow: hidden; /* Corta lo que sobre de las esquinas */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08); /* Sombra elegante */
+    border: 1px solid white;
+}
+
+/* Barra lateral azul DENTRO de la tarjeta */
+.sidebar-blue {
+    width: 140px;
+    background-color: var(--primary-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.sidebar-blue i {
+    font-size: 70px; /* Icono grande */
+    opacity: 0.9;
+}
+
+/* Cuerpo de la tarjeta */
+.card-content {
+    flex: 1;
+    padding: 35px;
+    background-color: #f8f9fa; /* Fondo gris muy clarito interno */
+}
+
+.info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 15px;
 }
 
 .info-header h2 {
-    font-size: 38px;
-    margin-bottom: 20px;
+    font-size: 28px;
     color: #333;
+}
+
+.status-badge {
+    background-color: var(--success-color);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
 }
 
 .info-body {
@@ -118,41 +208,63 @@ body {
     gap: 40px;
 }
 
-.info-body p {
-    font-size: 13px;
-    margin-bottom: 8px;
-    color: #444;
+.column { flex: 1; }
+
+.column p {
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-/* Botones Laterales */
+.column p i {
+    color: var(--primary-color);
+    width: 20px;
+    text-align: center;
+}
+
+.desc {
+    margin-top: 15px;
+    padding: 10px;
+    background: #e9ecef;
+    border-radius: 8px;
+}
+
+/* --- BOTONES LATERALES (DERECHA) --- */
 .side-buttons {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    background-color: #d9dee3;
-    padding: 20px;
+    gap: 15px;
+    background-color: white;
+    padding: 25px;
+    border-radius: var(--radius-xl); /* También redondo */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
     justify-content: center;
+    width: 200px;
 }
 
 .btn-action {
     border: none;
     color: white;
-    padding: 10px 15px;
-    border-radius: 6px;
+    padding: 14px 20px;
+    border-radius: var(--radius-md);
     font-weight: bold;
     display: flex;
     align-items: center;
-    gap: 8px;
-    width: 160px;
+    gap: 10px;
+    width: 100%;
     cursor: pointer;
+    transition: 0.3s;
     font-size: 14px;
 }
 
-.btn-red { background-color: #e74c3c; }
-.btn-green { background-color: #1abc9c; }
-.btn-light-blue { background-color: #3498db; }
-
-.footer-logo img {
-    filter: brightness(0) invert(1);
-    height: 45px;
+.btn-action:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
 }
+
+.btn-red { background-color: var(--danger-color); }
+.btn-green { background-color: var(--success-color); }
+.btn-light-blue { background-color: #3498db; }
