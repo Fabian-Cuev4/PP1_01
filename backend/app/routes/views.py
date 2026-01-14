@@ -1,18 +1,12 @@
 from fastapi import APIRouter, Request
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
-from fastapi.staticfiles import StaticFiles
 
 route = APIRouter()
 
-dir = Path(__file__).resolve().parents[3]
-route.mount(
-    "/static",
-    StaticFiles(directory=dir /"frontend"/"static"),
-    name="static"
-)
-dir = Path(__file__).resolve().parents[3]
-templates = Jinja2Templates(directory=dir / "frontend"/"templates")
+# Subimos los niveles necesarios para llegar a la raíz del proyecto y luego a frontend/templates
+dir_raiz = Path(__file__).resolve().parents[3] 
+templates = Jinja2Templates(directory=dir_raiz / "frontend" / "templates")
 
 #Rutas para paginas renderizadas
 @route.get("/home", tags=["maquinas"])

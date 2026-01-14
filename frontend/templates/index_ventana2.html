@@ -98,6 +98,37 @@
                 <img src="/static/Logo b-n.png" alt="SIGLAB Logo">
             </div>
     </footer>
+
+    <!--prueba-->
     <script src="/static/ventana.js"></script>
+    <script>document.addEventListener("DOMContentLoaded", async () => {
+            const tablaCuerpo = document.getElementById("tabla-maquinas-cuerpo"); // Asegúrate de que tu <tbody> tenga este id
+
+            try {
+                const response = await fetch("/home/maquinas/listar");
+                const maquinas = await response.json();
+
+                if (maquinas.length === 0) {
+                    tablaCuerpo.innerHTML = "<tr><td colspan='3'>No hay máquinas registradas</td></tr>";
+                    return;
+                }
+
+                // Limpiar tabla y llenar con los datos del arreglo
+                tablaCuerpo.innerHTML = "";
+                maquinas.forEach(m => {
+                    const fila = `
+                        <tr>
+                            <td>${m.codigo}</td>
+                            <td>${m.area}</td>
+                            <td><span class="status-${m.estado.toLowerCase()}">${m.estado}</span></td>
+                        </tr>
+                    `;
+                    tablaCuerpo.insertAdjacentHTML("beforeend", fila);
+                });
+            } catch (error) {
+                console.error("Error cargando máquinas:", error);
+            }
+        });</script>
+    
 </body>
 </html>

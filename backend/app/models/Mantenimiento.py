@@ -1,12 +1,23 @@
 class Mantenimiento:
     # Metodo constructor
-    def __init__(self, empresa, tecnico, tipo, fecha, observaciones):
+    def __init__(self, maquina_objeto, empresa, tecnico, tipo, fecha, observaciones):
         # Atributos privados
+        self._maquina = maquina_objeto # Relación con Maquina
         self._empresa = empresa
         self._tecnico = tecnico
         self._tipo = tipo # Preventivo, Correctivo, etc.
         self._fecha = fecha
         self._observaciones = observaciones
+
+    # Getter para sacar el código directamente de la máquina vinculada
+    @property
+    def codigo_maquina_vinculada(self):
+        # Accedemos al getter de la clase Maquina
+        return self._maquina.codigo_equipo
+
+    @property
+    def empresa(self):
+        return self._empresa
 
     #Getters
     @property

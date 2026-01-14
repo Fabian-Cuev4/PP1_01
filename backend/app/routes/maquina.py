@@ -1,18 +1,33 @@
-from fastapi import FastAPI
-from typing import List
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+from datetime import date
+from app.models import Maquina  # Importas el modelo con getters/setters
+from app.repositories import repo_instancia as repo
 
-app = FastAPI()
+router = APIRouter(prefix="/home/maquinas")
 
-class Maquina(BaseModel):
+
+# Modelo de datos (Pydantic)
+class MaquinaSchema(BaseModel):
     codigo_equipo: str
-    estado_equipo: str
-    area_equipo: str
-    fecha_adquision: str
-maquinas: List[Maquina] = []
+    estado_actual: str
+    area: str
+    fecha: date
 
-#Rutas de acciones 
-@app.post("/maquinas", tags=["maquinas"])
-def agregar_maquina(maquina: Maquina):
-    maquinas.append(maquina)
-    return {"ok": True}
+@router.post("/agregar")
+async def agregar_maquina(datos: MaquinaSchema):
+    nueva_maquina = Maquina(datos.codigo_equipo, datos.estado_actual, datos.area, datos.fecha)
+    repo.guardar_maquina(nueva_maquina)
+    return {"mensaje": f"Máquina {nueva_maquina.codigo_equipo} guardada en el repo"}
+
+@router.get("/listar")
+async def listar_maquinas():
+    maquinas_objetos = repo.obtener_todas_maquinas()
+    # Convertimos los objetos a diccionarios para que el Navegador los entienda (JSON)
+    return [
+        {
+            "codigo": m.codigo_equipo, 
+            "estado": m.estado_actual, 
+            "area": m.area
+        } for m in maquinas_objetos
+    ]
