@@ -2,63 +2,79 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <!-- define la codificacion de caracteres para que los acentos y simbolos se muestren correctamente -->
     <title>Registro de Mantenimiento - SIGLAB</title>
-    <link rel="stylesheet" href="./style_formulario2.css">
+    <!-- titulo que aparece en la pestaña del navegador -->
+    <link rel="stylesheet" href="/static/style_formulario2.css">
+    <!-- vincula el archivo css que contiene los estilos del formulario -->
+
 </head>
 <body>
-
     <div class="modal-overlay">
-        
+        <!-- fondo oscuro que aparece detras del modal -->
         <div class="modal-content">
+            <!-- contenido principal del modal --> 
             <div class="modal-header">
-                <i class="fa-solid fa-screwdriver-wrench icon-title"></i>
+                <!-- encabezado del modal -->
                 <h2 class="modal-title">Registro de mantenimiento</h2>
+                <!-- titulo del modal -->
             </div>
-            
             <form>
+                <!-- formulario para registrar mantenimiento -->
                 <div class="form-group">
+                    <!-- grupo de formulario para empresa/institucion -->
                     <label>Empresa/ Institución</label>
                     <input type="text" placeholder="Añade la empresa y especificar el cargo">
+                    <!-- caja de texto para ingresar empresa y cargo -->
                 </div>
-
                 <div class="form-row">
+                    <!-- fila que contiene dos grupos de formulario -->
                     <div class="form-group">
+                        <!-- grupo para tecnico responsable -->
                         <label>Técnico Responsable</label>
                         <input type="text" placeholder="Ingresa nombres completos">
+                        <!-- caja de texto para el nombre del tecnico -->
                     </div>
                     <div class="form-group">
+                        <!-- grupo para tipo de mantenimiento -->
                         <label>Tipo de mantenimiento</label>
                         <select>
                             <option value="">Selecciona</option>
                             <option value="preventivo">Preventivo</option>
                             <option value="correctivo">Correctivo</option>
                         </select>
+                        <!-- menu desplegable para seleccionar tipo de mantenimiento -->
                     </div>
                 </div>
-
                 <div class="form-group" style="width: 50%;">
+                    <!-- grupo para la fecha de mantenimiento -->
                     <label>Fecha de mantenimiento</label>
                     <input type="text" placeholder="dd/mm/aaaa">
+                    <!-- caja de texto para ingresar la fecha -->
                 </div>
-
                 <div class="form-group">
+                    <!-- grupo para observaciones -->
                     <label>Observaciones</label>
                     <input type="text" placeholder="Ingresa un comentario">
+                    <!-- caja de texto para comentarios adicionales -->
                 </div>
-
                 <div class="form-group checkbox-group">
+                    <!-- grupo con checkbox para opciones avanzadas -->
                     <input type="checkbox" id="avanzadas">
                     <label for="avanzadas">Opciones avanzadas</label>
+                    <!-- etiqueta para el checkbox -->
                 </div>
-
                 <div class="form-actions">
+                    <!-- botones de accion del formulario -->
                     <button type="button" class="btn-save">Guardar</button>
-                    <button type="button" class="btn-cancel">Cancelar</button>
+                    <!-- boton para guardar los datos -->
+                    <button type="button" id="btn-cancel-action" class="btn-cancel">Cancelar</button>
+                    <!-- boton para cancelar la accion -->
                 </div>
             </form>
         </div>
-
     </div>
-
+    <script src="/static/formulario.js"></script>
+    <!-- vincula el archivo javascript para funcionalidades del formulario -->
 </body>
 </html>

@@ -9,11 +9,10 @@ class Maquina(BaseModel):
     estado_equipo: str
     area_equipo: str
     fecha_adquision: str
-
-
 maquinas: List[Maquina] = []
 
-@app.post('/maquinas',tags=['maquinas'])
-def agregar_maquina(maquina:Maquina):
+#Rutas de acciones 
+@app.post("/maquinas", tags=["maquinas"])
+def agregar_maquina(maquina: Maquina):
     maquinas.append(maquina)
-    return [m.model_dump() for m in maquinas]
+    return {"ok": True}

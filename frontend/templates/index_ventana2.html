@@ -1,71 +1,102 @@
 <!DOCTYPE html>
+<!-- Esto le dice al navegador que este archivo es un documento HTML5 -->
+
 <html lang="es">
+<!-- Aquí empieza el documento HTML y 'lang="es"' indica que está en español -->
+
 <head>
     <meta charset="UTF-8">
-    <title>SIGLAB - Lista de Máquinas</title>
-    <link rel="stylesheet" href="./style_ventana2.css">
+    <!-- Define la codificación de caracteres, así los acentos y símbolos se muestran bien -->
+    
+    <title>SIGLAB - Detalle de Máquina</title>
+    <!-- Este es el título de la página que aparece en la pestaña del navegador -->
+    
+    <link rel="stylesheet" href="/static/style_ventana2.css">
+    <!-- Aquí estamos enlazando un archivo CSS externo para darle estilo a la página -->
 </head>
-<body>
 
+<body>
+<!-- Aquí empieza todo el contenido visible de la página -->
     <header class="main-header">
+        <!-- Header o cabecera de la página -->
         <div class="user-profile">
-            <div class="avatar-pink">
-                <i class="fa-solid fa-user"></i>
-            </div>
+            <!-- Sección donde aparece el perfil del usuario -->
+            <div class="avatar">
+                    <img src="/static/icono_user.png"/>
+                </div>
         </div>
+        <!--Botón para cerrar sesión-->
         <div class="logout-section">
-            <button class="btn-logout">
-                <i class="fa-solid fa-right-from-bracket"></i>
-                <span>Cerrar Sesión</span>
-            </button>
+                <button class="btn-logout">
+                    Cerrar Sesión
+                    <img src="/static/icono_cerrar_sesion.png" />
+                </button>
         </div>
     </header>
 
     <main class="content">
+    <!-- Contenido principal de la página -->
         <div class="action-bar">
+            <!-- Barra de acciones arriba de la información de la máquina -->
             <div class="left-actions">
-                <button class="btn-blue"><i class="fa-solid fa-plus"></i> Agregar Máquina</button>
-                <button class="btn-blue"><i class="fa-solid fa-file-lines"></i> Generar Reporte</button>
+                <button class="btn-blue">Agregar Máquina</button>
+                <button class="btn-blue">Generar Reporte</button>
+                <!-- Botones para agregar máquina y generar reporte -->
             </div>
             <div class="search-container">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" placeholder="Search">
+                <!-- Ícono de lupa para búsqueda -->
+                <input type="text" placeholder="Buscar equipo...">
+                <!-- Caja de texto donde el usuario puede escribir para buscar -->
             </div>
         </div>
 
         <div class="detail-container">
-            <div class="info-card">
-                <div class="info-header">
-                    <h2>PC-LAB-012</h2>
+        <!-- Contenedor principal con la información detallada de la máquina -->
+            <div class="info-card-modern">
+            <!-- Tarjeta donde se muestra la información -->
+                <div class="sidebar-blue">
+                <!-- Barra lateral decorativa, solo por estilo -->
                 </div>
-                <div class="info-body">
-                    <div class="column">
-                        <p><strong>Área:</strong> Laboratorio de Redes</p>
-                        <p><strong>Estado actual:</strong> Operativa</p>
-                        <p><strong>Fecha de adquisición:</strong> 25/12/2021</p>
+
+                <div class="card-content">
+                <!-- Aquí está el contenido real de la tarjeta -->
+                    <div class="info-header">
+                        <h2>PC-LAB-012</h2>
+                        <!-- Nombre o identificador de la máquina -->
+                        <span class="status-badge">Operativa</span>
+                        <!-- Estado de la máquina -->
                     </div>
-                    <div class="column">
-                        <p><strong>Último mantenimiento:</strong> 20/01/2022</p>
-                        <p><strong>Tipo de mantenimiento:</strong> Correctivo</p>
-                        <p><strong>Técnico responsable:</strong> Juan Cardenas</p>
-                        <p><strong>Empresa / Institución:</strong> UCE, estudiante</p>
-                        <p><strong>Descripción:</strong> Equipo restaurado con éxito, se puede volver a utilizar.</p>
+                    <div class="info-body">
+                    <!-- Información detallada de la máquina dividida en columnas -->
+                        <div class="column">
+                            <p><strong> Ubicación:</strong> Edificio A - Piso 2</p>
+                            <p><strong> Área:</strong> Laboratorio de Redes</p>
+                            <p><strong> Adquisición:</strong> 25/12/2021</p>
+                        </div>
+                        <div class="column">
+                            <p><strong> Mantenimiento:</strong> 20/01/2022</p>
+                            <p><strong> Responsable:</strong> Juan Cardenas</p>
+                            <p class="desc"><strong> Nota:</strong> Equipo restaurado con éxito.</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="side-buttons">
-                <button class="btn-action btn-red"><i class="fa-solid fa-trash-can"></i> Eliminar</button>
-                <button class="btn-action btn-green"><i class="fa-solid fa-arrows-rotate"></i> Actualizar</button>
-                <button class="btn-action btn-light-blue"><i class="fa-solid fa-screwdriver-wrench"></i> Mantenimiento</button>
+            <!-- Botones de acciones rápidas al lado de la tarjeta -->
+                <button class="btn-action btn-red">Eliminar</button>
+                <button class="btn-action btn-green">Actualizar</button>
+                <button class="btn-action btn-light-blue"> Mantenimiento</button>
+                <!-- Cada botón tiene su color para diferenciar la acción -->
             </div>
         </div>
     </main>
 
+    <!--Pie de página-->
     <footer class="main-footer">
-        <div class="footer-logo">
-            <img src="https://via.placeholder.com/100x40?text=SIGLAB" alt="SIGLAB Logo">
-        </div>
+            <div class="footer-logo">
+                <img src="/static/Logo b-n.png" alt="SIGLAB Logo">
+            </div>
     </footer>
 
 </body>
