@@ -35,10 +35,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 const resultado = await response.json();
 
                 if (response.ok) {
-                    alert("✅ Máquina guardada: " + resultado.mensaje);
+                    alert("Máquina guardada: " + resultado.mensaje);
                     window.location.href = "/home/maquinas"; // Redirige a la lista
                 } else {
-                    alert("❌ Error: " + (resultado.detail || "No se pudo guardar"));
+                    alert("Error: " + (resultado.detail || "No se pudo guardar"));
                 }
             } catch (error) {
                 console.error("Error en la petición:", error);

@@ -1,7 +1,7 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel
 from datetime import date
-from app.models import Maquina  # Importas el modelo con getters/setters
+from app.models.Maquina import Maquina  # Importas el modelo con getters/setters
 from app.repositories import repo_instancia as repo
 
 router = APIRouter(prefix="/home/maquinas")
@@ -28,6 +28,7 @@ async def listar_maquinas():
         {
             "codigo": m.codigo_equipo, 
             "estado": m.estado_actual, 
-            "area": m.area
+            "area": m.area,
+            "fecha": str(m.fecha)
         } for m in maquinas_objetos
     ]

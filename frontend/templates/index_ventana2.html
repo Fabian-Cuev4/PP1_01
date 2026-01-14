@@ -69,7 +69,6 @@
                     <div class="info-body">
                     <!-- Información detallada de la máquina dividida en columnas -->
                         <div class="column">
-                            <p><strong> Ubicación:</strong> Edificio A - Piso 2</p>
                             <p><strong> Área:</strong> Laboratorio de Redes</p>
                             <p><strong> Adquisición:</strong> 25/12/2021</p>
                         </div>
@@ -100,9 +99,24 @@
     </footer>
 
     <!--prueba-->
+    <div class="inventory-section" style="margin-top: 20px; background: white; padding: 15px; border-radius: 10px;">
+    <h3>Inventario de Equipos</h3>
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="text-align: left; border-bottom: 2px solid #0056b3;">
+                <th>Código</th>
+                <th>Área</th>
+                <th>Estado</th>
+                <th>Fecha</th>
+            </tr>
+        </thead>
+        <tbody id="tabla-maquinas-cuerpo">
+            </tbody>
+    </table>
+</div>
     <script src="/static/ventana.js"></script>
     <script>document.addEventListener("DOMContentLoaded", async () => {
-            const tablaCuerpo = document.getElementById("tabla-maquinas-cuerpo"); // Asegúrate de que tu <tbody> tenga este id
+            const tablaCuerpo = document.getElementById("tabla-maquinas-cuerpo");
 
             try {
                 const response = await fetch("/home/maquinas/listar");
@@ -121,6 +135,7 @@
                             <td>${m.codigo}</td>
                             <td>${m.area}</td>
                             <td><span class="status-${m.estado.toLowerCase()}">${m.estado}</span></td>
+                            <td>${m.fecha}</td>
                         </tr>
                     `;
                     tablaCuerpo.insertAdjacentHTML("beforeend", fila);
