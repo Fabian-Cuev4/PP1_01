@@ -32,96 +32,50 @@ async function cargarMaquinas() {
         const response = await fetch("/home/maquinas/listar");
         const maquinas = await response.json();
         
-        contenedor.innerHTML = "";
+        contenedor.innerHTML = ""; // Limpiamos contenedor
 
         if (maquinas.length === 0) {
-            contenedor.innerHTML = "<p style='text-align:center; padding:20px;'>No se encontraron equipos registrados.</p>";
+            contenedor.innerHTML = "<p style='text-align:center; padding:20px;'>No hay equipos registrados.</p>";
             return;
         }
 
         for (const m of maquinas) {
-            // 1. Valores por defecto (Importante: 'empresa' y 'tipo' son directos de h[0])
-            let ultimo = { empresa: "---", tipo: "---", fecha: "---", tecnico: "---", nota: "Sin registros recientes." };
-            
-            try {
-                const resM = await fetch(`/home/mantenimiento/listar/${m.codigo}`);
-                if (resM.ok) {
-                    const h = await resM.json();
-                    if (h && h.length > 0) {
-                        // CORRECCIÓN AQUÍ: Accedemos directamente a las propiedades del primer registro [0]
-                        ultimo = { 
-                            empresa: h[0].empresa || "---",
-                            tipo: h[0].tipo || "---",
-                            fecha: h[0].fecha || "---", 
-                            tecnico: h[0].tecnico || "---", 
-                            nota: h[0].observaciones || "Sin observaciones." 
-                        };
-                    }
-                }
-            } catch (e) { 
-                console.warn("No se pudo obtener el historial de " + m.codigo); 
-            }
-
             const claseEstado = obtenerClaseEstado(m.estado);
 
-            // 2. Generación del HTML (Se corrigió la etiqueta <strong> de Empresa)
+            // TARJETA MINIMALISTA: Solo datos base y los 4 botones
             const tarjetaHTML = `
                 <div class="detail-container">
                     <div class="card-space">
                         <div class="card-icon"></div>
                         <div class="card-info">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                <h3 style="font-size: 22px; color: #2c3e50;">${m.codigo}</h3>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h3 style="font-size: 22px; color: #2c3e50; margin: 0;">${m.codigo}</h3>
                                 <span class="status-badge ${claseEstado}">${m.estado}</span>
                             </div>
-                            <div style="display: flex; gap: 30px;">
-                                <div style="min-width: 200px;">
-                                    <p style="margin-bottom: 8px;"><strong>Área:</strong> ${m.area}</p>
-                                    <p><strong>Adquisición:</strong> ${m.fecha}</p>
-                                </div>
-                                <div style="flex: 1;">
-                                    <p style="margin-bottom: 8px;"><strong>Empresa:</strong> ${ultimo.empresa}</p>
-                                    <p style="margin-bottom: 8px;"><strong>Tipo Mantenimiento:</strong> ${ultimo.tipo}</p>
-                                    <p style="margin-bottom: 8px;"><strong>Último Mantenimiento:</strong> ${ultimo.fecha}</p>
-                                    <p style="margin-bottom: 8px;"><strong>Responsable:</strong> ${ultimo.tecnico}</p>
-                                    <div class="desc"><strong>Nota:</strong> ${ultimo.nota}</div>
-                                </div>
+                            <div style="display: flex; gap: 40px; font-size: 14px; color: #555;">
+                                <p><strong>Área:</strong> ${m.area}</p>
+                                <p><strong>Adquisición:</strong> ${m.fecha}</p>
                             </div>
                         </div>
                     </div>
                     
                     <div class="side-buttons">
-                        <button class="btn-action btn-red" onclick="confirmarEliminar('${m.codigo}')">Eliminar</button>
-                        <button class="btn-action btn-green" onclick="actualizar('${m.codigo}')">Actualizar</button>
+                        <button class="btn-action btn-yellow-history" onclick="verHistorial('${m.codigo}')">Historial mantenimiento</button>
                         <button class="btn-action btn-blue-act" onclick="irAMantenimiento('${m.codigo}')">Mantenimiento</button>
+                        <button class="btn-action btn-green" onclick="actualizar('${m.codigo}')">Actualizar</button>
+                        <button class="btn-action btn-red" onclick="confirmarEliminar('${m.codigo}')">Eliminar</button>
                     </div>
                 </div>
             `;
             contenedor.insertAdjacentHTML("beforeend", tarjetaHTML);
         }
     } catch (error) {
-        console.error("Error crítico al cargar máquinas:", error);
-        contenedor.innerHTML = "<p style='color:red;'>Error al conectar con el servidor.</p>";
+        console.error("Error al cargar máquinas:", error);
     }
 }
 
-/**
- * Funciones de Acción
- */
-function irAMantenimiento(codigo) {
+// Nueva función para el botón Historial
+function verHistorial(codigo) {
     localStorage.setItem("maquinaSeleccionada", codigo);
-    window.location.href = "/home/maquinas/formulario/mantenimiento";
-}
-
-/**
- * Función de filtrado para el buscador
- */
-function filtrarMaquinas() {
-    const termino = document.getElementById("input-busqueda").value.toLowerCase();
-    const tarjetas = document.querySelectorAll(".detail-container");
-
-    tarjetas.forEach(tarjeta => {
-        const texto = tarjeta.innerText.toLowerCase();
-        tarjeta.style.display = texto.includes(termino) ? "flex" : "none";
-    });
+    window.location.href = "/home/maquinas/historial";
 }

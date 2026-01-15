@@ -229,6 +229,7 @@ body {
 .btn-red { background-color: #e74c3c; }
 .btn-green { background-color: #2ecc71; }
 .btn-blue-act { background-color: #3498db; }
+.btn-yellow-history {background-color: #e4bc0b;}
 
 /* 7. FOOTER (Fijo con Logo ajustado) */
 .main-footer {
