@@ -22,8 +22,17 @@ class ProyectoService:
             fecha=datos_dict.get("fecha"),
             observaciones=datos_dict.get("observaciones")
         )
-
-        # Guarda obejto en el repo
+        # Guarda objeto en el repo
         self._repo.guardar_mantenimiento(nuevo_mtto)
-        
         return nuevo_mtto, None
+
+    def obtener_historial_mantenimiento(self, codigo_maquina: str):
+        # Primero verificamos si la máquina existe
+        maquina = self._repo.buscar_maquina_por_codigo(codigo_maquina)
+        if not maquina:
+            return None, "No se encontró la máquina para ver el historial"
+        
+        # Obtenemos los mantenimientos desde el repo
+        historial = self._repo.obtener_mantenimientos_por_maquina(codigo_maquina)
+        return historial, None
+        
