@@ -27,8 +27,6 @@ class ProyectoService:
                 area=datos_dict.get("area"),
                 fecha=datos_dict.get("fecha")
             )
-        else:
-            return None, "Tipo de equipo no reconocido"
 
         # Guardamos en el repo
         self._repo.guardar_maquina(nueva_maquina)
