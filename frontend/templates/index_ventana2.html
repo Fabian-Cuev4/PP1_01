@@ -27,7 +27,7 @@
         </div>
         <!--Botón para cerrar sesión-->
         <div class="logout-section">
-                <button class="btn-logout">
+                <button type="button" id="btn-logout-off" class="btn-logout">
                     Cerrar Sesión
                     <img src="/static/icono_cerrar_sesion.png" />
                 </button>
@@ -97,7 +97,8 @@
                 <img src="/static/Logo b-n.png" alt="SIGLAB Logo">
             </div>
     </footer>
-
+    <script src="/static/ventana.js"></script>
+    <script src="/static/session.js"></script>
     <!--prueba-->
     <div class="inventory-section" style="margin-top: 20px; background: white; padding: 15px; border-radius: 10px;">
     <h3>Inventario de Equipos</h3>
@@ -113,8 +114,7 @@
         <tbody id="tabla-maquinas-cuerpo">
             </tbody>
     </table>
-</div>
-    <script src="/static/ventana.js"></script>
+    </div>
     <script>document.addEventListener("DOMContentLoaded", async () => {
             const tablaCuerpo = document.getElementById("tabla-maquinas-cuerpo");
 

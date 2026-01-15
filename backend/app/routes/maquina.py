@@ -14,6 +14,7 @@ class MaquinaSchema(BaseModel):
     area: str
     fecha: date
 
+#Rutas funcionales
 @router.post("/agregar")
 async def agregar_maquina(datos: MaquinaSchema):
     nueva_maquina = Maquina(datos.codigo_equipo, datos.estado_actual, datos.area, datos.fecha)
