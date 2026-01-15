@@ -17,7 +17,7 @@ body {
 /* Contenedor principal del header */
 .main-header {
     background-color: #3498db;
-    height: 85px;
+    height: 85px; /* misma altura visual */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -27,14 +27,15 @@ body {
 /* Sección donde va la información del usuario */
 .user-profile {
     display: flex;
-    align-items: center;
+    align-items: center; /* centra verticalmente */
+    height: 100%; /* fuerza que ocupe toda la altura del header */
 }
 
 /* Círculo donde va el avatar del usuario */
 .avatar {
     background-color: #ec7063;
-    width: 60px;
-    height: 60px;
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
     display: flex;
     justify-content: center;
@@ -43,15 +44,16 @@ body {
 
 /* Imagen del avatar */
 .avatar img {
-    width: 80px;
-    height: 80px;
-    object-fit: contain;
+    width: 70px;
+    height: 70px;
+    object-fit: cover; /* centrado y recorte uniforme */
 }
 
 /* Contenedor del botón cerrar sesión */
 .logout-section {
     display: flex;
-    align-items: center;
+    align-items: center; /* centra verticalmente */
+    height: 100%; /* fuerza a ocupar toda la altura del header */
 }
 
 /* Botón cerrar sesión */
@@ -63,18 +65,16 @@ body {
     font-weight: bold;
     cursor: pointer;
     text-transform: uppercase;
-
-    /* Alinea el texto y el icono uno al lado del otro */
     display: flex;
-    align-items: center;
+    align-items: center; /* centra texto e icono verticalmente */
     gap: 8px;
 }
 
 /* Icono del botón cerrar sesión */
 .btn-logout img {
-    width: 65px;
-    height: 65px;
-    object-fit: contain;
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
 }
 
 /* Contenido principal de la página */
@@ -118,11 +118,10 @@ body {
 
 /* Botón que envuelve cada tarjeta */
 .card-target {
-    background: none;
-    border: none;
-    padding: 0;
+    text-decoration: none;
+    color: inherit;          
+    display: inline-block;
     cursor: pointer;
-    text-align: left;
 }
 
 /* Quita el borde cuando se hace clic */
@@ -130,7 +129,7 @@ body {
     outline: none;
 }
 
-/* Tarjeta del esapcio de trabajo */
+/* Tarjeta del espacio de trabajo */
 .card-space {
     background-color: #d6dbdf;
     display: flex;

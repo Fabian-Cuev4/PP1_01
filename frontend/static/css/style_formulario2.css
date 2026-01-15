@@ -1,0 +1,148 @@
+/* general: aplica a todos los elementos de la pagina */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* hace que el padding y border no aumenten el ancho del elemento */
+    font-family: 'Segoe UI', Arial, sans-serif; /* fuente por defecto */
+}
+
+/* modal-overlay: capa que cubre toda la pantalla cuando se abre el modal */
+.modal-overlay {
+    position: fixed; /* se queda fijo en la pantalla */
+    top: 0;
+    left: 0;
+    width: 100%; /* ocupa todo el ancho de la pantalla */
+    height: 100%; /* ocupa todo el alto de la pantalla */
+    background-color: rgba(0, 0, 0, 0.4); /* fondo negro transparente */
+    display: flex;
+    justify-content: center; /* centra el modal horizontalmente */
+    align-items: center; /* centra el modal verticalmente */
+}
+
+/* modal-content: caja principal del modal */
+.modal-content {
+    background-color: white; /* fondo blanco */
+    width: 650px; /* ancho del modal */
+    padding: 40px; /* espacio interno */
+    border-radius: 15px; /* bordes redondeados */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2); /* sombra para dar profundidad */
+}
+
+/* modal-header: encabezado del modal */
+.modal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* espacio entre elementos del header */
+    margin-bottom: 25px; /* espacio abajo del header */
+}
+
+/* icon-title: icono dentro del header */
+.icon-title {
+    color: #ef5b83; /* color rosado */
+    font-size: 24px; /* tamaño del icono */
+}
+
+/* modal-title: titulo del modal */
+.modal-title {
+    font-size: 22px; /* tamaño de la letra */
+    color: #333; /* color de texto */
+    font-weight: 700; /* negrita */
+}
+
+/* form-row: fila de formulario para organizar grupos */
+.form-row {
+    display: flex; /* coloca los hijos en fila */
+    gap: 20px; /* espacio entre los grupos */
+}
+
+/* form-group: contenedor de cada input o select */
+.form-group {
+    margin-bottom: 20px; /* espacio debajo del grupo */
+    display: flex;
+    flex-direction: column; /* organiza label arriba y input abajo */
+}
+
+/* label dentro de form-group */
+.form-group label {
+    font-size: 14px;
+    color: #777; /* gris suave */
+    margin-bottom: 8px; /* espacio entre label e input */
+    font-weight: 500; /* semi-negrita */
+}
+
+/* inputs y selects */
+input[type="text"], 
+select {
+    background-color: #f1f3f5; /* color de fondo */
+    border: none; /* sin borde */
+    padding: 12px 15px; /* espacio interno */
+    border-radius: 8px; /* bordes redondeados */
+    font-size: 14px;
+    color: #333;
+    outline: none; /* quita el borde al enfocar */
+    width: 100%; /* ocupa todo el ancho del contenedor */
+}
+
+/* placeholder de los inputs */
+input::placeholder {
+    color: #b0b5b9; /* color gris claro */
+}
+
+/* estilo para el select con flecha */
+select {
+    appearance: none; /* quita el estilo por defecto */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat; /* no repetir icono */
+    background-position: right 15px center; /* coloca la flecha a la derecha */
+    background-size: 15px; /* tamaño de la flecha */
+}
+
+/* checkbox-group: contenedor para checkbox y su label */
+.checkbox-group {
+    flex-direction: row; /* coloca checkbox y label en fila */
+    align-items: center; /* alinea verticalmente */
+    gap: 10px; /* espacio entre checkbox y label */
+    margin-top: 20px; /* espacio arriba */
+}
+
+/* label del checkbox */
+.checkbox-group label {
+    margin-bottom: 0; /* quitar margen debajo */
+    font-size: 13px;
+    color: #444; /* color gris oscuro */
+}
+
+/* form-actions: contenedor de los botones del formulario */
+.form-actions {
+    display: flex;
+    justify-content: space-between; /* separa los botones */
+    margin-top: 40px; /* espacio arriba */
+}
+
+/* estilo comun para botones */
+.btn-save, .btn-cancel {
+    padding: 12px 30px; /* espacio interno */
+    border: none; /* sin borde */
+    border-radius: 8px; /* bordes redondeados */
+    font-weight: bold;
+    cursor: pointer; /* cambia el cursor al pasar sobre el boton */
+    font-size: 14px;
+    transition: 0.3s; /* animacion al hover */
+}
+
+/* boton guardar */
+.btn-save {
+    background-color: #3ca0e7; /* azul */
+    color: white; /* texto blanco */
+}
+
+/* boton cancelar */
+.btn-cancel {
+    background-color: #e74c3c; /* rojo */
+    color: white; /* texto blanco */
+}
+
+/* hover de los botones */
+.btn-save:hover, .btn-cancel:hover {
+    filter: brightness(0.9); /* oscurece un poco al pasar el mouse */
+}

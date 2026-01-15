@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Historial de Mantenimiento</title>
+    <link rel="stylesheet" href="/static/css/style_historial.css">
+</head>
+<body>
+    <div class="overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>Historial de Mantenimiento</h2>
+                <p id="subtitulo-maquina">Equipo: <span>---</span></p>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Técnico</th>
+                            <th>Empresa</th>
+                            <th>Observaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-cuerpo-historial">
+                        </tbody>
+                </table>
+            </div>
+
+            <div class="modal-footer">
+                <button id="btn-volver-historial" class="btn-back">Regresar</button>
+            </div>
+        </div>
+    </div>
+    <script src="/static/javascript/historial.js"></script>
+</body>
+</html>

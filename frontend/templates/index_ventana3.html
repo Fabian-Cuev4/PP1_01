@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<!-- Esto le dice al navegador que el documento es HTML5 -->
+
+<html lang="es">
+<!-- Comienza el documento HTML y le indica que el idioma es español -->
+
+<head>
+    <meta charset="UTF-8">
+    <!-- Define la codificación de caracteres, para que los acentos y símbolos se muestren bien -->
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Hace que la página se vea bien en dispositivos móviles y ajusta el tamaño automáticamente -->
+    
+    <title>SIGLAB - Reportes</title>
+    <!-- Título que aparece en la pestaña del navegador -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Importa los iconos de Font Awesome para usarlos en la página -->
+
+    <link rel="stylesheet" href="/static/css/style_ventana3.css">
+    <!-- Vincula el archivo CSS donde están los estilos de la página -->
+</head>
+
+<body>
+<!-- Todo lo que se ve en la página va dentro de <body> -->
+
+    <header class="main-header">
+        <!-- Header o cabecera de la página -->
+        <div class="user-profile">
+            <!-- Sección donde aparece el perfil del usuario -->
+            <div class="avatar">
+                    <img src="/static/img/icono_user.png"/>
+                </div>
+        </div>
+    </header>
+
+    <main class="content">
+    <!-- Contenedor principal del contenido de la página -->
+
+        <div class="page-header">
+            <!-- Encabezado dentro de la página -->
+            <h1><i class="fa-solid fa-chart-pie"></i> Reporte de Mantenimientos</h1>
+            <!-- Título principal con un icono de gráfico -->
+            <p>Genera consultas y exporta la información de los laboratorios.</p>
+            <!-- Texto explicativo debajo del título -->
+        </div>
+
+        <div class="filter-card">
+            <!-- Tarjeta donde están los filtros de búsqueda -->
+            <form class="filter-form">
+                <!-- Formulario para filtrar reportes -->
+
+                <div class="filter-group">
+                    <!-- Grupo de filtro: Máquina / ID -->
+                    <label><i class="fa-solid fa-desktop"></i> Máquina / ID</label>
+                    <input type="text" placeholder="Ej: PC-LAB-012">
+                    <!-- Caja de texto para escribir el ID o nombre de la máquina -->
+                </div>
+                
+                <div class="filter-group">
+                    <!-- Grupo de filtro: Fecha -->
+                    <label><i class="fa-solid fa-calendar"></i> Fecha</label>
+                    <input type="date">
+                    <!-- Selector de fecha -->
+                </div>
+
+                <div class="filter-group">
+                    <!-- Grupo de filtro: Tipo de mantenimiento -->
+                    <label><i class="fa-solid fa-filter"></i> Tipo</label>
+                    <select>
+                        <option value="">Todos</option>
+                        <option value="preventivo">Preventivo</option>
+                        <option value="correctivo">Correctivo</option>
+                    </select>
+                    <!-- Menú desplegable -->
+                </div>
+
+                <div class="filter-actions">
+                    <!-- Contenedor del botón de búsqueda -->
+                    <button type="button" class="btn-search">
+                        <i class="fa-solid fa-magnifying-glass"></i> Buscar
+                        <!-- Botón con icono de lupa y texto -->
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-container">
+            <!-- Contenedor de la tabla de reportes -->
+            <div class="table-responsive">
+                <!-- Permite desplazar la tabla horizontalmente si es muy ancha -->
+                <table class="report-table">
+                    <thead>
+                        <!-- Encabezado de la tabla -->
+                        <tr>
+                            <th>ID Equipo</th>
+                            <th>Ubicación</th>
+                            <th>Técnico</th>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Estado</th>
+                            <th>Descripción</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Aquí van los datos de cada fila -->
+                        <tr>
+                            <td class="fw-bold">PC-LAB-012</td>
+                            <!-- Negrita para destacar el ID del equipo -->
+                            <td>Lab. Redes</td>
+                            <td>Juan Cardenas</td>
+                            <td>20/01/2022</td>
+                            <td><span class="badge badge-corr">Correctivo</span></td>
+                            <td><span class="badge badge-ok">Operativa</span></td>
+                            <td>Restauración de sistema operativo completa.</td>
+                            <td>
+                                <!-- Botones de acción -->
+                                <button class="btn-icon"><i class="fa-solid fa-eye"></i></button>
+                                <button class="btn-icon"><i class="fa-solid fa-download"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">PC-LAB-015</td>
+                            <td>Lab. Software</td>
+                            <td>Maria Lopez</td>
+                            <td>15/02/2022</td>
+                            <td><span class="badge badge-prev">Preventivo</span></td>
+                            <td><span class="badge badge-maint">En Revisión</span></td>
+                            <td>Limpieza interna y cambio de pasta térmica.</td>
+                            <td>
+                                <button class="btn-icon"><i class="fa-solid fa-eye"></i></button>
+                                <button class="btn-icon"><i class="fa-solid fa-download"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">PC-LAB-020</td>
+                            <td>Lab. Redes</td>
+                            <td>Pedro Diaz</td>
+                            <td>10/03/2022</td>
+                            <td><span class="badge badge-prev">Preventivo</span></td>
+                            <td><span class="badge badge-ok">Operativa</span></td>
+                            <td>Actualización de antivirus y drivers.</td>
+                            <td>
+                                <button class="btn-icon"><i class="fa-solid fa-eye"></i></button>
+                                <button class="btn-icon"><i class="fa-solid fa-download"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <button id="btn-return" class="btn-back">
+            Regresar
+        </button>
+
+    </main>
+
+
+    <!--Pie de página-->
+    <footer class="main-footer">
+            <div class="footer-logo">
+                <img src="/static/img/Logo b-n.png" alt="SIGLAB Logo">
+            </div>
+    </footer>
+    <script src="/static/javascript/reporte.js"></script>
+</body>
+</html>

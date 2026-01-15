@@ -2,63 +2,68 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <!-- define la codificacion de caracteres para que los acentos y simbolos se muestren correctamente -->
     <title>Registro de Mantenimiento - SIGLAB</title>
-    <link rel="stylesheet" href="./style_formulario2.css">
+    <!-- titulo que aparece en la pestaña del navegador -->
+    <link rel="stylesheet" href="/static/css/style_formulario2.css">
+    <!-- vincula el archivo css que contiene los estilos del formulario -->
+
 </head>
 <body>
-
     <div class="modal-overlay">
-        
+        <!-- fondo oscuro que aparece detras del modal -->
         <div class="modal-content">
+            <!-- contenido principal del modal --> 
             <div class="modal-header">
-                <i class="fa-solid fa-screwdriver-wrench icon-title"></i>
+                <!-- encabezado del modal -->
                 <h2 class="modal-title">Registro de mantenimiento</h2>
+                <!-- titulo del modal -->
             </div>
-            
             <form>
+                <!-- formulario para registrar mantenimiento -->
                 <div class="form-group">
                     <label>Empresa/ Institución</label>
-                    <input type="text" placeholder="Añade la empresa y especificar el cargo">
+                     <input type="text" id="mant-empresa" placeholder="Añade la empresa y especificar el cargo">
                 </div>
-
                 <div class="form-row">
                     <div class="form-group">
                         <label>Técnico Responsable</label>
-                        <input type="text" placeholder="Ingresa nombres completos">
+                        <input type="text" id="mant-tecnico" placeholder="Ingresa nombres completos">
                     </div>
                     <div class="form-group">
                         <label>Tipo de mantenimiento</label>
-                        <select>
+                        <select id="mant-tipo">
                             <option value="">Selecciona</option>
                             <option value="preventivo">Preventivo</option>
                             <option value="correctivo">Correctivo</option>
                         </select>
                     </div>
                 </div>
-
                 <div class="form-group" style="width: 50%;">
                     <label>Fecha de mantenimiento</label>
-                    <input type="text" placeholder="dd/mm/aaaa">
+                    <input type="date" id="mant-fecha">
                 </div>
-
                 <div class="form-group">
                     <label>Observaciones</label>
-                    <input type="text" placeholder="Ingresa un comentario">
+                    <input type="text" id="mant-observaciones" placeholder="Ingresa un comentario">
                 </div>
-
                 <div class="form-group checkbox-group">
+                    <!-- grupo con checkbox para opciones avanzadas -->
                     <input type="checkbox" id="avanzadas">
                     <label for="avanzadas">Opciones avanzadas</label>
+                    <!-- etiqueta para el checkbox -->
                 </div>
-
                 <div class="form-actions">
+                    <!-- botones de accion del formulario -->
                     <button type="button" class="btn-save">Guardar</button>
-                    <button type="button" class="btn-cancel">Cancelar</button>
+                    <!-- boton para guardar los datos -->
+                    <button type="button" id="btn-cancel-action" class="btn-cancel">Cancelar</button>
+                    <!-- boton para cancelar la accion -->
                 </div>
             </form>
         </div>
-
     </div>
-
+    <script src="/static/javascript/formulario.js"></script>
+    <!-- vincula el archivo javascript para funcionalidades del formulario -->
 </body>
 </html>

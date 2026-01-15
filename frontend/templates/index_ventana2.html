@@ -3,76 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <title>SIGLAB - Detalle de Máquina</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="./style_ventana2.css">
+    <link rel="stylesheet" href="/static/css/style_ventana2.css">
 </head>
 <body>
-
     <header class="main-header">
         <div class="user-profile">
-            <div class="avatar-pink">
-                <i class="fa-solid fa-user"></i>
+            <div class="avatar">
+                <img src="/static/img/icono_user.png" alt="Usuario">
             </div>
-        </div>
-        <div class="logout-section">
-            <button class="btn-logout">
-                <i class="fa-solid fa-right-from-bracket"></i>
-                <span>Cerrar Sesión</span>
-            </button>
         </div>
     </header>
 
     <main class="content">
         <div class="action-bar">
             <div class="left-actions">
-                <button class="btn-blue"><i class="fa-solid fa-plus"></i> Agregar Máquina</button>
-                <button class="btn-blue"><i class="fa-solid fa-file-lines"></i> Generar Reporte</button>
+                <button id="btn-create-machine" class="btn-create">Agregar Máquina</button>
+                <button id="btn-action-report" class="btn-create">Generar Reporte</button>
+                <button id="btn-return-action" class="btn-create">Regresar</button>
             </div>
             <div class="search-container">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" placeholder="Buscar equipo...">
+                <input type="text" id="input-busqueda" placeholder="Buscar equipo...">
             </div>
-        </div>
-
-        <div class="detail-container">
-            <div class="info-card-modern">
-                <div class="sidebar-blue">
-                    <i class="fa-solid fa-desktop"></i>
-                </div>
-
-                <div class="card-content">
-                    <div class="info-header">
-                        <h2>PC-LAB-012</h2>
-                        <span class="status-badge">Operativa</span>
-                    </div>
-                    <div class="info-body">
-                        <div class="column">
-                            <p><strong><i class="fa-solid fa-location-dot"></i> Ubicación:</strong> Edificio A - Piso 2</p>
-                            <p><strong><i class="fa-solid fa-layer-group"></i> Área:</strong> Laboratorio de Redes</p>
-                            <p><strong><i class="fa-regular fa-calendar"></i> Adquisición:</strong> 25/12/2021</p>
-                        </div>
-                        <div class="column">
-                            <p><strong><i class="fa-solid fa-wrench"></i> Mantenimiento:</strong> 20/01/2022</p>
-                            <p><strong><i class="fa-solid fa-user-gear"></i> Responsable:</strong> Juan Cardenas</p>
-                            <p class="desc"><strong><i class="fa-solid fa-align-left"></i> Nota:</strong> Equipo restaurado con éxito.</p>
-                        </div>
-                    </div>
-                </div>
             </div>
-
-            <div class="side-buttons">
-                <button class="btn-action btn-red"><i class="fa-solid fa-trash-can"></i> Eliminar</button>
-                <button class="btn-action btn-green"><i class="fa-solid fa-arrows-rotate"></i> Actualizar</button>
-                <button class="btn-action btn-light-blue"><i class="fa-solid fa-screwdriver-wrench"></i> Mantenimiento</button>
+            <div id="contenedor-principal-maquinas">
             </div>
-        </div>
     </main>
 
     <footer class="main-footer">
         <div class="footer-logo">
-            <span style="color:white; font-weight:bold;">SIGLAB UCE</span>
+            <img src="/static/img/Logo b-n.png" alt="SIGLAB Logo">
         </div>
     </footer>
 
-</body>
+    <script src="/static/javascript/mantenimiento.js"></script>
+    <script src="/static/javascript/ventana.js"></script>
+    <script src="/static/javascript/session.js"></script>
+    </body>
 </html>

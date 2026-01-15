@@ -4,64 +4,65 @@
         <meta charset="UTF-8">
         <title>SIGLAB - Página Principal</title>
 
-        <!-- Importación del archivo CSS para los estilos de la página -->
-        <link rel="stylesheet" href="style_ventana1.css">
+        <!-- Importación del archivo CSS para los estilos de la página-->
+        <link rel="stylesheet" href="/static/css/style_ventana1.css">
     </head>
     <body>
-        <!-- Encabezado superior -->
+        <!--Encabezado superior-->
         <header class="main-header">
-            <!-- Sección del usuario -->
+            <!--Sección del usuario-->
             <div class="user-profile">
                 <div class="avatar">
-                    <img src="../imagenes y logos/icono_user.png"/>
+                    <img src="/static/img/icono_user.png"/>
                 </div>
             </div>
-            <!-- Botón para cerrar sesión -->
+            <!--Botón para cerrar sesión-->
             <div class="logout-section">
-                <button class="btn-logout">
+                <button type="button" id="btn-logout-off" class="btn-logout">
                     Cerrar Sesión
-                    <img src="../imagenes y logos/icono_cerrar_sesion.png" />
+                    <img src="/static/img/icono_cerrar_sesion.png" />
                 </button>
             </div>
         </header>
 
-        <!-- Contenido principal de la página -->
+        <!--Contenido principal de la página-->
         <main class="content">
-            <!-- Barra superior con botón -->
+            <!--Barra superior con botón-->
             <div class="top-bar">
-                <button class="btn-create">
+                <button type="button" class="btn-create">
                     + Crear Espacio
                 </button>
             </div>
-            <!-- Título principal -->
+            <!--Título principal-->
             <h1 class="title">Tu espacio de trabajo</h1> 
-            <!-- Contenedor de tarjetas -->
+            <!--Contenedor de tarjetas-->
             <div class="cards-conta">
                 <!-- Tarjeta de espacio de trabajo -->
-                <button type="button" class="card-target">
+                <a href="/home/maquinas" class="card-target">
                     <div class="card-space">
-                        <!-- Parte izquierda de la tarjeta -->
                         <div class="card-icon">
-                            <img src="../imagenes y logos/icono_maquina.png" />
+                            <img src="/static/img/icono_maquina.png" />
                         </div>
-                        <!-- Información del laboratorio -->
+                        <!--Información de equipo-->
                         <div class="card-info">
                             <h3>Laboratorio de Redes</h3>
                             <p><strong>Ubicación:</strong> Edificio A - Piso 2</p>
                             <p><strong>Entidad:</strong> FICA - Ing. en Sistemas</p>
-                            <p><strong>N° Equipos:</strong> 25</p>
+                            <p><strong>N° Equipos:</strong> 5</p>
                         </div>
                     </div>
-                </button>
+                </a>
             </div>
         </main>
 
-        <!-- Pie de página -->
+        <!--Pie de página-->
         <footer class="main-footer">
             <div class="footer-logo">
-                <img src="../imagenes y logos/Logo b-n.png" alt="SIGLAB Logo">
+                <img src="/static/img/Logo b-n.png" alt="SIGLAB Logo">
             </div>
         </footer>
-
+        <script src="/static/javascript/session.js"></script>
     </body>
-</html>
+
+    
+    </html>
