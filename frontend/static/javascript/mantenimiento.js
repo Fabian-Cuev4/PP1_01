@@ -79,3 +79,7 @@ function verHistorial(codigo) {
     localStorage.setItem("maquinaSeleccionada", codigo);
     window.location.href = "/home/maquinas/historial";
 }
+
+function irAMantenimiento(codigo) {
+    window.location.href = "/home/maquinas/formulario/mantenimiento";
+}

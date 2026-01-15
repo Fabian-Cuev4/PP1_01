@@ -11,12 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    if (btnAgregarMantenimiento) {
-        btnAgregarMantenimiento.addEventListener("click", () => {
-            window.location.href = "/home/maquinas/formulario/mantenimiento";
-        });
-    }
-
     if (btnCrearReporte) {
         btnCrearReporte.addEventListener("click", () => {
             window.location.href = "/home/maquinas/reporte";
