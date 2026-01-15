@@ -45,3 +45,6 @@ def plantilla_ventana3(request: Request):
         "index_ventana3.html",
         {"request": request}
     )
+@route.get("/home/maquinas/historial")
+def ver_historial(request: Request):
+    return templates.TemplateResponse("index_historial.html", {"request": request})

@@ -32,7 +32,6 @@ async function cargarMaquinas() {
         const response = await fetch("/home/maquinas/listar");
         const maquinas = await response.json();
         
-        // Limpiamos el contenedor para evitar duplicados
         contenedor.innerHTML = "";
 
         if (maquinas.length === 0) {
@@ -41,17 +40,20 @@ async function cargarMaquinas() {
         }
 
         for (const m of maquinas) {
-            // Valores por defecto si no hay mantenimiento
-            let ultimo = { fecha: "---", tecnico: "---", nota: "Sin registros recientes." };
+            // 1. Valores por defecto (Importante: 'empresa' y 'tipo' son directos de h[0])
+            let ultimo = { empresa: "---", tipo: "---", fecha: "---", tecnico: "---", nota: "Sin registros recientes." };
             
             try {
                 const resM = await fetch(`/home/mantenimiento/listar/${m.codigo}`);
                 if (resM.ok) {
                     const h = await resM.json();
                     if (h && h.length > 0) {
+                        // CORRECCIÓN AQUÍ: Accedemos directamente a las propiedades del primer registro [0]
                         ultimo = { 
-                            fecha: h[0].fecha, 
-                            tecnico: h[0].tecnico, 
+                            empresa: h[0].empresa || "---",
+                            tipo: h[0].tipo || "---",
+                            fecha: h[0].fecha || "---", 
+                            tecnico: h[0].tecnico || "---", 
                             nota: h[0].observaciones || "Sin observaciones." 
                         };
                     }
@@ -62,7 +64,7 @@ async function cargarMaquinas() {
 
             const claseEstado = obtenerClaseEstado(m.estado);
 
-            // Generación de la estructura idéntica a tu diseño
+            // 2. Generación del HTML (Se corrigió la etiqueta <strong> de Empresa)
             const tarjetaHTML = `
                 <div class="detail-container">
                     <div class="card-space">
@@ -78,6 +80,8 @@ async function cargarMaquinas() {
                                     <p><strong>Adquisición:</strong> ${m.fecha}</p>
                                 </div>
                                 <div style="flex: 1;">
+                                    <p style="margin-bottom: 8px;"><strong>Empresa:</strong> ${ultimo.empresa}</p>
+                                    <p style="margin-bottom: 8px;"><strong>Tipo Mantenimiento:</strong> ${ultimo.tipo}</p>
                                     <p style="margin-bottom: 8px;"><strong>Último Mantenimiento:</strong> ${ultimo.fecha}</p>
                                     <p style="margin-bottom: 8px;"><strong>Responsable:</strong> ${ultimo.tecnico}</p>
                                     <div class="desc"><strong>Nota:</strong> ${ultimo.nota}</div>
@@ -107,14 +111,6 @@ async function cargarMaquinas() {
 function irAMantenimiento(codigo) {
     localStorage.setItem("maquinaSeleccionada", codigo);
     window.location.href = "/home/maquinas/formulario/mantenimiento";
-}
-
-function confirmarEliminar(codigo) {
-    if (confirm(`¿Estás seguro de que deseas eliminar el equipo ${codigo}? Esta acción no se puede deshacer.`)) {
-        // Aquí iría tu fetch para eliminar: fetch(`/home/maquinas/eliminar/${codigo}`, { method: 'DELETE' })
-        console.log("Eliminando máquina:", codigo);
-        // Al terminar, recargar: cargarMaquinas();
-    }
 }
 
 /**
