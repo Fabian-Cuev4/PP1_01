@@ -4,9 +4,9 @@ from pathlib import Path
 from fastapi.staticfiles import StaticFiles
 from app.routes import views, maquina, mantenimiento # Importamos ambos
 from app.database.mongodb import MongoDB
+from app.database.mysql import MySQLConnection
 
 app = FastAPI()
-
 
 @app.on_event("startup")
 def startup_db_client():
@@ -15,6 +15,8 @@ def startup_db_client():
 @app.on_event("shutdown")
 def shutdown_db_client():
     MongoDB.cerrar()
+
+MySQLConnection.inicializar_base_datos()
 
 base_path = Path(__file__).resolve().parent.parent
 
