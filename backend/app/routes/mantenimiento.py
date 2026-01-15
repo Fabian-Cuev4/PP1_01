@@ -4,7 +4,7 @@ from datetime import date
 from app.repositories import repo_instancia as repo
 from app.services import ProyectoService
 
-router = APIRouter()
+router = APIRouter(prefix="/home/mantenimiento")
 # Inicializamos el flujo
 service = ProyectoService(repo)
 

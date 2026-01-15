@@ -1,5 +1,5 @@
 from app.repositories import ProyectoRepository
-from app.models import Mantenimiento
+from app.models.Mantenimiento import Mantenimiento
 
 class ProyectoService:
     def __init__(self, repository: ProyectoRepository):

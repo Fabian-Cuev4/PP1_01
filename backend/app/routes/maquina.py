@@ -19,12 +19,11 @@ class MaquinaSchema(BaseModel):
 async def agregar_maquina(datos: MaquinaSchema):
     nueva_maquina = Maquina(datos.codigo_equipo, datos.estado_actual, datos.area, datos.fecha)
     repo.guardar_maquina(nueva_maquina)
-    return {"mensaje": f"Máquina {nueva_maquina.codigo_equipo} guardada en el repo"}
-
+    return {"mensaje": f"Máquina {nueva_maquina.codigo_equipo} guardada"}
 @router.get("/listar")
 async def listar_maquinas():
     maquinas_objetos = repo.obtener_todas_maquinas()
-    # Convertimos los objetos a diccionarios para que el Navegador los entienda (JSON)
+    # Conversion a JSON
     return [
         {
             "codigo": m.codigo_equipo, 

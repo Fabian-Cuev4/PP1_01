@@ -99,51 +99,130 @@
     </footer>
     <script src="/static/ventana.js"></script>
     <script src="/static/session.js"></script>
-    <!--prueba-->
-    <div class="inventory-section" style="margin-top: 20px; background: white; padding: 15px; border-radius: 10px;">
-    <h3>Inventario de Equipos</h3>
-    <table style="width: 100%; border-collapse: collapse;">
-        <thead>
-            <tr style="text-align: left; border-bottom: 2px solid #0056b3;">
-                <th>Código</th>
-                <th>Área</th>
-                <th>Estado</th>
-                <th>Fecha</th>
-            </tr>
-        </thead>
-        <tbody id="tabla-maquinas-cuerpo">
-            </tbody>
-    </table>
-    </div>
-    <script>document.addEventListener("DOMContentLoaded", async () => {
-            const tablaCuerpo = document.getElementById("tabla-maquinas-cuerpo");
+    <script src="/static/formulario.js"></script>
 
-            try {
-                const response = await fetch("/home/maquinas/listar");
-                const maquinas = await response.json();
-
-                if (maquinas.length === 0) {
-                    tablaCuerpo.innerHTML = "<tr><td colspan='3'>No hay máquinas registradas</td></tr>";
-                    return;
-                }
-
-                // Limpiar tabla y llenar con los datos del arreglo
-                tablaCuerpo.innerHTML = "";
-                maquinas.forEach(m => {
-                    const fila = `
-                        <tr>
-                            <td>${m.codigo}</td>
-                            <td>${m.area}</td>
-                            <td><span class="status-${m.estado.toLowerCase()}">${m.estado}</span></td>
-                            <td>${m.fecha}</td>
-                        </tr>
-                    `;
-                    tablaCuerpo.insertAdjacentHTML("beforeend", fila);
-                });
-            } catch (error) {
-                console.error("Error cargando máquinas:", error);
-            }
-        });</script>
     
+    <!--prueba-->
+
+    <div class="inventory-section" style="margin-top: 20px; background: white; padding: 15px; border-radius: 10px;">
+
+    <h3>Inventario de Equipos</h3>
+
+    <table style="width: 100%; border-collapse: collapse;">
+
+        <thead>
+
+            <tr style="text-align: left; border-bottom: 2px solid #0056b3;">
+
+                <th>Código</th>
+
+                <th>Área</th>
+
+                <th>Estado</th>
+
+                <th>Fecha</th>
+
+                <th>Acción</th> </tr>
+
+        </thead>
+
+        <tbody id="tabla-maquinas-cuerpo">
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", async () => {
+
+        const tablaCuerpo = document.getElementById("tabla-maquinas-cuerpo");
+
+
+
+        try {
+
+            const response = await fetch("/home/maquinas/listar");
+
+            const maquinas = await response.json();
+
+
+
+            if (maquinas.length === 0) {
+
+                tablaCuerpo.innerHTML = "<tr><td colspan='5'>No hay máquinas registradas</td></tr>";
+
+                return;
+
+            }
+
+
+
+            // Limpiar tabla y llenar con los datos del arreglo
+
+            tablaCuerpo.innerHTML = "";
+
+            maquinas.forEach(m => {
+
+                // Generamos la fila incluyendo el botón de mantenimiento
+
+                const fila = `
+
+                    <tr style="border-bottom: 1px solid #eee;">
+
+                        <td>${m.codigo}</td>
+
+                        <td>${m.area}</td>
+
+                        <td><span class="status-${m.estado.toLowerCase()}">${m.estado}</span></td>
+
+                        <td>${m.fecha}</td>
+
+                        <td>
+
+                            <button
+
+                                onclick="irAMantenimiento('${m.codigo}')"
+
+                                style="background-color: #0056b3; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">
+
+                                Mantenimiento
+
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+                tablaCuerpo.insertAdjacentHTML("beforeend", fila);
+
+            });
+
+        } catch (error) {
+
+            console.error("Error cargando máquinas:", error);
+
+        }
+
+    });
+
+
+
+    // Función para vincular el código y redirigir
+
+    function irAMantenimiento(codigo) {
+
+        // Guardamos el código en el localStorage para que el formulario lo reconozca
+        localStorage.setItem("maquinaSeleccionada", codigo);
+        // Redirigimos al archivo del formulario de mantenimiento (ajusta la ruta si es necesario)
+        window.location.href = "/home/maquinas/formulario/mantenimiento";
+    }
+</script>
 </body>
 </html>
