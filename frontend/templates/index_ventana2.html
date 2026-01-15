@@ -11,28 +11,21 @@
             <div class="avatar">
                 <img src="/static/icono_user.png" alt="Usuario">
             </div>
-        </div>
-        <div class="logout-section">
-            <button type="button" id="btn-logout-off" class="btn-logout">
-                CERRAR SESIÓN
-                <img src="/static/icono_cerrar_sesion.png" alt="Salir">
-            </button>
-        </div>
     </header>
 
     <main class="content">
-        <div class="action-bar" style="display: flex; justify-content: space-between; margin-bottom: 40px;">
+        <div class="action-bar">
             <div class="left-actions">
-                <button id="btn-create-machine" class="btn-create" style="margin-right: 15px;">Agregar Máquina</button>
+                <button id="btn-create-machine" class="btn-create">Agregar Máquina</button>
                 <button id="btn-action-report" class="btn-create">Generar Reporte</button>
             </div>
             <div class="search-container">
-                <input type="text" id="input-busqueda" placeholder="Buscar equipo..." 
-                       style="padding: 12px 20px; border-radius: 8px; border: 1px solid #ccc; width: 300px;">
+                <input type="text" id="input-busqueda" placeholder="Buscar equipo...">
             </div>
         </div>
 
-        <div id="contenedor-principal-maquinas"></div>
+        <div id="contenedor-principal-maquinas">
+            </div>
     </main>
 
     <footer class="main-footer">
@@ -41,9 +34,7 @@
         </div>
     </footer>
 
-    <script src="/static/ventana.js"></script>
-    <script src="/static/session.js"></script>
-    <script src="/static/formulario.js"></script>
     <script src="/static/mantenimiento.js"></script>
-</body>
+    <script src="/static/ventana.js"></script>
+    </body>
 </html>
