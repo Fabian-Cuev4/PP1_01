@@ -1,12 +1,15 @@
-from app.models import Maquina, Mantenimiento
+# app/repositories.py
+# Asegúrate de que estas rutas coincidan con tus carpetas reales
+from app.models.abstrac_factory.Maquina import Maquina 
+from app.models.Mantenimiento import Mantenimiento
 
 class ProyectoRepository:
     def __init__(self):
-        # Listas en memoria para simular una base de datos
+        # Listas que actúan como base de datos temporal
         self._maquinas = []
         self._mantenimientos = []
 
-    #Métodos para Máquinas
+    # --- MÉTODOS PARA MÁQUINAS ---
     def guardar_maquina(self, maquina: Maquina):
         self._maquinas.append(maquina)
         return maquina
@@ -15,18 +18,19 @@ class ProyectoRepository:
         return self._maquinas
 
     def buscar_maquina_por_codigo(self, codigo: str):
-        # Buscamos el objeto Maquina que coincida con el código
         for m in self._maquinas:
             if m.codigo_equipo == codigo:
                 return m
         return None
 
-    #Métodos para Mantenimientos
+    # --- MÉTODOS PARA MANTENIMIENTOS ---
     def guardar_mantenimiento(self, mantenimiento: Mantenimiento):
         self._mantenimientos.append(mantenimiento)
         return mantenimiento
 
     def obtener_mantenimientos_por_maquina(self, codigo_maquina: str):
-        # Filtramos los mantenimientos que pertenecen a esa máquina específica
-        return [mtto for mtto in self._mantenimientos if mtto.codigo_maquina_vinculada == codigo_maquina]
+        # Aquí m.codigo_maquina_vinculada llama a la @property del modelo
+        return [m for m in self._mantenimientos if m.codigo_maquina_vinculada == codigo_maquina]
+
+# ESTO ES LO MÁS IMPORTANTE: La instancia se crea al final
 repo_instancia = ProyectoRepository()

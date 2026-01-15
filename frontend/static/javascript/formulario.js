@@ -1,26 +1,25 @@
 document.addEventListener("DOMContentLoaded", () => {
     const btnCancelar = document.getElementById("btn-cancel-action");
     const formMaquina = document.querySelector(".form");
-    // Detectamos el botón de guardar del formulario de mantenimiento
     const btnGuardarMant = document.querySelector(".btn-save");
 
-    // Lógica para Cancelar
+    // 1. Lógica para Cancelar (Volver a la lista)
     if (btnCancelar) {
         btnCancelar.addEventListener("click", () => {
             window.location.href = "/home/maquinas";
         });
     }
 
-    // Lógica para guardar una maquina (Enviar al Backend)
+    // 2. Lógica para GUARDAR MÁQUINA (Aquí estaba el error 422)
     if (formMaquina) {
         formMaquina.addEventListener("submit", async (e) => {
-            e.preventDefault(); // Evita que la página se recargue
+            e.preventDefault();
 
-            // Capturamos los datos del formulario
+            // CAPTURA COMPLETA: Estos nombres deben ser IGUALES a tu MaquinaSchema en Python
             const datos = {
+                tipo_equipo: document.getElementById("tipo_equipo").value,
                 codigo_equipo: document.getElementById("codigo").value,
-                // Capturamos el select (asegúrate que el <select> tenga id="estado_actual")
-                estado_actual: document.getElementById("estado_actual") ? document.getElementById("estado_actual").value : "operativa",
+                estado_actual: document.getElementById("estado_actual").value,
                 area: document.getElementById("area").value,
                 fecha: document.getElementById("fecha").value
             };
@@ -28,39 +27,37 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 const response = await fetch("/home/maquinas/agregar", {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(datos)
                 });
 
                 const resultado = await response.json();
 
                 if (response.ok) {
-                    alert("Máquina guardada: " + resultado.mensaje);
-                    window.location.href = "/home/maquinas"; // Redirige a la lista
+                    alert("¡Éxito!: " + resultado.mensaje);
+                    window.location.href = "/home/maquinas";
                 } else {
-                    alert("Error: " + (resultado.detail || "No se pudo guardar"));
+                    console.error("Detalle del error 422:", resultado.detail);
+                    alert("Error de validación: Revisa que todos los campos estén llenos.");
                 }
             } catch (error) {
                 console.error("Error en la petición:", error);
-                alert("Hubo un error al conectar con el servidor.");
+                alert("Error al conectar con el servidor.");
             }
         });
     }
 
-    // Lógica para guardar mantenimiento (Enviar al Backend)
+    // 3. Lógica para GUARDAR MANTENIMIENTO
     if (btnGuardarMant) {
         btnGuardarMant.addEventListener("click", async () => {
-            // Recuperamos el codigo de maquina vinculado desde el localStorage
             const codigoVinculado = localStorage.getItem("maquinaSeleccionada");
 
             if (!codigoVinculado) {
-                alert("Error: No se ha seleccionado una máquina para el mantenimiento.");
+                alert("Error: No se ha seleccionado una máquina.");
                 return;
             }
 
-            // Capturamos los datos del mantenimiento (asegúrate que los IDs coincidan con tu HTML)
+            // Aquí mandamos lo que el MantenimientoSchema necesita
             const datosMant = {
                 codigo_maquina: codigoVinculado,
                 empresa: document.getElementById("mant-empresa").value,
@@ -71,26 +68,22 @@ document.addEventListener("DOMContentLoaded", () => {
             };
 
             try {
-                // Ajustamos la ruta para que coincida con el APIRouter prefix="/home/mantenimiento"
                 const response = await fetch("/home/mantenimiento/agregar", {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(datosMant)
                 });
 
                 const resultado = await response.json();
 
                 if (response.ok) {
-                    alert("Mantenimiento guardado con éxito para la máquina: " + codigoVinculado);
-                    window.location.href = "/home/maquinas"; // Redirige a la lista para ver cambios
+                    alert("Mantenimiento guardado para: " + codigoVinculado);
+                    window.location.href = "/home/maquinas";
                 } else {
-                    alert("Error: " + (resultado.detail || "No se pudo registrar el mantenimiento"));
+                    alert("Error al registrar mantenimiento: " + (resultado.detail || "Error desconocido"));
                 }
             } catch (error) {
-                console.error("Error en la petición de mantenimiento:", error);
-                alert("Hubo un error al conectar con el servidor.");
+                console.error("Error:", error);
             }
         });
     }

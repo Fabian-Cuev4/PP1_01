@@ -55,6 +55,7 @@ async function cargarMaquinas() {
                             <div style="display: flex; gap: 40px; font-size: 14px; color: #555;">
                                 <p><strong>Área:</strong> ${m.area}</p>
                                 <p><strong>Adquisición:</strong> ${m.fecha}</p>
+                                <p><strong>Tipo máquina:</strong> ${m.tipo}</p>
                             </div>
                         </div>
                     </div>
