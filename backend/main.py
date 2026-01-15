@@ -3,8 +3,19 @@ from fastapi import FastAPI
 from pathlib import Path
 from fastapi.staticfiles import StaticFiles
 from app.routes import views, maquina, mantenimiento # Importamos ambos
+from app.database.mongodb import MongoDB
 
 app = FastAPI()
+
+
+@app.on_event("startup")
+def startup_db_client():
+    MongoDB.conectar()
+
+@app.on_event("shutdown")
+def shutdown_db_client():
+    MongoDB.cerrar()
+
 base_path = Path(__file__).resolve().parent.parent
 
 # Ahora buscamos frontend/static desde la raíz
