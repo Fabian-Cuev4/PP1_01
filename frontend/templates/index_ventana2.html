@@ -1,228 +1,49 @@
 <!DOCTYPE html>
-<!-- Esto le dice al navegador que este archivo es un documento HTML5 -->
-
 <html lang="es">
-<!-- Aquí empieza el documento HTML y 'lang="es"' indica que está en español -->
-
 <head>
     <meta charset="UTF-8">
-    <!-- Define la codificación de caracteres, así los acentos y símbolos se muestran bien -->
-    
     <title>SIGLAB - Detalle de Máquina</title>
-    <!-- Este es el título de la página que aparece en la pestaña del navegador -->
-    
     <link rel="stylesheet" href="/static/style_ventana2.css">
-    <!-- Aquí estamos enlazando un archivo CSS externo para darle estilo a la página -->
 </head>
-
 <body>
-<!-- Aquí empieza todo el contenido visible de la página -->
     <header class="main-header">
-        <!-- Header o cabecera de la página -->
         <div class="user-profile">
-            <!-- Sección donde aparece el perfil del usuario -->
             <div class="avatar">
-                    <img src="/static/icono_user.png"/>
-                </div>
+                <img src="/static/icono_user.png" alt="Usuario">
+            </div>
         </div>
-        <!--Botón para cerrar sesión-->
         <div class="logout-section">
-                <button type="button" id="btn-logout-off" class="btn-logout">
-                    Cerrar Sesión
-                    <img src="/static/icono_cerrar_sesion.png" />
-                </button>
+            <button type="button" id="btn-logout-off" class="btn-logout">
+                CERRAR SESIÓN
+                <img src="/static/icono_cerrar_sesion.png" alt="Salir">
+            </button>
         </div>
     </header>
 
     <main class="content">
-    <!-- Contenido principal de la página -->
-        <div class="action-bar">
-            <!-- Barra de acciones arriba de la información de la máquina -->
+        <div class="action-bar" style="display: flex; justify-content: space-between; margin-bottom: 40px;">
             <div class="left-actions">
-                <button id="btn-create-machine" class="btn-blue">Agregar Máquina</button>
-                <button id="btn-action-report" class="btn-blue">Generar Reporte</button>
-                <!-- Botones para agregar máquina y generar reporte -->
+                <button id="btn-create-machine" class="btn-create" style="margin-right: 15px;">Agregar Máquina</button>
+                <button id="btn-action-report" class="btn-create">Generar Reporte</button>
             </div>
             <div class="search-container">
-                <!-- Ícono de lupa para búsqueda -->
-                <input type="text" placeholder="Buscar equipo...">
-                <!-- Caja de texto donde el usuario puede escribir para buscar -->
+                <input type="text" id="input-busqueda" placeholder="Buscar equipo..." 
+                       style="padding: 12px 20px; border-radius: 8px; border: 1px solid #ccc; width: 300px;">
             </div>
         </div>
 
-        <div class="detail-container">
-        <!-- Contenedor principal con la información detallada de la máquina -->
-            <div class="info-card-modern">
-            <!-- Tarjeta donde se muestra la información -->
-                <div class="sidebar-blue">
-                <!-- Barra lateral decorativa, solo por estilo -->
-                </div>
-
-                <div class="card-content">
-                <!-- Aquí está el contenido real de la tarjeta -->
-                    <div class="info-header">
-                        <h2>PC-LAB-012</h2>
-                        <!-- Nombre o identificador de la máquina -->
-                        <span class="status-badge">Operativa</span>
-                        <!-- Estado de la máquina -->
-                    </div>
-                    <div class="info-body">
-                    <!-- Información detallada de la máquina dividida en columnas -->
-                        <div class="column">
-                            <p><strong> Área:</strong> Laboratorio de Redes</p>
-                            <p><strong> Adquisición:</strong> 25/12/2021</p>
-                        </div>
-                        <div class="column">
-                            <p><strong> Mantenimiento:</strong> 20/01/2022</p>
-                            <p><strong> Responsable:</strong> Juan Cardenas</p>
-                            <p class="desc"><strong> Nota:</strong> Equipo restaurado con éxito.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="side-buttons">
-            <!-- Botones de acciones rápidas al lado de la tarjeta -->
-                <button class="btn-action btn-red">Eliminar</button>
-                <button class="btn-action btn-green">Actualizar</button>
-                <button id = "btn-action-mant" class="btn-action btn-light-blue"> Mantenimiento</button>
-                <!-- Cada botón tiene su color para diferenciar la acción -->
-            </div>
-        </div>
+        <div id="contenedor-principal-maquinas"></div>
     </main>
 
-    <!--Pie de página-->
     <footer class="main-footer">
-            <div class="footer-logo">
-                <img src="/static/Logo b-n.png" alt="SIGLAB Logo">
-            </div>
+        <div class="footer-logo">
+            <img src="/static/Logo b-n.png" alt="SIGLAB Logo">
+        </div>
     </footer>
+
     <script src="/static/ventana.js"></script>
     <script src="/static/session.js"></script>
     <script src="/static/formulario.js"></script>
-
-    
-    <!--prueba-->
-
-    <div class="inventory-section" style="margin-top: 20px; background: white; padding: 15px; border-radius: 10px;">
-
-    <h3>Inventario de Equipos</h3>
-
-    <table style="width: 100%; border-collapse: collapse;">
-
-        <thead>
-
-            <tr style="text-align: left; border-bottom: 2px solid #0056b3;">
-
-                <th>Código</th>
-
-                <th>Área</th>
-
-                <th>Estado</th>
-
-                <th>Fecha</th>
-
-                <th>Acción</th> </tr>
-
-        </thead>
-
-        <tbody id="tabla-maquinas-cuerpo">
-
-        </tbody>
-
-    </table>
-
-</div>
-
-
-
-<script>
-
-    document.addEventListener("DOMContentLoaded", async () => {
-
-        const tablaCuerpo = document.getElementById("tabla-maquinas-cuerpo");
-
-
-
-        try {
-
-            const response = await fetch("/home/maquinas/listar");
-
-            const maquinas = await response.json();
-
-
-
-            if (maquinas.length === 0) {
-
-                tablaCuerpo.innerHTML = "<tr><td colspan='5'>No hay máquinas registradas</td></tr>";
-
-                return;
-
-            }
-
-
-
-            // Limpiar tabla y llenar con los datos del arreglo
-
-            tablaCuerpo.innerHTML = "";
-
-            maquinas.forEach(m => {
-
-                // Generamos la fila incluyendo el botón de mantenimiento
-
-                const fila = `
-
-                    <tr style="border-bottom: 1px solid #eee;">
-
-                        <td>${m.codigo}</td>
-
-                        <td>${m.area}</td>
-
-                        <td><span class="status-${m.estado.toLowerCase()}">${m.estado}</span></td>
-
-                        <td>${m.fecha}</td>
-
-                        <td>
-
-                            <button
-
-                                onclick="irAMantenimiento('${m.codigo}')"
-
-                                style="background-color: #0056b3; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">
-
-                                Mantenimiento
-
-                            </button>
-
-                        </td>
-
-                    </tr>
-
-                `;
-
-                tablaCuerpo.insertAdjacentHTML("beforeend", fila);
-
-            });
-
-        } catch (error) {
-
-            console.error("Error cargando máquinas:", error);
-
-        }
-
-    });
-
-
-
-    // Función para vincular el código y redirigir
-
-    function irAMantenimiento(codigo) {
-
-        // Guardamos el código en el localStorage para que el formulario lo reconozca
-        localStorage.setItem("maquinaSeleccionada", codigo);
-        // Redirigimos al archivo del formulario de mantenimiento (ajusta la ruta si es necesario)
-        window.location.href = "/home/maquinas/formulario/mantenimiento";
-    }
-</script>
+    <script src="/static/mantenimiento.js"></script>
 </body>
 </html>
