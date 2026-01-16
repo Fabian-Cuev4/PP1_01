@@ -48,7 +48,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // 3. Lógica para GUARDAR MANTENIMIENTO
-    if (btnGuardarMant) {
+    // Solo ejecutar si estamos en la página de mantenimiento (tiene campos mant-*)
+    const esFormularioMantenimiento = document.getElementById("mant-empresa") !== null;
+    
+    if (btnGuardarMant && esFormularioMantenimiento) {
         btnGuardarMant.addEventListener("click", async () => {
             // Obtener el código de la máquina desde los parámetros de la URL
             const urlParams = new URLSearchParams(window.location.search);
