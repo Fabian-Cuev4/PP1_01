@@ -95,8 +95,7 @@ class ProyectoService:
                 tipo=maq["tipo"],
                 area=maq["area"],
                 estado=maq["estado"],
-                mantenimientos=mttos_limpios,
-                total_mantenimientos=len(mttos_limpios)
+                mantenimientos=mttos_limpios
             )
             lista_informes.append(informe)
         

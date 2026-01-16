@@ -7,4 +7,3 @@ class InformeMaquinaDTO(BaseModel):
     area: str
     estado: str
     mantenimientos: List[dict] = []
-    total_mantenimientos: int = 0

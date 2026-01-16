@@ -40,4 +40,6 @@ async def informe_general(codigo: str = None):
     resultado, error = service.obtener_informe_completo(codigo)
     if error:
         raise HTTPException(status_code=404, detail=error)
+    if resultado is None:
+        raise HTTPException(status_code=404, detail="No se encontraron datos")
     return resultado
