@@ -10,20 +10,52 @@ class ProyectoService:
 
     def registrar_maquina(self, datos_dict):
         tipo = datos_dict.get("tipo_equipo", "").upper()
-        nueva = Computadora(datos_dict.get("codigo_equipo"), datos_dict.get("estado_actual"), 
-                           datos_dict.get("area"), datos_dict.get("fecha")) if tipo == "PC" \
-                else Impresora(datos_dict.get("codigo_equipo"), datos_dict.get("estado_actual"), 
-                             datos_dict.get("area"), datos_dict.get("fecha"))
+        # Abstract Factory: Crea Computadora si es "PC", Impresora si es "IMP"
+        if tipo == "PC":
+            nueva = Computadora(
+                datos_dict.get("codigo_equipo"), 
+                datos_dict.get("estado_actual"), 
+                datos_dict.get("area"), 
+                datos_dict.get("fecha")
+            )
+        elif tipo == "IMP":
+            nueva = Impresora(
+                datos_dict.get("codigo_equipo"), 
+                datos_dict.get("estado_actual"), 
+                datos_dict.get("area"), 
+                datos_dict.get("fecha")
+            )
+        else:
+            return None, f"Tipo de equipo '{tipo}' no válido. Use 'PC' o 'IMP'."
+        
+        # DAO persiste en MySQL usando la abstracción Maquina
         self._dao_maq.guardar(nueva)
         return nueva, None
 
     def registrar_mantenimiento(self, datos_dict):
         codigo = datos_dict.get("codigo_maquina")
         maquina_db = self._dao_maq.buscar_por_codigo(codigo)
-        if not maquina_db: return None, f"La máquina {codigo} no existe."
+        if not maquina_db: 
+            return None, f"La máquina {codigo} no existe."
 
-        maquina_obj = Computadora(maquina_db['codigo'], maquina_db['estado'], 
-                                 maquina_db['area'], maquina_db['fecha'])
+        # Abstract Factory: Recrear el objeto correcto según el tipo guardado en MySQL
+        tipo_maquina = maquina_db.get('tipo', '').upper()
+        if tipo_maquina in ['COMPUTADORA', 'PC']:
+            maquina_obj = Computadora(
+                maquina_db['codigo'], 
+                maquina_db['estado'], 
+                maquina_db['area'], 
+                maquina_db['fecha']
+            )
+        elif tipo_maquina in ['IMPRESORA', 'IMP']:
+            maquina_obj = Impresora(
+                maquina_db['codigo'], 
+                maquina_db['estado'], 
+                maquina_db['area'], 
+                maquina_db['fecha']
+            )
+        else:
+            return None, f"Tipo de máquina '{tipo_maquina}' no reconocido."
 
         nuevo_mtto = Mantenimiento(
             maquina_objeto=maquina_obj,

@@ -77,10 +77,9 @@ async function cargarMaquinas() {
 
 // Nueva función para el botón Historial
 function verHistorial(codigo) {
-    localStorage.setItem("maquinaSeleccionada", codigo);
-    window.location.href = "/home/maquinas/historial";
+    window.location.href = `/home/maquinas/historial?codigo=${encodeURIComponent(codigo)}`;
 }
 
 function irAMantenimiento(codigo) {
-    window.location.href = "/home/maquinas/formulario/mantenimiento";
+    window.location.href = `/home/maquinas/formulario/mantenimiento?codigo=${encodeURIComponent(codigo)}`;
 }

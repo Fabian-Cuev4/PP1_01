@@ -50,7 +50,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // 3. Lógica para GUARDAR MANTENIMIENTO
     if (btnGuardarMant) {
         btnGuardarMant.addEventListener("click", async () => {
-            const codigoVinculado = localStorage.getItem("maquinaSeleccionada");
+            // Obtener el código de la máquina desde los parámetros de la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const codigoVinculado = urlParams.get("codigo");
 
             if (!codigoVinculado) {
                 alert("Error: No se ha seleccionado una máquina.");
