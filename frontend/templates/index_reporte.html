@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGLAB - Reportes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="./style_reporte.css">
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="user-profile">
+            <div class="avatar-pink">
+                <i class="fa-solid fa-user"></i>
+            </div>
+        </div>
+        <div class="logout-section">
+            <button class="btn-logout">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Cerrar Sesión</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="content">
+        
+        <div class="page-header">
+            <h1><i class="fa-solid fa-chart-pie"></i> Reporte de Mantenimientos</h1>
+            <p>Genera consultas y exporta la información de los laboratorios.</p>
+        </div>
+
+        <div class="filter-card">
+            <form class="filter-form">
+                <div class="filter-group">
+                    <label><i class="fa-solid fa-desktop"></i> Máquina / ID</label>
+                    <input type="text" placeholder="Ej: PC-LAB-012">
+                </div>
+                
+                <div class="filter-group">
+                    <label><i class="fa-solid fa-calendar"></i> Fecha</label>
+                    <input type="date">
+                </div>
+
+                <div class="filter-group">
+                    <label><i class="fa-solid fa-filter"></i> Tipo</label>
+                    <select>
+                        <option value="">Todos</option>
+                        <option value="preventivo">Preventivo</option>
+                        <option value="correctivo">Correctivo</option>
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="button" class="btn-search">
+                        <i class="fa-solid fa-magnifying-glass"></i> Buscar
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>ID Equipo</th>
+                            <th>Ubicación</th>
+                            <th>Técnico</th>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Estado</th>
+                            <th>Descripción</th> <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold">PC-LAB-012</td>
+                            <td>Lab. Redes</td>
+                            <td>Juan Cardenas</td>
+                            <td>20/01/2022</td>
+                            <td><span class="badge badge-corr">Correctivo</span></td>
+                            <td><span class="badge badge-ok">Operativa</span></td>
+                            <td>Restauración de sistema operativo completa.</td>
+                            <td>
+                                <button class="btn-icon"><i class="fa-solid fa-eye"></i></button>
+                                <button class="btn-icon"><i class="fa-solid fa-download"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">PC-LAB-015</td>
+                            <td>Lab. Software</td>
+                            <td>Maria Lopez</td>
+                            <td>15/02/2022</td>
+                            <td><span class="badge badge-prev">Preventivo</span></td>
+                            <td><span class="badge badge-maint">En Revisión</span></td>
+                            <td>Limpieza interna y cambio de pasta térmica.</td>
+                            <td>
+                                <button class="btn-icon"><i class="fa-solid fa-eye"></i></button>
+                                <button class="btn-icon"><i class="fa-solid fa-download"></i></button>
+                            </td>
+                        </tr>
+                         <tr>
+                            <td class="fw-bold">PC-LAB-020</td>
+                            <td>Lab. Redes</td>
+                            <td>Pedro Diaz</td>
+                            <td>10/03/2022</td>
+                            <td><span class="badge badge-prev">Preventivo</span></td>
+                            <td><span class="badge badge-ok">Operativa</span></td>
+                            <td>Actualización de antivirus y drivers.</td>
+                            <td>
+                                <button class="btn-icon"><i class="fa-solid fa-eye"></i></button>
+                                <button class="btn-icon"><i class="fa-solid fa-download"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-logo">
+            <span style="color:white; font-weight:bold;">SIGLAB UCE</span>
+        </div>
+    </footer>
+
+</body>
+</html>
