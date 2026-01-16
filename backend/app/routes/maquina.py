@@ -29,6 +29,12 @@ async def agregar_maquina(datos: MaquinaSchema):
 async def listar_maquinas():
     return dao_maq.listar_todas()
 
+@router.get("/verificar-codigo/{codigo}")
+async def verificar_codigo(codigo: str):
+    """Verifica si un código de máquina ya existe"""
+    maquina = dao_maq.buscar_por_codigo(codigo)
+    return {"existe": maquina is not None, "codigo": codigo}
+
 @router.get("/home/maquinas/informe-general")
 async def informe_general():
     return service.obtener_todos_los_informes()

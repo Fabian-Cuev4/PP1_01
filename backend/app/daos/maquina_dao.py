@@ -10,6 +10,9 @@ class MaquinaDAO:
             cursor.execute(query, (maquina.codigo_equipo, maquina.tipo_maquina, 
                                    maquina.estado_actual, maquina.area, maquina.fecha))
             conn.commit()
+        except Exception as e:
+            conn.rollback()
+            raise e  # Re-lanzar el error para manejarlo en el Service
         finally:
             cursor.close()
             conn.close()

@@ -9,6 +9,13 @@ class ProyectoService:
         self._dao_mtto = mantenimiento_dao
 
     def registrar_maquina(self, datos_dict):
+        codigo = datos_dict.get("codigo_equipo")
+        
+        # Validar que el código no esté duplicado (clave primaria)
+        maquina_existente = self._dao_maq.buscar_por_codigo(codigo)
+        if maquina_existente:
+            return None, f"El código '{codigo}' ya existe. El código debe ser único."
+        
         tipo = datos_dict.get("tipo_equipo", "").upper()
         # Abstract Factory: Crea Computadora si es "PC", Impresora si es "IMP"
         if tipo == "PC":
@@ -29,8 +36,15 @@ class ProyectoService:
             return None, f"Tipo de equipo '{tipo}' no válido. Use 'PC' o 'IMP'."
         
         # DAO persiste en MySQL usando la abstracción Maquina
-        self._dao_maq.guardar(nueva)
-        return nueva, None
+        try:
+            self._dao_maq.guardar(nueva)
+            return nueva, None
+        except Exception as e:
+            # Capturar error de clave duplicada de MySQL
+            error_msg = str(e).lower()
+            if "duplicate entry" in error_msg or "duplicate key" in error_msg:
+                return None, f"El código '{codigo}' ya existe. El código debe ser único."
+            return None, f"Error al guardar la máquina: {str(e)}"
 
     def registrar_mantenimiento(self, datos_dict):
         codigo = datos_dict.get("codigo_maquina")
