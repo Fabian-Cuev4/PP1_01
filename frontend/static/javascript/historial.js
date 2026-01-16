@@ -1,5 +1,14 @@
 // maneja la visualización del historial de mantenimientos de una máquina específica
 document.addEventListener("DOMContentLoaded", async () => {
+    // botón de regresar: vuelve a la lista de máquinas (se configura primero para que siempre funcione)
+    const btnVolver = document.getElementById("btn-volver-historial");
+    if (btnVolver) {
+        btnVolver.addEventListener("click", (e) => {
+            e.preventDefault();
+            window.location.href = "/home/maquinas";
+        });
+    }
+
     // obtiene el código de la máquina desde la URL
     const params = new URLSearchParams(window.location.search);
     const codigo = params.get("codigo");
@@ -59,15 +68,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
     } catch (error) {
-        console.error("Error al cargar historial:", error);
-        tablaBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Error al cargar el historial.</td></tr>`;
-    }
-
-    // botón de regresar: vuelve a la lista de máquinas
-    const btnVolver = document.getElementById("btn-volver-historial");
-    if (btnVolver) {
-        btnVolver.addEventListener("click", () => {
-            window.location.href = "/home/maquinas";
-        });
+        // console.error("Error al cargar historial:", error);
+        if (tablaBody) {
+            tablaBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Error al cargar el historial.</td></tr>`;
+        }
     }
 });
