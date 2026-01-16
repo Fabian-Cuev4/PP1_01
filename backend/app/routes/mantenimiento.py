@@ -1,15 +1,15 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from datetime import date
-from app.repositories import repo_instancia # Importamos la instancia de la RAM
 from app.daos.mantenimiento_dao import MantenimientoDAO
+from app.daos.maquina_dao import MaquinaDAO
 from app.services import ProyectoService
 
 router = APIRouter(prefix="/home/mantenimiento")
 
-# Inyección de dependencias: Pasamos RAM y Mongo al Service
-dao_mtto = MantenimientoDAO()
-service = ProyectoService(repo_instancia, dao_mtto)
+# Inyección de dependencias actualizada
+dao_mtto = MantenimientoDAO() # MongoDB
+dao_maq = MaquinaDAO()        # MySQL
+service = ProyectoService(dao_maq, dao_mtto)
 
 class MantenimientoSchema(BaseModel):
     codigo_maquina: str
@@ -18,10 +18,10 @@ class MantenimientoSchema(BaseModel):
     tipo: str
     fecha: str
     observaciones: str
-    
 
 @router.post("/agregar")
 async def agregar(datos: MantenimientoSchema):
+    # El service ahora buscará en MySQL si el codigo_maquina existe
     resultado, error = service.registrar_mantenimiento(datos.model_dump())
     if error:
         raise HTTPException(status_code=400, detail=error)
@@ -29,14 +29,11 @@ async def agregar(datos: MantenimientoSchema):
 
 @router.get("/listar/{codigo}")
 async def listar_mantenimientos_equipo(codigo: str):
-    """
-    Ruta para obtener todo el historial de una sola máquina.
-    Trae los datos desde MongoDB.
-    """
     registros = service.obtener_historial_por_maquina(codigo)
     
-    # IMPORTANTE: Convertir el ObjectId de MongoDB a String para que FastAPI pueda enviarlo
+    # Convertir ObjectId de MongoDB a String para JSON
     for r in registros:
-        r["_id"] = str(r["_id"])
+        if "_id" in r:
+            r["_id"] = str(r["_id"])
         
     return registros

@@ -3,12 +3,12 @@
     <head>
         <meta charset="UTF-8">
         <title>Registro - SIGLAB</title>
-        <link rel="stylesheet" href="style_session.css">
+        <link rel="stylesheet" href="/static/css/style_session.css">
     </head>
     <body>
         <div class="login-card">
             <div class="logo-section">
-                <img src="../imagenes y logos/Logo.png" alt="SIGLAB Logo" class="logo">
+                <img src="/static/img/Logo.png" alt="SIGLAB Logo" class="logo">
             </div>
 
             <h2>Crear Cuenta</h2>
@@ -43,12 +43,14 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-signin">Registrarse</button>
+                <button type="button" id="btn-register" class="btn-signin">Registrarse</button>
             </form>
 
             <p class="footer-text">
-                ¿Ya tienes cuenta? <a href="index_session.html">Inicia sesión aquí</a>
+                ¿Ya tienes cuenta? <a href="/templates/index_session.html">Inicia sesión aquí</a>
             </p>
         </div>
+
+        <script src="/static/javascript/register.js"></script>
     </body>
 </html>

@@ -3,44 +3,34 @@ from app.models.Impresora import Impresora
 from app.models.Mantenimiento import Mantenimiento
 
 class ProyectoService:
-    def __init__(self, repository, mantenimiento_dao):
-        self._repo = repository        # Repositorio en RAM (Arreglo)
-        self._dao_mtto = mantenimiento_dao  # DAO de MongoDB
+    def __init__(self, maquina_dao, mantenimiento_dao):
+        self._dao_maq = maquina_dao    # MySQL
+        self._dao_mtto = mantenimiento_dao  # MongoDB
 
-    # --- LÓGICA DE MÁQUINAS (EN RAM) ---
     def registrar_maquina(self, datos_dict):
         tipo = datos_dict.get("tipo_equipo", "").upper()
         if tipo == "PC":
             nueva = Computadora(datos_dict.get("codigo_equipo"), datos_dict.get("estado_actual"), 
                                datos_dict.get("area"), datos_dict.get("fecha"))
-        elif tipo == "IMP":
+        else:
             nueva = Impresora(datos_dict.get("codigo_equipo"), datos_dict.get("estado_actual"), 
                              datos_dict.get("area"), datos_dict.get("fecha"))
-        else:
-            return None, "Tipo de equipo no soportado"
         
-        self._repo.guardar_maquina(nueva)
+        self._dao_maq.guardar(nueva)
         return nueva, None
 
-    # --- LÓGICA DE MANTENIMIENTO (EN MONGO) ---
     def registrar_mantenimiento(self, datos_dict):
         codigo = datos_dict.get("codigo_maquina")
-        
-        # 1. Intentamos buscar la máquina en RAM
-        maquina_obj = self._repo.buscar_maquina_por_codigo(codigo)
+        # Validamos que la máquina exista en MySQL
+        maquina_db = self._dao_maq.buscar_por_codigo(codigo)
 
-        # 2. SI NO EXISTE EN RAM, creamos un objeto genérico rápido
-        # para que el modelo Mantenimiento no explote
-        if not maquina_obj:
-            from app.models.Computadora import Computadora # Importamos una clase base
-            maquina_obj = Computadora(
-                codigo_equipo=codigo, 
-                estado_actual="Desconocido", 
-                area="General", 
-                fecha="2024-01-01"
-            )
+        if not maquina_db:
+            return None, f"La máquina {codigo} no existe en MySQL."
 
-        # 3. Creamos el objeto mantenimiento con la maquina (sea la real o la generica)
+        # Reconstruimos el objeto para el modelo de Mantenimiento
+        maquina_obj = Computadora(maquina_db['codigo'], maquina_db['estado'], 
+                                 maquina_db['area'], maquina_db['fecha'])
+
         nuevo_mtto = Mantenimiento(
             maquina_objeto=maquina_obj,
             empresa=datos_dict.get("empresa"),
@@ -50,13 +40,8 @@ class ProyectoService:
             observaciones=datos_dict.get("observaciones")
         )
         
-        try:
-            # 4. Guardamos en MongoDB
-            self._dao_mtto.guardar(nuevo_mtto)
-            return nuevo_mtto, None
-        except Exception as e:
-            return None, f"Error en MongoDB: {str(e)}"
+        self._dao_mtto.guardar(nuevo_mtto)
+        return nuevo_mtto, None
 
     def obtener_historial_por_maquina(self, codigo_maquina):
-        """Consulta el DAO para traer el historial de la base de datos"""
         return self._dao_mtto.listar_por_maquina(codigo_maquina)
