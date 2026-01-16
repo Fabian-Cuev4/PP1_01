@@ -106,3 +106,10 @@ body {
 .footer-text a:hover {
     text-decoration: underline;
 }
+
+/* Añadir esto al final de style_session.css /Kenny añadio esto para el register*/
+h2 {
+    color: #555;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
