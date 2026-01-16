@@ -10,15 +10,29 @@ app = FastAPI()
 
 @app.on_event("startup")
 def startup_db_client():
-    MongoDB.conectar()
+    # Inicializar MySQL primero (crea DB y tablas si no existen)
+    # Usamos try-except para no bloquear el startup si hay problemas temporales
+    try:
+        MySQLConnection.inicializar_base_datos()
+    except Exception as e:
+        print(f"Advertencia: No se pudo inicializar MySQL en el startup: {e}")
+        print("La aplicación continuará, pero algunas funciones pueden no estar disponibles.")
+        print("MySQL se intentará inicializar automáticamente en el próximo request.")
+    
+    # Luego conectar MongoDB
+    try:
+        MongoDB.conectar()
+    except Exception as e:
+        print(f"Advertencia: No se pudo conectar a MongoDB en el startup: {e}")
+        print("La aplicación continuará, pero algunas funciones pueden no estar disponibles.")
+        print("MongoDB se intentará conectar automáticamente en el próximo request.")
 
 @app.on_event("shutdown")
 def shutdown_db_client():
     MongoDB.cerrar()
 
-MySQLConnection.inicializar_base_datos()
-
-base_path = Path(__file__).resolve().parent.parent
+# Desde /app/main.py: parent = /app/
+base_path = Path(__file__).resolve().parent
 
 
 app.mount(

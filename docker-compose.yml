@@ -1,6 +1,5 @@
-version: '3.8'
-
 services:
+  # Base de datos MySQL
   mysql:
     image: mysql:8.0
     container_name: mysql_siglab
@@ -12,16 +11,80 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    networks:
+      - siglab_network
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p${MYSQL_ROOT_PASSWORD} || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
 
-  # (Opcional) Si también quieres levantar mongo aquí
-  mongo:
+  # Base de datos MongoDB
+  mongodb:
     image: mongo:latest
     container_name: mongo_siglab
+    restart: always
     ports:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    networks:
+      - siglab_network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')", "--quiet"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Backend FastAPI
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend_siglab
+    restart: always
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: Clubpengui1
+      MYSQL_DATABASE: proyecto_maquinas
+      MONGO_HOST: mongodb
+      MONGO_PORT: 27017
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./frontend:/app/frontend
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    networks:
+      - siglab_network
+
+  # Frontend con Nginx
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend_siglab
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - siglab_network
 
 volumes:
   mysql_data:
+    driver: local
   mongo_data:
+    driver: local
+
+networks:
+  siglab_network:
+    driver: bridge

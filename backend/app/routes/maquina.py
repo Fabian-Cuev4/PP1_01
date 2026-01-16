@@ -34,7 +34,3 @@ async def verificar_codigo(codigo: str):
     """Verifica si un código de máquina ya existe"""
     maquina = dao_maq.buscar_por_codigo(codigo)
     return {"existe": maquina is not None, "codigo": codigo}
-
-@router.get("/home/maquinas/informe-general")
-async def informe_general():
-    return service.obtener_todos_los_informes()

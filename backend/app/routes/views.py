@@ -4,8 +4,9 @@ from pathlib import Path
 
 route = APIRouter()
 
-# Subimos los niveles necesarios para llegar a la raíz del proyecto y luego a frontend/templates
-dir_raiz = Path(__file__).resolve().parents[3] 
+# Subimos los niveles necesarios para llegar a /app y luego a frontend/templates
+# Desde /app/app/routes/views.py: parents[2] = /app/
+dir_raiz = Path(__file__).resolve().parents[2]
 templates = Jinja2Templates(directory=dir_raiz / "frontend" / "templates")
 
 #Rutas para paginas renderizadas
