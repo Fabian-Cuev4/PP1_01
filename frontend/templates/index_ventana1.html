@@ -1,68 +1,66 @@
-<!DOCTYPE html>
-<html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <title>SIGLAB - Página Principal</title>
+<!DOCTYPE html> <!-- Indica que el documento es una página web HTML5 -->
+<html lang="es"> <!-- Define el idioma de la página como español -->
 
-        <!-- Importación del archivo CSS para los estilos de la página-->
-        <link rel="stylesheet" href="/static/css/style_ventana1.css">
-    </head>
-    <body>
-        <!--Encabezado superior-->
-        <header class="main-header">
-            <!--Sección del usuario-->
-            <div class="user-profile">
-                <div class="avatar">
-                    <img src="/static/img/icono_user.png"/>
-                </div>
-            </div>
-            <!--Botón para cerrar sesión-->
-            <div class="logout-section">
-                <button type="button" id="btn-logout-off" class="btn-logout">
-                    Cerrar Sesión
-                    <img src="/static/img/icono_cerrar_sesion.png" />
-                </button>
-            </div>
-        </header>
+<head> <!-- Configuraciones que el navegador usa pero que no se ven en la pantalla -->
+    <meta charset="UTF-8"> <!-- Permite que el texto se vea bien (tildes, letra ñ) -->
+    <title>SIGLAB - Página Principal</title> <!-- Es el título que sale en la parte superior del navegador -->
 
-        <!--Contenido principal de la página-->
-        <main class="content">
-            <!--Barra superior con botón-->
-            <div class="top-bar">
-                <button type="button" class="btn-create">
-                    + Crear Espacio
-                </button>
+    <!-- Enlazamos los estilos visuales específicos para esta página del panel principal -->
+    <link rel="stylesheet" href="/static/css/style_ventana1.css?v=1.4">
+</head>
+
+<body> <!-- Aquí va todo lo que el usuario ve y puede tocar -->
+    <!-- Este es el encabezado de la parte superior (barra azul oscura) -->
+    <header class="main-header">
+        <!-- Parte que muestra el perfil o avatar del usuario que entró -->
+        <div class="user-profile">
+            <div class="avatar">
+                <img src="/static/img/icono_user.png" />
             </div>
-            <!--Título principal-->
-            <h1 class="title">Tu espacio de trabajo</h1> 
-            <!--Contenedor de tarjetas-->
-            <div class="cards-conta">
-                <!-- Tarjeta de espacio de trabajo -->
-                <a href="/home/maquinas" class="card-target">
-                    <div class="card-space">
-                        <div class="card-icon">
-                            <img src="/static/img/icono_maquina.png" />
-                        </div>
-                        <!--Información de equipo-->
-                        <div class="card-info">
-                            <h3>Laboratorio de Redes</h3>
-                            <p><strong>Ubicación:</strong> Edificio A - Piso 2</p>
-                            <p><strong>Entidad:</strong> FICA - Ing. en Sistemas</p>
-                            <p><strong>N° Equipos:</strong> 5</p>
-                        </div>
+        </div>
+        <!-- Botón para salir del sistema y volver al login -->
+        <div class="logout-section">
+            <!-- Al darle clic a este botón se activa la función de 'Cerrar Sesión' en JS -->
+            <button type="button" id="btn-logout-off" class="btn-logout">
+                Cerrar Sesión
+                <img src="/static/img/icono_cerrar_sesion.png" />
+            </button>
+        </div>
+    </header>
+
+    <!-- Este es el cuerpo central de la página -->
+    <main class="content">
+        <!-- Una barrita arriba que permite crear nuevos espacios de trabajo -->
+        <!-- Espacio reservado para acciones futuras -->
+        <div class="top-bar" style="height: 40px;">
+        </div>
+        <!-- El título grande que dice qué estamos viendo -->
+        <h1 class="title">Tu espacio de trabajo</h1>
+        <!-- Aquí se muestran los diferentes laboratorios o tarjetas de equipo -->
+        <div class="cards-conta">
+            <!-- Una tarjeta que al clicarla nos lleva a la lista de máquinas del laboratorio -->
+            <a href="/home/maquinas" class="card-target">
+                <div class="card-space">
+                    <div class="card-icon"> <!-- Icono representador de máquinas -->
+                        <img src="/static/img/icono_maquina.png" />
                     </div>
-                </a>
-            </div>
-        </main>
+                    <!-- Textos con la información del laboratorio -->
+                    <div class="card-info">
+                        <h3>Laboratorio de Redes</h3>
+                        <p><strong>Ubicación:</strong> Edificio A - Piso 2</p>
+                        <p><strong>Entidad:</strong> FICA - Ing. en Sistemas</p>
+                        <p><strong>N° Equipos:</strong> 5</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </main>
 
-        <!--Pie de página-->
-        <footer class="main-footer">
-            <div class="footer-logo">
-                <img src="/static/img/Logo b-n.png" alt="SIGLAB Logo">
-            </div>
-        </footer>
-        <script src="/static/javascript/session.js"></script>
-    </body>
+    <!-- La parte de abajo de la página (actualmente vacía para dar margen) -->
+    <footer class="main-footer">
+    </footer>
+    <!-- Cargamos el script de la sesión para que el botón de salir funcione -->
+    <script src="/static/javascript/session.js"></script>
+</body>
 
-    
-    </html>
+</html>

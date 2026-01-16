@@ -1,11 +1,15 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>SIGLAB - Detalle de Máquina</title>
+<!DOCTYPE html> <!-- Indica que es un documento web de tipo HTML5 -->
+<html lang="es"> <!-- Define el idioma de la página como español -->
+
+<head> <!-- Configuraciones internas que usa el navegador -->
+    <meta charset="UTF-8"> <!-- Permite que la letra ñ y las tildes se vean bien -->
+    <title>SIGLAB - Detalle de Máquina</title> <!-- El título que sale en la pestaña del navegador -->
+    <!-- Enlazamos los estilos visuales (colores, fuentes) específicos de esta página -->
     <link rel="stylesheet" href="/static/css/style_ventana2.css">
 </head>
-<body>
+
+<body> <!-- Aquí va todo lo que el usuario ve en su pantalla -->
+    <!-- Encabezado superior con el dibujo del perfil del usuario -->
     <header class="main-header">
         <div class="user-profile">
             <div class="avatar">
@@ -14,29 +18,39 @@
         </div>
     </header>
 
+    <!-- Cuerpo principal donde se listan las máquinas del laboratorio -->
     <main class="content">
+        <!-- Barra de acciones con botones y el buscador -->
         <div class="action-bar">
             <div class="left-actions">
-                <button id="btn-create-machine" class="btn-create">Agregar Máquina</button>
-                <button id="btn-action-report" class="btn-create">Generar Reporte</button>
-                <button id="btn-return-action" class="btn-create">Regresar</button>
+                <!-- Botón para ir a registrar una máquina nueva -->
+                <button id="btn-agregar-maquina" class="btn-create">Agregar Máquina</button>
+                <!-- Botón para ir a ver las estadísticas y reportes -->
+                <button id="btn-reportes" class="btn-create">Generar Reporte</button>
+                <!-- Botón para volver al tablero de laboratorios (Ventana 1) -->
+                <button id="btn-regresar" class="btn-create">Regresar</button>
             </div>
+            <!-- Cuadro de texto para buscar máquinas por su nombre o código -->
             <div class="search-container">
                 <input type="text" id="input-busqueda" placeholder="Buscar equipo...">
             </div>
-            </div>
-            <div id="contenedor-principal-maquinas">
-            </div>
+        </div>
+        <!-- En este contenedor vacío es donde el JavaScript dibujará todas las máquinas que encuentre -->
+        <div id="contenedor-principal-maquinas">
+        </div>
     </main>
 
+    <!-- La parte de abajo de la página, por ahora se deja libre por estética -->
     <footer class="main-footer">
-        <div class="footer-logo">
-            <img src="/static/img/Logo b-n.png" alt="SIGLAB Logo">
-        </div>
     </footer>
 
+    <!-- Cargamos los scripts necesarios para la lógica de esta página -->
+    <!-- mantenimiento.js: Se encarga de traer y dibujar las máquinas desde la base de datos -->
     <script src="/static/javascript/mantenimiento.js"></script>
+    <!-- ventana.js: Maneja las funciones de los botones de navegar (Agregar, Regresar) -->
     <script src="/static/javascript/ventana.js"></script>
+    <!-- session.js: Maneja la sesión y el botón de cerrar sesión si lo hubiera -->
     <script src="/static/javascript/session.js"></script>
-    </body>
+</body>
+
 </html>

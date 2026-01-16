@@ -1,120 +1,102 @@
-/*variables y general*/
-/* definimos colores y radios que vamos a usar en todo el sitio */
+/* Aquí definimos los colores y tamaños que usaremos en toda la página de reportes */
 :root {
-    --primary-color: #3498db; /* color principal azul */
-    --hover-color: #2e86c1; /* color al pasar el mouse */
-    --danger-color: #e74c3c; /* color rojo para errores */
-    --success-color: #2ecc71; /* color verde para exitos */
-    --bg-body: #eef2f5; /* color de fondo del body */
-    --card-bg: #ffffff; /* fondo de tarjetas o contenedores */
-    --radius-xl: 20px; /* bordes muy redondeados */
-    --radius-md: 12px; /* bordes medianos */
+    --primary-color: #3498db;
+    /* Azul principal */
+    --hover-color: #2e86c1;
+    /* Azul más oscuro para los botones cuando se tocan */
+    --danger-color: #e74c3c;
+    /* Rojo para alertas o errores */
+    --success-color: #2ecc71;
+    /* Verde para éxitos */
+    --bg-body: #eef2f5;
+    /* Gris muy claro para el fondo de la pantalla */
+    --card-bg: #ffffff;
+    /* Blanco para los cuadros de información */
+    --radius-xl: 20px;
+    /* Esquinas muy redondeadas */
+    --radius-md: 12px;
+    /* Esquinas medianamente redondeadas */
 }
 
-/* aplica a todos los elementos */
+/* Quita márgenes extra y pone la letra bonita en todos los elementos */
 * {
-    margin: 0; /* elimina margenes por defecto */
-    padding: 0; /* elimina padding por defecto */
-    box-sizing: border-box; /* hace que padding y border no cambien el tamaño total */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* fuente principal */
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    /* Asegura que los tamaños de las cajas incluyan sus bordes */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* body */
+/* Estilo del fondo de la página entera */
 body {
-    background-color: var(--bg-body); /* fondo gris claro */
-    min-height: 100vh; /* ocupa toda la pantalla vertical */
-    display: flex; /* usamos flex para organizar contenido */
-    flex-direction: column; /* los hijos van en columna */
-    position: relative; /* permite ubicar botones con position absolute o fixed */
-}
-
-/*header moderno*/
-.main-header {
-    background-color: var(--primary-color); /* fondo azul */
-    height: 85px; /* altura del header */
-    padding: 0 40px; /* espacio interno horizontal */
-    display: flex; /* flex para alinear elementos */
-    align-items: center; /* centra verticalmente */
-    justify-content: space-between; /* separa elementos a los extremos */
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* sombra suave */
-    transition: all 0.3s ease; /* animacion para cambios */
-}
-
-/* avatar del usuario */
-.avatar {
-    background-color: #ec7063; /* fondo rosado */
-    width: 70px;
-    height: 70px;
-    border-radius: 50%; /* circulo */
+    background-color: var(--bg-body);
+    min-height: 100vh;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden; /* corta imagen que sobresalga */
-    transition: all 0.3s ease;
+    flex-direction: column;
+    /* Organiza el contenido en una columna vertical */
 }
 
-/* imagen dentro del avatar */
-.avatar img {
-    width: 70px;
-    height: 70px;
-    object-fit: cover; /* ajusta imagen al contenedor */
-}
-
-/*contenido principal*/
+/* Espaciado del contenido central */
 .content {
-    padding: 40px 60px; /* espacio interno */
-    flex: 1; /* ocupa espacio disponible */
+    padding: 40px 60px;
+    flex: 1;
+    /* Ocupa todo el espacio de sobra entre arriba y abajo */
 }
 
-/* titulo y descripcion de la pagina */
+/* Encabezado con el título "Reporte de Mantenimientos" y el botón Regresar */
 .page-header {
-    margin-bottom: 30px; /* espacio debajo */
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    /* Título a la izquierda, botón a la derecha */
+    align-items: center;
+    /* Alineados al centro verticalmente */
 }
 
+/* Título principal de la página con su icono */
 .page-header h1 {
-    color: #333; /* gris oscuro */
-    font-size: 28px; /* tamaño letra */
-    display: flex; /* para icono y texto en fila */
-    align-items: center; /* centra verticalmente */
-    gap: 10px; /* espacio entre icono y texto */
+    color: #333;
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
+/* Texto gris pequeño debajo del título */
 .page-header p {
-    color: #666; /* gris medio */
-    font-size: 14px; /* tamaño letra */
-    margin-top: 5px; /* espacio encima */
+    color: #666;
+    font-size: 14px;
 }
 
-.page-header i {
-    color: var(--primary-color); /* icono azul */
-}
-
-/*tarjeta de filtros*/
+/* Estilo de la tarjeta blanca donde están los filtros de búsqueda */
 .filter-card {
-    background-color: var(--card-bg); /* fondo blanco */
-    padding: 25px; /* espacio interno */
-    border-radius: var(--radius-xl); /* bordes redondeados */
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05); /* sombra suave */
-    margin-bottom: 30px; /* espacio debajo */
+    background-color: var(--card-bg);
+    padding: 25px;
+    border-radius: var(--radius-xl);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    /* Sombra muy suave */
+    margin-bottom: 30px;
 }
 
-/* formulario de filtros */
+/* Organización de los campos de texto dentro del filtro */
 .filter-form {
-    display: flex; /* filas de elementos */
-    gap: 20px; /* espacio entre grupos */
-    align-items: flex-end; /* alinea botones abajo */
-    flex-wrap: wrap; /* se ajusta a pantalla */
+    display: flex;
+    gap: 20px;
+    align-items: flex-end;
+    /* Alinea los inputs con el botón al mismo nivel */
+    flex-wrap: wrap;
+    /* Si la pantalla es pequeña, se amontonan hacia abajo */
 }
 
-/* cada grupo de filtro */
+/* Grupo que contiene la etiqueta (label) y el cuadro de texto (input) */
 .filter-group {
     display: flex;
-    flex-direction: column; /* label arriba, input abajo */
-    flex: 1; /* ocupa espacio disponible */
-    min-width: 200px; /* ancho minimo */
+    flex-direction: column;
+    flex: 1;
+    min-width: 200px;
 }
 
-/* label del filtro */
+/* Estilo de los textos de Usuario/Código en el filtro */
 .filter-group label {
     font-size: 14px;
     color: #555;
@@ -122,31 +104,25 @@ body {
     font-weight: 600;
 }
 
-.filter-group label i {
-    margin-right: 5px; /* espacio entre icono y texto */
-    color: var(--primary-color); /* icono azul */
-}
-
-/* input y select */
-.filter-group input,
-.filter-group select {
-    padding: 12px 15px; /* espacio interno */
-    border: 1px solid #ddd; /* borde gris claro */
+/* Estilo del cuadro de búsqueda (Input) */
+.filter-group input {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
     border-radius: var(--radius-md);
-    background-color: #f9f9f9; /* fondo gris claro */
-    outline: none; /* quita borde al enfocar */
+    background-color: #f9f9f9;
+    outline: none;
     transition: 0.3s;
+    /* Para que el cambio de color sea suave */
 }
 
-/* input enfocado */
-.filter-group input:focus,
-.filter-group select:focus {
-    border-color: var(--primary-color); /* borde azul */
-    background-color: white; /* fondo blanco */
-    box-shadow: 0 0 0 3px rgba(60, 160, 231, 0.1); /* sombra alrededor */
+/* El input cambia de color y gana una sombrita azul cuando haces clic en él */
+.filter-group input:focus {
+    border-color: var(--primary-color);
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(60, 160, 231, 0.1);
 }
 
-/* boton buscar */
+/* Botón de buscar con lupa */
 .btn-search {
     background-color: var(--primary-color);
     color: white;
@@ -158,130 +134,114 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    transition: 0.3s;
 }
 
-/* hover del boton */
-.btn-search:hover {
-    background-color: var(--hover-color);
-    transform: translateY(-2px); /* sube ligeramente */
-}
-
-/*tabla de resultados*/
+/* Tarjeta que contiene la gran tabla de resultados */
 .table-container {
-    background-color: var(--card-bg); /* fondo blanco */
+    background-color: var(--card-bg);
     border-radius: var(--radius-xl);
     padding: 20px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-    overflow: hidden; /* oculta overflow */
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
 }
 
-.table-responsive {
-    overflow-x: auto; /* scroll horizontal si es necesario */
-    width: 100%;
-}
-
+/* Estilo de la tabla de reportes */
 .report-table {
     width: 100%;
-    border-collapse: collapse; /* une bordes */
-    min-width: 900px; /* ancho minimo */
+    border-collapse: collapse;
+    /* Une las líneas de las celdas */
 }
 
-.report-table thead tr {
-    background-color: #f1f5f9; /* fondo encabezado */
-    text-align: left;
-}
-
+/* Estilo de los títulos (encabezados) de la tabla */
 .report-table th {
     padding: 15px 20px;
     font-size: 13px;
     color: #555;
-    text-transform: uppercase; /* mayuscula */
+    text-transform: uppercase;
     font-weight: 700;
     border-bottom: 2px solid #e1e4e8;
+    background-color: #f1f5f9;
 }
 
+/* Estilo de las celdas con la información real */
 .report-table td {
     padding: 15px 20px;
     font-size: 14px;
     color: #333;
     border-bottom: 1px solid #eee;
-    vertical-align: middle; /* centra vertical */
 }
 
-.report-table tbody tr:hover {
-    background-color: #f8fbff; /* cambia fondo al pasar el mouse */
-}
-
-/*badges*/
+/* Etiquetas de colores para estados y tipos */
 .badge {
-    padding: 5px 10px;
-    border-radius: 15px;
+    padding: 8px 16px;
+    border-radius: 30px;
     font-size: 11px;
-    font-weight: bold;
+    font-weight: 800;
     text-transform: uppercase;
+    display: inline-block;
 }
 
-/* colores de los badges */
-.badge-corr { background-color: #ffe5e5; color: var(--danger-color); }
-.badge-prev { background-color: #e3f2fd; color: var(--primary-color); }
-.badge-ok { background-color: #e8f5e9; color: var(--success-color); }
-.badge-maint { background-color: #fff3e0; color: #f39c12; }
+/* Etiqueta Verde: Todo está bien (Operativa) */
+.badge-ok {
+    background-color: #e6fffa;
+    color: #00b894;
+    border: 1px solid #b2f2bb;
+}
 
-.fw-bold { font-weight: 700; color: var(--primary-color); }
+/* Etiqueta Roja: Equipo de baja o dañado */
+.badge-baja {
+    background-color: #ffe5e5;
+    color: #c0392b;
+    border: 1px solid #ffcccc;
+}
 
-/*botones de accion en tabla*/
+/* Etiqueta Naranja: Mantenimiento correctivo */
+.badge-corr {
+    background-color: #fff0df;
+    color: #d35400;
+    border: 1px solid #f5c6cb;
+}
+
+/* Etiqueta Amarilla: Mantenimiento en proceso */
+.badge-maint {
+    background-color: #fff8e1;
+    color: #f39c12;
+    border: 1px solid #ffe082;
+}
+
+/* Etiqueta Azul: Mantenimiento preventivo */
+.badge-prev {
+    background-color: #e3f2fd;
+    color: #2980b9;
+    border: 1px solid #bbdefb;
+}
+
+/* Botones de acción (el icono del ojo) */
 .btn-icon {
-    background: none; /* sin fondo */
-    border: none; /* sin borde */
+    background: none;
+    border: none;
     color: #999;
     cursor: pointer;
     font-size: 16px;
-    margin: 0 5px; /* espacio entre botones */
     transition: 0.2s;
 }
 
+/* El ojo se pone azul y crece un poco cuando pasas el mouse */
 .btn-icon:hover {
     color: var(--primary-color);
-    transform: scale(1.2); /* aumenta tamaño al pasar mouse */
+    transform: scale(1.2);
 }
 
-/*footer moderno*/
-.main-footer {
-    background-color: var(--primary-color);
-    padding: 1px 2px;
-    padding-top: 20px;
-    display: flex;
-    justify-content: flex-end; /* coloca al final */
-    align-items: center;
-    margin-top: auto; /* pega al final del body */
-}
-
-.footer-logo img{
-    height: 100px;  
-    object-fit: contain; /* mantiene proporciones */
-}
-
-/* boton regresar*/
+/* Botón de "Regresar" azul fuerte */
 .btn-back {
-    position: fixed; 
-    top: 145px; 
-    right: 80px; 
-    background-color: var(--primary-color); 
-    color: white; 
-    border: none; 
-    padding: 12px 25px; 
-    border-radius: var(--radius-md); 
-    font-weight: bold; 
-    cursor: pointer; 
-    display: flex; 
-    align-items: center; 
-    gap: 8px; 
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2); 
-    transition: 0.3s; 
-    z-index: 1000; 
-} 
-.btn-back:hover { 
-    background-color: var(--hover-color); 
-    transform: translateY(-2px); 
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: var(--radius-md);
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }

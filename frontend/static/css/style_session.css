@@ -1,4 +1,4 @@
-/* Quita los espacios por defecto del navegador */
+/* reset de estilos por defecto del navegador */
 * {
     margin: 0;
     padding: 0;
@@ -6,7 +6,7 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Estilo general del fondo y centrado del formulario */
+/* fondo gris y centra el contenido en toda la pantalla */
 body {
     background-color: #9da1a5;
     display: flex;
@@ -15,7 +15,7 @@ body {
     height: 100vh;
 }
 
-/* Tarjeta blanca donde está el login */
+/* tarjeta blanca del formulario de login/registro */
 .login-card {
     background-color: #ffffff;
     width: 500px;
@@ -25,25 +25,25 @@ body {
     text-align: center;
 }
 
-/* Espacio del logo */
+/* espacio debajo del logo */
 .logo-section {
     margin-bottom: 35px;
 }
 
-/* Tamaño del logo */
+/* tamaño del logo */
 .logo {
     width: 300px;
     height: auto;
 }
 
-/* Estilo de los campos de texto */
+/* alineación de los campos de entrada */
 .input-user,
 .input-password {
     text-align: left;
     margin-bottom: 22px;
 }
 
-/* Texto de los labels */
+/* etiquetas de los campos (usuario, contraseña) */
 .input-user label,
 .input-password label {
     display: block;
@@ -53,7 +53,7 @@ body {
     color: #666;
 }
 
-/* Estilo de los inputs */
+/* estilo de los inputs de texto */
 .input-information input {
     width: 100%;
     padding: 14px 16px;
@@ -64,12 +64,12 @@ body {
     outline: none;
 }
 
-/* Color del texto del placeholder */
+/* color del placeholder */
 .input-information input::placeholder {
     color: #b0b5b9;
 }
 
-/* Botón de iniciar sesión */
+/* botón principal azul */
 .btn-signin {
     width: 100%;
     margin-top: 25px;
@@ -83,26 +83,115 @@ body {
     cursor: pointer;
 }
 
-/* Cambio de color cuando se pasa el mouse */
+/* efecto hover del botón */
 .btn-signin:hover {
     background-color: #2980b9;
 }
 
-/* Texto que aparece al final */
+/* texto del pie de página */
 .footer-text {
     margin-top: 50px;
     font-size: 13px;
     color: #555;
 }
 
-/* Estilo del enlace */
+/* enlaces del footer */
 .footer-text a {
     color: #3498db;
     font-weight: 600;
     text-decoration: none;
 }
 
-/* Subrayado cuando se pasa el mouse */
+/* subrayado al pasar el mouse */
 .footer-text a:hover {
     text-decoration: underline;
+}
+
+/* títulos h2 */
+h2 {
+    color: #555;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+/* overlay del modal (fondo oscuro) */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+}
+
+/* contenido del modal (caja blanca) */
+.modal-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 16px;
+    width: 380px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    animation: bounceIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* icono del modal */
+.modal-icon {
+    font-size: 50px;
+    color: #e74c3c;
+    margin-bottom: 20px;
+    display: block;
+}
+
+/* título del modal */
+.modal-content h3 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+/* mensaje del modal */
+.modal-content p {
+    font-size: 15px;
+    color: #7f8c8d;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+/* botón del modal */
+.btn-modal {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 40px;
+    border-radius: 25px;
+    font-weight: bold;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+/* efecto hover del botón del modal */
+.btn-modal:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+}
+
+/* animación de entrada del modal */
+@keyframes bounceIn {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
 }

@@ -1,45 +1,66 @@
-<!DOCTYPE html>
-<html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <title>Login - SIGLAB</title>
-        <!-- Importacion del archivo CSS para los estilos de la página -->
-        <link rel="stylesheet" href="/static/css/style_session.css">
-    </head>
-    <body>
-        <!-- Contenedor principal del formulario de inicio de sesión -->
-        <div class="login-card">
+<!DOCTYPE html> <!-- Define que este documento es una página web moderna -->
+<html lang="es"> <!-- Inicia el documento y define el idioma español -->
 
-            <!-- Sección donde va el logo -->
-            <div class="logo-section">
-                <img src="/static/img/Logo.png" alt="SIGLAB Logo" class="logo">
-            </div>
+<head> <!-- Sección para la configuración interna del navegador -->
+    <meta charset="UTF-8"> <!-- Permite mostrar tildes y caracteres especiales correctamente -->
+    <title>Login - SIGLAB</title> <!-- Es el nombre que sale en la pestaña del navegador -->
+    <!-- Enlazamos el archivo CSS que da color y diseño a esta página -->
+    <link rel="stylesheet" href="/static/css/style_session.css?v=3.0">
+    <!-- Enlazamos íconos bonitos de una librería llamada Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
 
-            <!-- Formulario de inicio de sesión -->
-            <form>
-                <!-- Campo para ingresar el usuario -->
-                <div class="input-user">
-                    <label for="usuario">Usuario</label>
-                    <div class="input-information">
-                        <input type="text" id="usuario" placeholder="Ingresar usuario">
-                    </div>
-                </div>
-                <!-- Campo para ingresar la contraseña -->
-                <div class="input-password">
-                    <label for="password">Contraseña</label>
-                    <div class="input-information">
-                        <input type="password" id="password" placeholder="Ingresar contraseña">
-                    </div>
-                </div>
-                <!-- Botón para enviar el formulario -->
-                <button type="button" id="btn-signin-on" class="btn-signin">Iniciar sesión</button>
-            </form>
+<body> <!-- Aquí empieza lo que el usuario realmente ve en la pantalla -->
+    <!-- Esta caja blanca contiene todo el formulario de entrada -->
+    <div class="login-card">
 
-            <!-- Texto que aparece debajo del formulario para poder registrarse-->
-            <p class="footer-text">
-                ¿No tienes cuenta? <a href="#">Registrarse</a>
-            </p>
+        <!-- Dibujo del logo del proyecto en la parte de arriba -->
+        <div class="logo-section">
+            <img src="/static/img/Logo.png" alt="SIGLAB Logo" class="logo">
         </div>
-    <script src="/static/javascript/session.js"></script>
-    </body>
+
+        <!-- El formulario donde se escriben los datos -->
+        <form>
+            <!-- Contenedor para el nombre de usuario -->
+            <div class="input-user">
+                <label for="usuario">Usuario</label> <!-- Etiqueta que dice "Usuario" -->
+                <div class="input-information">
+                    <!-- Cuadro de texto para escribir el nombre de usuario -->
+                    <input type="text" id="usuario" placeholder="Ingresar usuario">
+                </div>
+            </div>
+            <!-- Contenedor para la clave secreta -->
+            <div class="input-password">
+                <label for="password">Contraseña</label> <!-- Etiqueta que dice "Contraseña" -->
+                <div class="input-information">
+                    <!-- Cuadro para escribir la clave (se oculta con puntitos) -->
+                    <input type="password" id="password" placeholder="Ingresar contraseña">
+                </div>
+            </div>
+            <!-- Botón azul que al darle clic intenta entrar al sistema -->
+            <button type="button" id="btn-signin-on" class="btn-signin">Iniciar sesión</button>
+        </form>
+
+        <!-- Enlace para ir a la página de registro si no tienes cuenta -->
+        <p class="footer-text">
+            ¿No tienes cuenta? <a href="/registro">Registrarse</a>
+        </p>
+    </div>
+
+    <!-- Esta es la ventana flotante que sale solo cuando hay un aviso o error -->
+    <div id="modal-notificacion" class="modal-overlay"> <!-- Fondo oscuro que tapa todo -->
+        <div class="modal-content"> <!-- Cajita blanca flotante -->
+            <!-- Ícono de alerta que cambia de color según el aviso -->
+            <span class="modal-icon"><i class="fas fa-exclamation-circle"></i></span>
+            <h3 id="modal-titulo">Atención</h3> <!-- Título llamativo -->
+            <p id="modal-mensaje">Mensaje de prueba</p> <!-- Aquí se escribirá el error real -->
+            <!-- Botón para cerrar esta ventana flotante -->
+            <button type="button" id="btn-modal-cerrar" class="btn-modal">Entendido</button>
+        </div>
+    </div>
+
+    <!-- Cargamos el archivo JavaScript que hace que todo esto funcione y valide -->
+    <script src="/static/javascript/session.js?v=3.1"></script>
+</body>
+
 </html>

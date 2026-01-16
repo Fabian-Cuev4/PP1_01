@@ -1,32 +1,39 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIGLAB - Reportes</title>
+<!DOCTYPE html> <!-- Especifica que el documento es una página web HTML5 -->
+<html lang="es"> <!-- Define el idioma español para el contenido -->
+
+<head> <!-- Cabecera con configuraciones técnicas -->
+    <meta charset="UTF-8"> <!-- Permite que las tildes y ñ se vean bien -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Ajusta la escala en móviles -->
+    <title>SIGLAB - Reportes</title> <!-- Título en la pestaña del navegador -->
+    <!-- Cargamos iconos externos para una interfaz más bonita -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/static/css/style_ventana3.css">
+    <!-- Enlazamos el archivo de estilos visuales para los reportes -->
+    <link rel="stylesheet" href="/static/css/style_ventana3.css?v=2.2">
 </head>
-<body>
-    <header class="main-header">
-        <div class="user-profile">
-            <div class="avatar"><img src="/static/img/icono_user.png"/></div>
-        </div>
-    </header>
 
+<body> <!-- Parte visible de la página de reportes -->
+    <!-- Contenido principal de la interfaz -->
     <main class="content">
+        <!-- Encabezado de la página con título y botón de retorno -->
         <div class="page-header">
-            <h1><i class="fa-solid fa-chart-pie"></i> Reporte de Mantenimientos</h1>
-            <p>Genera consultas y exporta la información de los laboratorios.</p>
+            <div class="header-text">
+                <h1><i class="fa-solid fa-chart-pie"></i> Reporte de Mantenimientos</h1>
+                <p>Genera consultas y exporta la información de los laboratorios.</p>
+            </div>
+            <!-- Botón para volver a la pantalla anterior -->
+            <button id="btn-return" class="btn-back">Regresar</button>
         </div>
 
+        <!-- Tarjeta blanca con el filtro de búsqueda -->
         <div class="filter-card">
             <form class="filter-form">
+                <!-- Campo para escribir el ID o código de la máquina a buscar -->
                 <div class="filter-group">
                     <label><i class="fa-solid fa-desktop"></i> Máquina / ID</label>
                     <input type="text" id="input-codigo" placeholder="Ej: PC-LAB-012">
                 </div>
                 <div class="filter-actions">
+                    <!-- Botón que activa la búsqueda en el archivo JS -->
                     <button type="button" id="btn-buscar" class="btn-search">
                         <i class="fa-solid fa-magnifying-glass"></i> Buscar
                     </button>
@@ -34,9 +41,11 @@
             </form>
         </div>
 
+        <!-- Contenedor para mostrar los resultados en una tabla -->
         <div class="table-container">
             <div class="table-responsive">
                 <table class="report-table">
+                    <!-- Títulos de las columnas de la tabla de reportes -->
                     <thead>
                         <tr>
                             <th>ID Equipo</th>
@@ -49,13 +58,15 @@
                             <th>Acciones</th>
                         </tr>
                     </thead>
+                    <!-- Aquí el JavaScript 'reporte.js' llenará los datos de los mantenimientos -->
                     <tbody id="tabla-reporte">
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
         </div>
-        <button id="btn-return" class="btn-back">Regresar</button>
     </main>
+    <!-- Cargamos el archivo JavaScript que maneja la lógica de los reportes -->
     <script src="/static/javascript/reporte.js"></script>
 </body>
+
 </html>

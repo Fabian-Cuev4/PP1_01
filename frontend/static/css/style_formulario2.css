@@ -1,148 +1,260 @@
-/* general: aplica a todos los elementos de la pagina */
+/* Quita espacios y pone el tipo de letra base para todo el formulario */
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box; /* hace que el padding y border no aumenten el ancho del elemento */
-    font-family: 'Segoe UI', Arial, sans-serif; /* fuente por defecto */
+    box-sizing: border-box;
+    /* Asegura que los tamaños de las cajas sean exactos */
+    font-family: 'Segoe UI', Arial, sans-serif;
 }
 
-/* modal-overlay: capa que cubre toda la pantalla cuando se abre el modal */
+/* Capa gris oscura que se pone de fondo cuando se abre el formulario de mantenimiento */
 .modal-overlay {
-    position: fixed; /* se queda fijo en la pantalla */
+    position: fixed;
     top: 0;
     left: 0;
-    width: 100%; /* ocupa todo el ancho de la pantalla */
-    height: 100%; /* ocupa todo el alto de la pantalla */
-    background-color: rgba(0, 0, 0, 0.4); /* fondo negro transparente */
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    /* Negro transparente */
     display: flex;
-    justify-content: center; /* centra el modal horizontalmente */
-    align-items: center; /* centra el modal verticalmente */
+    justify-content: center;
+    /* Centra el formulario horizontalmente */
+    align-items: center;
+    /* Centra el formulario verticalmente */
 }
 
-/* modal-content: caja principal del modal */
+/* La caja blanca que contiene el formulario de mantenimiento */
 .modal-content {
-    background-color: white; /* fondo blanco */
-    width: 650px; /* ancho del modal */
-    padding: 40px; /* espacio interno */
-    border-radius: 15px; /* bordes redondeados */
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2); /* sombra para dar profundidad */
+    background-color: white;
+    width: 650px;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    /* Sombra para resaltar */
 }
 
-/* modal-header: encabezado del modal */
+/* Parte superior de la caja blanca (Título e icono) */
 .modal-header {
     display: flex;
     align-items: center;
-    gap: 12px; /* espacio entre elementos del header */
-    margin-bottom: 25px; /* espacio abajo del header */
+    gap: 12px;
+    margin-bottom: 25px;
 }
 
-/* icon-title: icono dentro del header */
-.icon-title {
-    color: #ef5b83; /* color rosado */
-    font-size: 24px; /* tamaño del icono */
+/* Título principal de la ventana "Registro de mantenimiento" */
+.modal-title-main {
+    font-size: 22px;
+    color: #333;
+    font-weight: 700;
 }
 
-/* modal-title: titulo del modal */
-.modal-title {
-    font-size: 22px; /* tamaño de la letra */
-    color: #333; /* color de texto */
-    font-weight: 700; /* negrita */
-}
-
-/* form-row: fila de formulario para organizar grupos */
+/* Permite poner dos campos de texto uno al lado del otro */
 .form-row {
-    display: flex; /* coloca los hijos en fila */
-    gap: 20px; /* espacio entre los grupos */
-}
-
-/* form-group: contenedor de cada input o select */
-.form-group {
-    margin-bottom: 20px; /* espacio debajo del grupo */
     display: flex;
-    flex-direction: column; /* organiza label arriba y input abajo */
+    gap: 20px;
 }
 
-/* label dentro de form-group */
+/* Contenedor individual para cada dato (Técnico, Tipo, etc.) */
+.form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    /* Etiqueta arriba, cuadro abajo */
+}
+
+/* Texto de la etiqueta encima de cada cuadro */
 .form-group label {
     font-size: 14px;
-    color: #777; /* gris suave */
-    margin-bottom: 8px; /* espacio entre label e input */
-    font-weight: 500; /* semi-negrita */
+    color: #777;
+    margin-bottom: 8px;
+    font-weight: 500;
 }
 
-/* inputs y selects */
-input[type="text"], 
-select {
-    background-color: #f1f3f5; /* color de fondo */
-    border: none; /* sin borde */
-    padding: 12px 15px; /* espacio interno */
-    border-radius: 8px; /* bordes redondeados */
+/* Estilo para los cuadros de texto, fechas, listas y áreas de texto */
+input[type="text"],
+input[type="date"],
+select,
+textarea {
+    background-color: #f1f3f5;
+    /* Fondo gris suave */
+    border: 1px solid transparent;
+    /* Sin borde notable por defecto */
+    padding: 12px 15px;
+    border-radius: 8px;
     font-size: 14px;
     color: #333;
-    outline: none; /* quita el borde al enfocar */
-    width: 100%; /* ocupa todo el ancho del contenedor */
+    outline: none;
+    width: 100%;
+    transition: all 0.3s ease;
+    /* Transición suave al clicar */
 }
 
-/* placeholder de los inputs */
-input::placeholder {
-    color: #b0b5b9; /* color gris claro */
+/* Área de texto para observaciones, permite estirarla hacia abajo */
+textarea {
+    resize: vertical;
+    min-height: 80px;
 }
 
-/* estilo para el select con flecha */
-select {
-    appearance: none; /* quita el estilo por defecto */
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-    background-repeat: no-repeat; /* no repetir icono */
-    background-position: right 15px center; /* coloca la flecha a la derecha */
-    background-size: 15px; /* tamaño de la flecha */
+/* Efecto visual al clicar en cualquier cuadro de texto */
+input:focus,
+select:focus,
+textarea:focus {
+    background-color: #ffffff;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    /* Brillo azul */
 }
 
-/* checkbox-group: contenedor para checkbox y su label */
+/* Alinea el cuadrito de verificación con el texto horizontalmente */
 .checkbox-group {
-    flex-direction: row; /* coloca checkbox y label en fila */
-    align-items: center; /* alinea verticalmente */
-    gap: 10px; /* espacio entre checkbox y label */
-    margin-top: 20px; /* espacio arriba */
+    flex-direction: row !important;
+    /* Fuerza a que sea fila y no columna */
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
 }
 
-/* label del checkbox */
+.checkbox-group input[type="checkbox"] {
+    width: 18px;
+    /* Tamaño fijo para el checkbox */
+    height: 18px;
+    cursor: pointer;
+}
+
 .checkbox-group label {
-    margin-bottom: 0; /* quitar margen debajo */
-    font-size: 13px;
-    color: #444; /* color gris oscuro */
+    margin-bottom: 0;
+    /* Quita el espacio de abajo para que quede centrado con el checkbox */
+    cursor: pointer;
 }
 
-/* form-actions: contenedor de los botones del formulario */
+/* Estilos de los botones del final de la ventana */
 .form-actions {
     display: flex;
-    justify-content: space-between; /* separa los botones */
-    margin-top: 40px; /* espacio arriba */
+    justify-content: space-between;
+    /* Botones separados a los extremos */
+    gap: 15px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    /* Línea divisoria arriba de los botones */
 }
 
-/* estilo comun para botones */
-.btn-save, .btn-cancel {
-    padding: 12px 30px; /* espacio interno */
-    border: none; /* sin borde */
-    border-radius: 8px; /* bordes redondeados */
-    font-weight: bold;
-    cursor: pointer; /* cambia el cursor al pasar sobre el boton */
-    font-size: 14px;
-    transition: 0.3s; /* animacion al hover */
-}
-
-/* boton guardar */
-.btn-save {
-    background-color: #3ca0e7; /* azul */
-    color: white; /* texto blanco */
-}
-
-/* boton cancelar */
+/* Estilo general de los botones */
+.btn-save,
 .btn-cancel {
-    background-color: #e74c3c; /* rojo */
-    color: white; /* texto blanco */
+    padding: 12px 28px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-/* hover de los botones */
-.btn-save:hover, .btn-cancel:hover {
-    filter: brightness(0.9); /* oscurece un poco al pasar el mouse */
+/* Botón Guardar es azul */
+.btn-save {
+    background-color: #3498db;
+    color: white;
 }
+
+/* Botón Cancelar es rojo */
+.btn-cancel {
+    background-color: #e74c3c;
+    color: white;
+}
+
+/* Los botones cobran vida al pasar el ratón encima */
+.btn-save:hover,
+.btn-cancel:hover {
+    transform: translateY(-2px);
+    /* Se levantan un poco */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.validation-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Fondo oscuro transparente */
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    /* Asegura que esté por encima de todo */
+}
+
+.validation-modal-overlay.active {
+    display: flex;
+}
+
+.validation-card {
+    background-color: white;
+    padding: 35px;
+    border-radius: 16px;
+    width: 420px;
+    text-align: center;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+}
+
+/* Icono dentro del modal */
+.modal-icon {
+    font-size: 50px;
+    margin-bottom: 15px;
+}
+
+/* Título de la alerta (Ej: Campos Incompletos) */
+.modal-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Texto del mensaje descriptivo */
+.modal-message {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 30px;
+    line-height: 1.4;
+}
+
+/* Botón "Entendido" azul y redondeado */
+.btn-modal-ok {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 12px 40px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-modal-ok:hover {
+    background-color: #2980b9;
+}
+
+.btn-modal-ok:active {
+    transform: scale(0.95);
+}
+
+/* Colores de los iconos del aviso del modal */
+.icon-error {
+    color: #e74c3c;
+}
+
+/* Rojo para fallo */
+.icon-success {
+    color: #2ecc71;
+}
+
+/* Verde para éxito */
+.icon-warning {
+    color: #f1c40f;
+}
+
+/* Amarillo para falta de datos */

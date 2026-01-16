@@ -1,73 +1,93 @@
-/* Fondo oscuro translúcido parecido a tu imagen */
+/* Estilo del fondo de la página que envuelve la tabla de historial */
 body {
     margin: 0;
     padding: 0;
-    background-color: #9b9b9b; /* Color gris de tu captura */
+    background-color: #9b9b9b;
+    /* Color de fondo gris que resalta el cuadro blanco */
     display: flex;
     justify-content: center;
+    /* Centra el historial horizontalmente */
     align-items: center;
+    /* Centra el historial verticalmente */
     min-height: 100vh;
+    /* Ocupa toda la altura de la ventana */
     font-family: 'Segoe UI', sans-serif;
 }
 
-/* Tarjeta Blanca Central */
+/* Estilo para la tarjeta blanca central donde vive la tabla */
 .modal-card {
     background-color: white;
     width: 90%;
+    /* Ocupa el 90% del ancho para no chocar con los bordes */
     max-width: 850px;
+    /* Ancho máximo de la tarjeta para que no se estire demasiado */
     padding: 30px;
     border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    /* Esquinas redondeadas y modernas */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    /* Sombra elegante */
 }
 
+/* Estilo para los títulos internos de la tarjeta */
 .modal-header h2 {
     margin: 0;
     color: #333;
     font-size: 24px;
 }
 
+/* Estilo para el subtítulo detallando qué máquina se está viendo */
 .modal-header p {
     color: #666;
     margin-top: 5px;
     font-weight: bold;
 }
 
-/* Contenedor de tabla con scroll si hay muchos datos */
+/* Contenedor que permite bajar (scroll) si la tabla es muy larga */
 .table-wrapper {
     margin: 25px 0;
     max-height: 400px;
+    /* Altura máxima antes de que aparezca la barra de bajada */
     overflow-y: auto;
+    /* Activa la barra de bajada solo si es necesario */
     border: 1px solid #eee;
     border-radius: 8px;
 }
 
+/* Estructura básica de la tabla de historial */
 .history-table {
     width: 100%;
     border-collapse: collapse;
+    /* Une las líneas de las celdas */
     text-align: left;
+    /* Alineado de texto a la izquierda */
 }
 
+/* Estilo de los nombres de columna (Encabezados) */
 .history-table th {
     background-color: #f8f9fa;
     padding: 12px;
     color: #555;
     border-bottom: 2px solid #3498db;
+    /* Línea azul gruesa debajo de los títulos */
     font-size: 14px;
 }
 
+/* Estilo de las celdas con datos reales de mantenimiento */
 .history-table td {
     padding: 12px;
     border-bottom: 1px solid #eee;
+    /* Línea delgada entre cada registro */
     font-size: 13.5px;
     color: #444;
 }
 
-/* Botón Regresar (Rojo como el de tu imagen) */
+/* Alineación de los botones de la parte inferior a la derecha */
 .modal-footer {
     display: flex;
     justify-content: flex-end;
 }
 
+/* Botón de "Regresar" de color rojo llamativo */
 .btn-back {
     background-color: #e74c3c;
     color: white;
@@ -77,9 +97,12 @@ body {
     cursor: pointer;
     font-weight: bold;
     transition: 0.3s;
+    /* Tiempo que tarda en cambiar de color al pasar el mouse */
 }
 
+/* El botón rojo se oscurece y flota un poquito al poner el ratón encima */
 .btn-back:hover {
     background-color: #c0392b;
     transform: translateY(-2px);
+    /* Eleva el botón ligeramente */
 }

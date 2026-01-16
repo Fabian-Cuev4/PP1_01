@@ -1,61 +1,79 @@
-<!DOCTYPE html>
-<html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <title>Agregar Máquina - SIGLAB</title>
-        <!-- Importacion del archivo CSS para los estilos de la página -->
-        <link rel="stylesheet" href="/static/css/style_formulario1.css">
-    </head>
-    <body>
-        <!-- fondo que oscurece todo cuando se abre el modal -->
-        <div class="modal-overlay">   
-            <!-- caja blanca del formulario -->
-            <div class="modal-head">
-                <!-- titulo del formulario que dice que es agregar maquina -->
-                <h2 class="modal-content-head">Agregar Máquina</h2>
-                
-                <!-- inicio del formulario -->
-                <form class="form">
+<!DOCTYPE html> <!-- Especifica que el documento es una página web moderna HTML5 -->
+<html lang="es"> <!-- Define el idioma de la página como español -->
+
+<head> <!-- Configuraciones invisibles para el navegador -->
+    <meta charset="UTF-8"> <!-- Asegura la correcta visualización de tildes y ñ -->
+    <title>Agregar Máquina - SIGLAB</title> <!-- Título que se muestra en la pestaña superior -->
+    <!-- Enlazamos el diseño visual (CSS) para este formulario -->
+    <link rel="stylesheet" href="/static/css/style_formulario1.css?v=1.1">
+    <!-- Enlazamos íconos para mejorar la apariencia visual -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body> <!-- Lo que el usuario ve en pantalla -->
+    <!-- Este es el fondo oscuro (capa) que centra el formulario en la pantalla -->
+    <div class="modal-overlay">
+        <!-- Caja blanca donde se encuentran todos los campos a llenar -->
+        <div class="modal-head">
+            <!-- Título que indica al usuario qué está haciendo -->
+            <h2 class="modal-content-head">Agregar Máquina</h2>
+
+            <!-- Inicio del formulario para capturar los datos del equipo -->
+            <form class="form">
+                <div class="form-content">
+                    <label>Tipo de Equipo:</label> <!-- Etiqueta informativa -->
+                    <select id="tipo_equipo"> <!-- Menú desplegable para elegir el tipo -->
+                        <option value="">Selecciona</option>
+                        <option value="PC">Computadora</option>
+                        <option value="IMP">Impresora</option>
+                    </select>
+
                     <div class="form-content">
-                        <label>Tipo de Equipo:</label>
-                        <select id="tipo_equipo">
+                        <label>Código del equipo</label>
+                        <!-- Campo para que el usuario escriba el ID único de la máquina -->
+                        <input type="text" id="codigo" placeholder="Ingresa código">
+                    </div>
+
+                    <div class="form-content">
+                        <label>Estado actual</label>
+                        <!-- Menú desplegable para indicar si la máquina sirve o no -->
+                        <select id="estado_actual">
                             <option value="">Selecciona</option>
-                            <option value="PC">Computadora</option>
-                            <option value="IMP">Impresora</option>
+                            <option value="operativa">Operativa</option>
+                            <option value="Fuera de servicio">Fuera de servicio</option>
+                            <option value="dada de baja">Dada de baja</option>
                         </select>
-                        <div class="form-content">
-                            <label>Código del equipo</label>
-                            <input type="text" id="codigo" placeholder="Ingresa código">
-                        </div>
-                        
-                        <div class="form-content">
-                            <label>Estado actual</label>
-                            <select id="estado_actual">
-                                <option value="">Selecciona</option>
-                                <option value="operativa">Operativa</option>
-                                <option value="Fuera de servicio">Fuera de servicio</option>
-                                <option value="dada de baja">Dada de baja</option>
-                            </select>
-                        </div>
                     </div>
+                </div>
 
-                    <div class="form-content">
-                        <label>Área</label>
-                        <input type="text" id="area" placeholder="Ingresa el área">
-                    </div>
+                <div class="form-content">
+                    <label>Área</label> <!-- Dónde se encuentra ubicada la máquina -->
+                    <input type="text" id="area" placeholder="Ingresa el área">
+                </div>
 
-                    <div class="form-content">
-                        <label>Fecha de adquisición</label>
-                        <input type="date" id="fecha">
-                    </div>
+                <div class="form-content">
+                    <label>Fecha de adquisición</label> <!-- Cuándo se compró o registró -->
+                    <input type="date" id="fecha">
+                </div>
 
-                    <div class="form-actions">
-                        <button type="submit" class="btn-save">Guardar</button>
-                        <button type="button" id="btn-cancel-action" class="btn-cancel">Cancelar</button>
-                    </div>
-                </form> <!-- fin del formulario -->
-            </div> <!-- fin de la caja del formulario -->
-        </div> <!-- fin del fondo modal -->
-        <script src="/static/javascript/formulario.js"></script>
-    </body>
+                <!-- Una opción extra que el usuario puede marcar o desmarcar -->
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="avanzadas">
+                    <label for="avanzadas">Opciones avanzadas</label>
+                </div>
+
+                <div class="form-actions"> <!-- Botones finales para interactuar -->
+                    <!-- El botón 'submmit' dispara la orden de guardado en el archivo JS -->
+                    <button type="submit" class="btn-save">Guardar</button>
+                    <!-- El botón 'cancelar' sirve para volver atrás sin guardar nada -->
+                    <button type="button" id="btn-cancel-action" class="btn-cancel">Cancelar</button>
+                </div>
+            </form> <!-- Fin del formulario -->
+        </div> <!-- Fin de la caja blanca -->
+    </div> <!-- Fin de la capa oscura de fondo -->
+
+    <!-- Cargamos el script que valida que todo esté lleno y manda los datos al backend -->
+    <script src="/static/javascript/formulario.js"></script>
+</body>
+
 </html>

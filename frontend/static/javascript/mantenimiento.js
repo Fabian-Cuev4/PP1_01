@@ -1,19 +1,28 @@
+// maneja la lista de máquinas: carga, muestra y filtra las tarjetas de equipos
 document.addEventListener("DOMContentLoaded", async () => {
-    // Ejecuta la carga inicial de máquinas
-    await cargarMaquinas();
+    await cargarMaquinas(); // carga las máquinas al iniciar la página
 
-    // Opcional: Escuchador para el buscador (si quieres que funcione ya)
+    // activa el buscador para filtrar mientras se escribe
     const buscador = document.getElementById("input-busqueda");
     if (buscador) {
         buscador.addEventListener("input", filtrarMaquinas);
+
+        // atajos de teclado: enter para confirmar, escape para limpiar
+        buscador.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                filtrarMaquinas();
+            } else if (e.key === "Escape") {
+                buscador.value = "";
+                filtrarMaquinas();
+            }
+        });
     }
 });
 
-/**
- * Determina el color del badge según el texto del estado
- */
+// decide el color del badge según el estado de la máquina
 function obtenerClaseEstado(estado) {
-    if (!estado) return "status-baja"; // Por defecto rojo si no hay estado
+    if (!estado) return "status-baja";
     const e = estado.toLowerCase();
     if (e.includes("operativa")) return "status-operativa";
     if (e.includes("mantenimiento")) return "status-mantenimiento";
@@ -21,28 +30,47 @@ function obtenerClaseEstado(estado) {
     return "status-mantenimiento";
 }
 
-/**
- * Carga las máquinas desde el servidor y genera el HTML dinámico
- */
+// pide las máquinas al backend y las dibuja en pantalla
 async function cargarMaquinas() {
     const contenedor = document.getElementById("contenedor-principal-maquinas");
     if (!contenedor) return;
 
     try {
-        const response = await fetch("/home/maquinas/listar");
-        const maquinas = await response.json();
-        
-        contenedor.innerHTML = ""; // Limpiamos contenedor
+        // pide la lista de máquinas al backend
+        const timestamp = new Date().getTime();
+        const response = await fetch(`/home/maquinas/listar?_t=${timestamp}`, {
+            method: 'GET',
+            headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            }
+        });
 
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+
+        const maquinas = await response.json();
+
+        if (!Array.isArray(maquinas)) {
+            console.error("Error: La respuesta no es un array:", maquinas);
+            contenedor.innerHTML = "<p>Error al cargar las máquinas.</p>";
+            return;
+        }
+
+        contenedor.innerHTML = "";
+
+        // si no hay máquinas, muestra mensaje
         if (maquinas.length === 0) {
             contenedor.innerHTML = "<p style='text-align:center; padding:20px;'>No hay equipos registrados.</p>";
             return;
         }
 
+        // crea una tarjeta por cada máquina
         for (const m of maquinas) {
             const claseEstado = obtenerClaseEstado(m.estado);
 
-            // TARJETA MINIMALISTA: Solo datos base y los 4 botones
             const tarjetaHTML = `
                 <div class="detail-container">
                     <div class="card-space">
@@ -63,8 +91,6 @@ async function cargarMaquinas() {
                     <div class="side-buttons">
                         <button class="btn-action btn-yellow-history" onclick="verHistorial('${m.codigo}')">Historial mantenimiento</button>
                         <button class="btn-action btn-blue-act" onclick="irAMantenimiento('${m.codigo}')">Mantenimiento</button>
-                        <button class="btn-action btn-green" onclick="actualizar('${m.codigo}')">Actualizar</button>
-                        <button class="btn-action btn-red" onclick="confirmarEliminar('${m.codigo}')">Eliminar</button>
                     </div>
                 </div>
             `;
@@ -75,11 +101,38 @@ async function cargarMaquinas() {
     }
 }
 
-// Nueva función para el botón Historial
+// redirige a la página de historial pasando el código de la máquina
 function verHistorial(codigo) {
     window.location.href = `/home/maquinas/historial?codigo=${encodeURIComponent(codigo)}`;
 }
 
+// redirige al formulario de mantenimiento con el código pre-cargado
 function irAMantenimiento(codigo) {
     window.location.href = `/home/maquinas/formulario/mantenimiento?codigo=${encodeURIComponent(codigo)}`;
+}
+
+// filtra las tarjetas según lo que el usuario escribe en el buscador
+function filtrarMaquinas() {
+    const input = document.getElementById("input-busqueda");
+    if (!input) return;
+
+    const filtro = input.value.toLowerCase().trim();
+    const tarjetas = document.querySelectorAll(".detail-container");
+
+    tarjetas.forEach(tarjeta => {
+        const textoTarjeta = tarjeta.innerText.toLowerCase();
+
+        // si el buscador está vacío, muestra todas las tarjetas
+        if (filtro === "") {
+            tarjeta.style.display = "flex";
+            return;
+        }
+
+        // muestra u oculta según si el texto coincide
+        if (textoTarjeta.includes(filtro)) {
+            tarjeta.style.display = "flex";
+        } else {
+            tarjeta.style.display = "none";
+        }
+    });
 }

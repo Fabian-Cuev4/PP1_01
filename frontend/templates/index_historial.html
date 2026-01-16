@@ -1,21 +1,30 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Historial de Mantenimiento</title>
+<!DOCTYPE html> <!-- Especifica la versión del lenguaje web (HTML5) -->
+<html lang="es"> <!-- Define que la página estará en español -->
+
+<head> <!-- Cabecera con datos técnicos para el navegador -->
+    <meta charset="UTF-8"> <!-- Configuración para que se vean bien las tildes -->
+    <title>Historial de Mantenimiento</title> <!-- Título en la pestaña superior -->
+    <!-- Enlazamos los estilos visuales específicos de la tabla de historial -->
     <link rel="stylesheet" href="/static/css/style_historial.css">
 </head>
-<body>
+
+<body> <!-- Parte visible del historial -->
+    <!-- Capa de fondo que ayuda a centrar la tabla en la pantalla -->
     <div class="overlay">
+        <!-- Caja blanca donde se muestra la información -->
         <div class="modal-card">
+            <!-- Encabezado de la ventana de historial -->
             <div class="modal-header">
                 <h2>Historial de Mantenimiento</h2>
+                <!-- Aquí el JS pondrá el código de la máquina que estamos consultando -->
                 <p id="subtitulo-maquina">Equipo: <span>---</span></p>
             </div>
 
+            <!-- Contenedor para que la tabla tenga su propio estilo y márgenes -->
             <div class="table-wrapper">
+                <!-- Estructura de la tabla de datos -->
                 <table class="history-table">
-                    <thead>
+                    <thead> <!-- Títulos de las columnas de la tabla -->
                         <tr>
                             <th>Fecha</th>
                             <th>Tipo</th>
@@ -24,16 +33,21 @@
                             <th>Observaciones</th>
                         </tr>
                     </thead>
+                    <!-- Aquí el archivo 'historial.js' meterá las filas de datos reales -->
                     <tbody id="tabla-cuerpo-historial">
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
 
+            <!-- Parte inferior de la ventana con botones -->
             <div class="modal-footer">
+                <!-- Botón para cerrar esta vista y volver a la lista anterior -->
                 <button id="btn-volver-historial" class="btn-back">Regresar</button>
             </div>
         </div>
     </div>
+    <!-- Cargamos el archivo JavaScript que busca los datos técnicos en el servidor -->
     <script src="/static/javascript/historial.js"></script>
 </body>
+
 </html>

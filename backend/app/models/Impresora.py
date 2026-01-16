@@ -1,13 +1,12 @@
-# Importamos la clase base Maquina para poder heredar de ella
-from app.models.abstrac_factory.Maquina import Maquina 
+from app.models.abstrac_factory.Maquina import Maquina
 
+# Representa una impresora física dentro del laboratorio
 class Impresora(Maquina):
     def __init__(self, codigo_equipo, estado_actual, area, fecha):
-        # super().__init__ envía los datos al constructor de Maquina
-        super().__init__(
-            codigo_equipo=codigo_equipo, 
-            estado_actual=estado_actual, 
-            area=area, 
-            fecha=fecha,
-            tipo_maquina="Impresora"
-        )
+        # Hereda (copia) la estructura básica de una 'Máquina'
+        super().__init__(codigo_equipo, "Impresora", estado_actual, area, fecha)
+
+    # Prueba
+    # Comportamiento específico que solo las impresoras tendrían
+    def imprimir_prueba(self):
+        return f"La impresora {self.codigo_equipo} está imprimiendo una página de prueba."

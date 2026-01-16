@@ -1,30 +1,16 @@
-# app/models/abstrac_factory/Maquina.py
 from abc import ABC
 
+# Esta es la base (molde) de cualquier máquina del laboratorio.
+# No se puede crear una "Máquina" directamente, solo se pueden crear PCs o Impresoras que usen este molde.
 class Maquina(ABC):
-    def __init__(self, codigo_equipo, estado_actual, area, fecha, tipo_maquina):
-        self._codigo_equipo = codigo_equipo
-        self._estado_actual = estado_actual # Atributo privado
-        self._area = area
-        self._fecha = fecha
-        self._tipo_maquina = tipo_maquina
+    def __init__(self, codigo_equipo, tipo_equipo, estado_actual, area, fecha):
+        self.codigo_equipo = codigo_equipo # ID único (ej: PC001)
+        self.tipo_equipo = tipo_equipo     # Qué es (PC o IMP)
+        self.estado_actual = estado_actual # Si sirve o está dañada
+        self.area = area                   # Dónde está ubicada
+        self.fecha = fecha                 # Cuándo se registró
 
-    @property
-    def codigo_equipo(self):
-        return self._codigo_equipo
-
-    @property
-    def estado_actual(self): # <--- ESTO permite usar m.estado_actual
-        return self._estado_actual
-
-    @property
-    def area(self):
-        return self._area
-
-    @property
-    def fecha(self):
-        return self._fecha
-
-    @property
-    def tipo_maquina(self):
-        return self._tipo_maquina
+    # Prueba
+    # Función común para mostrar los datos básicos de cualquier equipo
+    def mostrar_detalle(self):
+        return f"Equipo: {self.codigo_equipo} | Tipo: {self.tipo_equipo} | Ubicado en: {self.area}"

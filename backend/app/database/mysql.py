@@ -1,52 +1,131 @@
+# Este archivo es el corazón de la conexión con MySQL.
+# Se encarga de abrir la puerta a la base de datos y crear las tablas necesarias.
+
 import mysql.connector
 from mysql.connector import Error
+import os
 
 class MySQLConnection:
-    # --- CONFIGURA ESTO ---
-    USER = 'root'
-    PASSWORD = 'Clubpengui1'  
-    HOST = 'localhost'
-    DATABASE = 'proyecto_maquinas'
-    # ----------------------
+    # Usamos os.getenv para leer variables del sistema (especialmente en Docker)
+    # Si no existen, usamos unos valores por defecto.
+    USER = os.getenv('MYSQL_USER', 'root')
+    PASSWORD = os.getenv('MYSQL_PASSWORD', 'Clubpengui1')
+    HOST = os.getenv('MYSQL_HOST', 'mysql')
+    DATABASE = os.getenv('MYSQL_DATABASE', 'proyecto_maquinas')
 
     @staticmethod
     def inicializar_base_datos():
-        try:
-            # Intentamos entrar al servidor
-            conn = mysql.connector.connect(
-                host=MySQLConnection.HOST,
-                user=MySQLConnection.USER,
-                password=MySQLConnection.PASSWORD
-            )
-            cursor = conn.cursor()
-            cursor.execute(f"CREATE DATABASE IF NOT EXISTS {MySQLConnection.DATABASE}")
-            cursor.execute(f"USE {MySQLConnection.DATABASE}")
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS maquinas (
-                    codigo VARCHAR(50) PRIMARY KEY,
-                    tipo VARCHAR(20),
-                    estado VARCHAR(50),
-                    area VARCHAR(100),
-                    fecha DATE
+        
+        #Esta función se asegura de que la base de datos y las tablas existan al arrancar.
+        #Tiene un sistema de 'reintentos' por si MySQL tarda en encender.
+        
+        import time
+        max_retries = 15  # Intentaremos conectar hasta 15 veces
+        retry_delay = 3   # Esperaremos 3 segundos entre cada intento
+        
+        for attempt in range(max_retries):
+            try:
+                # Intentamos entrar al servidor de MySQL (sin especificar base de datos todavía)
+                conn = mysql.connector.connect(
+                    host=MySQLConnection.HOST,
+                    user=MySQLConnection.USER,
+                    password=MySQLConnection.PASSWORD,
+                    connection_timeout=10, 
+                    autocommit=False
                 )
-            """)
-            conn.commit()
-            print("¡ÉXITO! MySQL configurado y base de datos lista. :V")
-        except Error as e:
-            print(f"ERROR DE ACCESO: Revisa si tu contraseña es correcta. Error: {e}")
-        finally:
-            if 'conn' in locals() and conn.is_connected():
+                cursor = conn.cursor()
+
+                # Creamos la base de datos si no existe
+                cursor.execute(f"CREATE DATABASE IF NOT EXISTS {MySQLConnection.DATABASE}")
+                # Empezamos a usar nuestra base de datos
+                cursor.execute(f"USE {MySQLConnection.DATABASE}")
+
+                # Creamos la tabla de usuarios
+                # id: número único, nombre_completo: texto, username: nombre único de usuario, password: su clave, rol: rol del usuario.
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS usuarios (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        nombre_completo VARCHAR(100) NOT NULL,
+                        username VARCHAR(50) NOT NULL UNIQUE,
+                        password VARCHAR(255) NOT NULL,
+                        rol VARCHAR(20) DEFAULT 'admin'
+                    )
+                """)
+                
+                # Creamos la tabla de máquinas
+                # Guardamos código, tipo (laptop, pc, etc), estado, área y fecha.
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS maquinas (
+                        codigo VARCHAR(50) PRIMARY KEY,
+                        tipo VARCHAR(20) NOT NULL,
+                        estado VARCHAR(50) NOT NULL,
+                        area VARCHAR(100) NOT NULL,
+                        fecha DATE NOT NULL
+                    )
+                """)
+
+                # Creamos un administrador por defecto
+                # Esto es para que puedas entrar la primera vez con 'admin' y '12345'
+                cursor.execute("SELECT * FROM usuarios WHERE username = 'admin'")
+                if not cursor.fetchone():
+                    cursor.execute("INSERT INTO usuarios (nombre_completo, username, password, rol) VALUES ('Administrador', 'admin', '12345', 'admin')")
+
+                # Guardamos los cambios
+                conn.commit()
+                print("¡ÉXITO! MySQL configurado correctamente. :V")
+                
+                # Cerramos la conexión temporal
                 cursor.close()
                 conn.close()
+                return # Salimos de la función con éxito
+            
+            except (Error, Exception) as e:
+                # Si falla, esperamos un poco y volvemos a intentar
+                if attempt < max_retries - 1:
+                    print(f"Intento {attempt + 1}/{max_retries} fallido. Reintentando... Error: {e}")
+                    time.sleep(retry_delay)
+                else:
+                    print(f"ERROR: No se pudo conectar a MySQL tras muchos intentos.")
+
+    # El 'Pool' es como una reserva de conexiones abiertas para no tener que abrir una nueva cada vez.
+    _pool = None
+
+    @classmethod
+    def get_pool(cls):
+        
+        #Administra una piscina de conexiones para que el servidor sea más rápido.
+        
+        if cls._pool is None:
+            try:
+                cls._pool = mysql.connector.pooling.MySQLConnectionPool(
+                    pool_name="mypool",
+                    pool_size=5, # Mantenemos 5 conexiones listas siempre
+                    pool_reset_session=True,
+                    host=cls.HOST,
+                    user=cls.USER,
+                    password=cls.PASSWORD,
+                    database=cls.DATABASE,
+                    connection_timeout=5,
+                    autocommit=False
+                )
+            except Error as e:
+                print(f"Error al crear el pool: {e}")
+                return None
+        return cls._pool
 
     @staticmethod
     def conectar():
+        
+        #Pide una conexión del pool para usarla en los DAOs.
+        pool = MySQLConnection.get_pool()
+        if not pool:
+            return None
+        
         try:
-            return mysql.connector.connect(
-                host=MySQLConnection.HOST,
-                user=MySQLConnection.USER,
-                password=MySQLConnection.PASSWORD,
-                database=MySQLConnection.DATABASE
-            )
-        except Error as e:
+            conn = pool.get_connection()
+            if conn.is_connected():
+                return conn
+            return None
+        except Exception as e:
+            print(f"Error al conectar a MySQL: {e}")
             return None
