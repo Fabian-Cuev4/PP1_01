@@ -22,23 +22,16 @@ class MySQLConnection:
             cursor.execute(f"CREATE DATABASE IF NOT EXISTS {MySQLConnection.DATABASE}")
             cursor.execute(f"USE {MySQLConnection.DATABASE}")
             cursor.execute("""
-                CREATE TABLE IF NOT EXISTS usuarios (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    nombre_completo VARCHAR(100) NOT NULL,
-                    username VARCHAR(50) NOT NULL UNIQUE,
-                    password VARCHAR(255) NOT NULL,
-                    rol VARCHAR(20) DEFAULT 'estudiante'
+                CREATE TABLE IF NOT EXISTS maquinas (
+                    codigo VARCHAR(50) PRIMARY KEY,
+                    tipo VARCHAR(20),
+                    estado VARCHAR(50),
+                    area VARCHAR(100),
+                    fecha DATE
                 )
             """)
-            # ----------------------------------
-
-            # Insertamos un admin por defecto si no existe (para que Javier pueda entrar ya)
-            cursor.execute("SELECT * FROM usuarios WHERE username = 'admin'")
-            if not cursor.fetchone():
-                cursor.execute("INSERT INTO usuarios (nombre_completo, username, password, rol) VALUES ('Administrador', 'admin', '12345', 'admin')")
-
             conn.commit()
-            print("¡ÉXITO! MySQL configurado (Máquinas y Usuarios) listo. :V")
+            print("¡ÉXITO! MySQL configurado y base de datos lista. :V")
         except Error as e:
             print(f"ERROR DE ACCESO: Revisa si tu contraseña es correcta. Error: {e}")
         finally:
