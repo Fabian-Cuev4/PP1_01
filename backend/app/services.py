@@ -1,35 +1,61 @@
 from app.models.Computadora import Computadora
 from app.models.Impresora import Impresora
 from app.models.Mantenimiento import Mantenimiento
+from app.dtos.informe_dto import InformeMaquinaDTO
 
 class ProyectoService:
     def __init__(self, maquina_dao, mantenimiento_dao):
-        self._dao_maq = maquina_dao    # MySQL
-        self._dao_mtto = mantenimiento_dao  # MongoDB
+        self._dao_maq = maquina_dao
+        self._dao_mtto = mantenimiento_dao
 
     def registrar_maquina(self, datos_dict):
         tipo = datos_dict.get("tipo_equipo", "").upper()
+        # Abstract Factory: Crea Computadora si es "PC", Impresora si es "IMP"
         if tipo == "PC":
-            nueva = Computadora(datos_dict.get("codigo_equipo"), datos_dict.get("estado_actual"), 
-                               datos_dict.get("area"), datos_dict.get("fecha"))
+            nueva = Computadora(
+                datos_dict.get("codigo_equipo"), 
+                datos_dict.get("estado_actual"), 
+                datos_dict.get("area"), 
+                datos_dict.get("fecha")
+            )
+        elif tipo == "IMP":
+            nueva = Impresora(
+                datos_dict.get("codigo_equipo"), 
+                datos_dict.get("estado_actual"), 
+                datos_dict.get("area"), 
+                datos_dict.get("fecha")
+            )
         else:
-            nueva = Impresora(datos_dict.get("codigo_equipo"), datos_dict.get("estado_actual"), 
-                             datos_dict.get("area"), datos_dict.get("fecha"))
+            return None, f"Tipo de equipo '{tipo}' no válido. Use 'PC' o 'IMP'."
         
+        # DAO persiste en MySQL usando la abstracción Maquina
         self._dao_maq.guardar(nueva)
         return nueva, None
 
     def registrar_mantenimiento(self, datos_dict):
         codigo = datos_dict.get("codigo_maquina")
-        # Validamos que la máquina exista en MySQL
         maquina_db = self._dao_maq.buscar_por_codigo(codigo)
+        if not maquina_db: 
+            return None, f"La máquina {codigo} no existe."
 
-        if not maquina_db:
-            return None, f"La máquina {codigo} no existe en MySQL."
-
-        # Reconstruimos el objeto para el modelo de Mantenimiento
-        maquina_obj = Computadora(maquina_db['codigo'], maquina_db['estado'], 
-                                 maquina_db['area'], maquina_db['fecha'])
+        # Abstract Factory: Recrear el objeto correcto según el tipo guardado en MySQL
+        tipo_maquina = maquina_db.get('tipo', '').upper()
+        if tipo_maquina in ['COMPUTADORA', 'PC']:
+            maquina_obj = Computadora(
+                maquina_db['codigo'], 
+                maquina_db['estado'], 
+                maquina_db['area'], 
+                maquina_db['fecha']
+            )
+        elif tipo_maquina in ['IMPRESORA', 'IMP']:
+            maquina_obj = Impresora(
+                maquina_db['codigo'], 
+                maquina_db['estado'], 
+                maquina_db['area'], 
+                maquina_db['fecha']
+            )
+        else:
+            return None, f"Tipo de máquina '{tipo_maquina}' no reconocido."
 
         nuevo_mtto = Mantenimiento(
             maquina_objeto=maquina_obj,
@@ -39,9 +65,38 @@ class ProyectoService:
             fecha=datos_dict.get("fecha"),
             observaciones=datos_dict.get("observaciones")
         )
-        
         self._dao_mtto.guardar(nuevo_mtto)
         return nuevo_mtto, None
 
-    def obtener_historial_por_maquina(self, codigo_maquina):
-        return self._dao_mtto.listar_por_maquina(codigo_maquina)
+    # ESTA ES LA FUNCIÓN QUE BUSCA TU RUTA DE HISTORIAL
+    def obtener_historial_por_maquina(self, codigo: str):
+        registros = self._dao_mtto.listar_por_maquina(codigo)
+        return registros
+
+    # ESTA ES PARA EL REPORTE GENERAL (VENTANA 3)
+    def obtener_informe_completo(self, codigo=None):
+        if codigo:
+            res = self._dao_maq.buscar_por_codigo(codigo)
+            maquinas_db = [res] if res else []
+            if not maquinas_db: return None, "Máquina no encontrada"
+        else:
+            maquinas_db = self._dao_maq.listar_todas()
+
+        lista_informes = []
+        for maq in maquinas_db:
+            res_mongo = self._dao_mtto.listar_por_maquina(maq["codigo"])
+            mttos_limpios = []
+            for m in res_mongo:
+                m["_id"] = str(m["_id"])
+                mttos_limpios.append(m)
+
+            informe = InformeMaquinaDTO(
+                codigo=maq["codigo"],
+                tipo=maq["tipo"],
+                area=maq["area"],
+                estado=maq["estado"],
+                mantenimientos=mttos_limpios
+            )
+            lista_informes.append(informe)
+        
+        return lista_informes, None

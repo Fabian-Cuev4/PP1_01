@@ -6,9 +6,8 @@ from app.services import ProyectoService
 
 router = APIRouter(prefix="/home/mantenimiento")
 
-# Inyección de dependencias actualizada
-dao_mtto = MantenimientoDAO() # MongoDB
-dao_maq = MaquinaDAO()        # MySQL
+dao_mtto = MantenimientoDAO()
+dao_maq = MaquinaDAO()
 service = ProyectoService(dao_maq, dao_mtto)
 
 class MantenimientoSchema(BaseModel):
@@ -21,19 +20,26 @@ class MantenimientoSchema(BaseModel):
 
 @router.post("/agregar")
 async def agregar(datos: MantenimientoSchema):
-    # El service ahora buscará en MySQL si el codigo_maquina existe
     resultado, error = service.registrar_mantenimiento(datos.model_dump())
     if error:
         raise HTTPException(status_code=400, detail=error)
-    return {"mensaje": "Mantenimiento guardado exitosamente en MongoDB"}
+    return {"mensaje": "Mantenimiento guardado exitosamente"}
 
+# HISTORIAL INDIVIDUAL
 @router.get("/listar/{codigo}")
 async def listar_mantenimientos_equipo(codigo: str):
     registros = service.obtener_historial_por_maquina(codigo)
-    
-    # Convertir ObjectId de MongoDB a String para JSON
     for r in registros:
         if "_id" in r:
             r["_id"] = str(r["_id"])
-        
     return registros
+
+# REPORTE GENERAL (BUSCADOR VENTANA 3)
+@router.get("/informe-general")
+async def informe_general(codigo: str = None):
+    resultado, error = service.obtener_informe_completo(codigo)
+    if error:
+        raise HTTPException(status_code=404, detail=error)
+    if resultado is None:
+        raise HTTPException(status_code=404, detail="No se encontraron datos")
+    return resultado

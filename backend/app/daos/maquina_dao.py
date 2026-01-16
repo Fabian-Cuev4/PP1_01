@@ -6,11 +6,9 @@ class MaquinaDAO:
         if not conn: return
         try:
             cursor = conn.cursor()
-            query = """INSERT INTO maquinas (codigo, tipo, estado, area, fecha) 
-                       VALUES (%s, %s, %s, %s, %s)"""
-            valores = (maquina.codigo_equipo, maquina.tipo_maquina, 
-                       maquina.estado_actual, maquina.area, maquina.fecha)
-            cursor.execute(query, valores)
+            query = "INSERT INTO maquinas (codigo, tipo, estado, area, fecha) VALUES (%s, %s, %s, %s, %s)"
+            cursor.execute(query, (maquina.codigo_equipo, maquina.tipo_maquina, 
+                                   maquina.estado_actual, maquina.area, maquina.fecha))
             conn.commit()
         finally:
             cursor.close()
@@ -20,7 +18,6 @@ class MaquinaDAO:
         conn = MySQLConnection.conectar()
         if not conn: return None
         try:
-            # dictionary=True sirve para que devuelva un JSON (dict) y no una lista
             cursor = conn.cursor(dictionary=True)
             cursor.execute("SELECT * FROM maquinas WHERE codigo = %s", (codigo,))
             return cursor.fetchone()
@@ -28,19 +25,16 @@ class MaquinaDAO:
             cursor.close()
             conn.close()
 
-    # --- ESTA ES LA FUNCIÓN QUE TE FALTA ---
     def listar_todas(self):
         conn = MySQLConnection.conectar()
         if not conn: return []
         try:
             cursor = conn.cursor(dictionary=True)
-            cursor.execute("SELECT codigo, tipo, estado, area, fecha FROM maquinas")
-            resultado = cursor.fetchall()
-            # Convertimos la fecha a string para que FastAPI no sufra al enviarla al front
-            for r in resultado:
-                if r['fecha']:
-                    r['fecha'] = str(r['fecha'])
-            return resultado
+            cursor.execute("SELECT * FROM maquinas")
+            res = cursor.fetchall()
+            for r in res:
+                if r['fecha']: r['fecha'] = str(r['fecha'])
+            return res
         finally:
             cursor.close()
             conn.close()
