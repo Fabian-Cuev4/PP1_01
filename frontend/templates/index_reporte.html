@@ -11,14 +11,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Enlace al archivo CSS que contiene los estilos visuales de esta página -->
-    <link rel="stylesheet" href="./style_reporte.css">
+    <link rel="stylesheet" href="/static/css/style_ventana3.css">
 </head>
 
 <body> <!-- Aquí empieza todo lo que el usuario VE en su pantalla -->
 
-    <!-- ========================================== -->
-    <!-- SECCIÓN 1: ENCABEZADO SUPERIOR (HEADER)   -->
-    <!-- ========================================== -->
+
+    <!-- Encabezado -->
     <header class="main-header"> <!-- Barra superior de color oscuro -->
 
         <!-- Parte izquierda: Avatar del usuario -->
@@ -38,14 +37,12 @@
 
     </header>
 
-    <!-- ========================================== -->
-    <!-- SECCIÓN 2: CONTENIDO PRINCIPAL (MAIN)     -->
-    <!-- ========================================== -->
+
+    <!-- Contenido principal    -->
     <main class="content"> <!-- Área central donde está toda la información importante -->
 
-        <!-- ========================================== -->
-        <!-- 2.1: TÍTULO DE LA PÁGINA                  -->
-        <!-- ========================================== -->
+
+        <!-- Titulo de pagina -->
         <div class="page-header"> <!-- Encabezado de la sección de reportes -->
             <h1> <!-- Título grande de la página -->
                 <i class="fa-solid fa-chart-pie"></i> <!-- Icono de gráfico circular -->
@@ -54,13 +51,11 @@
             <p>Genera consultas y exporta la información de los laboratorios.</p> <!-- Descripción breve -->
         </div>
 
-        <!-- ========================================== -->
-        <!-- 2.2: TARJETA DE FILTROS DE BÚSQUEDA       -->
-        <!-- ========================================== -->
+        <!--Filtros de busqueda-->>
         <div class="filter-card"> <!-- Caja blanca con bordes redondeados para los filtros -->
             <form class="filter-form"> <!-- Formulario que agrupa los campos de búsqueda -->
 
-                <!-- FILTRO 1: Buscar por código de máquina -->
+                <!-- Buscar por código de máquina -->
                 <div class="filter-group"> <!-- Grupo de un campo de filtro -->
                     <label> <!-- Etiqueta que describe el campo -->
                         <i class="fa-solid fa-desktop"></i> <!-- Icono de computadora -->
@@ -71,31 +66,7 @@
                     <!-- placeholder: Texto de ejemplo que desaparece al escribir -->
                 </div>
 
-                <!-- FILTRO 2: Buscar por fecha -->
-                <div class="filter-group">
-                    <label>
-                        <i class="fa-solid fa-calendar"></i> <!-- Icono de calendario -->
-                        Fecha
-                    </label>
-                    <!-- Campo de tipo fecha: Abre un calendario visual al hacer clic -->
-                    <input type="date">
-                </div>
-
-                <!-- FILTRO 3: Buscar por tipo de mantenimiento -->
-                <div class="filter-group">
-                    <label>
-                        <i class="fa-solid fa-filter"></i> <!-- Icono de embudo (filtro) -->
-                        Tipo
-                    </label>
-                    <!-- Lista desplegable (dropdown) con opciones -->
-                    <select>
-                        <option value="">Todos</option> <!-- Opción por defecto: muestra todo -->
-                        <option value="preventivo">Preventivo</option> <!-- Mantenimiento programado -->
-                        <option value="correctivo">Correctivo</option> <!-- Reparación de fallas -->
-                    </select>
-                </div>
-
-                <!-- BOTÓN DE BÚSQUEDA -->
+                <!-- Botón de búsqueda -->
                 <div class="filter-actions"> <!-- Contenedor del botón -->
                     <button type="button" class="btn-search"> <!-- Botón que activa la búsqueda -->
                         <i class="fa-solid fa-magnifying-glass"></i> <!-- Icono de lupa -->
@@ -106,9 +77,7 @@
             </form>
         </div>
 
-        <!-- ========================================== -->
-        <!-- 2.3: TABLA DE RESULTADOS                  -->
-        <!-- ========================================== -->
+        <!-- Tabla de resultados -->
         <div class="table-container"> <!-- Contenedor principal de la tabla -->
             <div class="table-responsive"> <!-- Hace que la tabla se pueda desplazar en pantallas pequeñas -->
 
@@ -130,103 +99,7 @@
 
                     <!-- CUERPO DE LA TABLA (Datos reales) -->
                     <tbody> <!-- tbody = Table Body (cuerpo de la tabla con los datos) -->
-
-                        <!-- ========================================== -->
-                        <!-- FILA 1: Primer registro de mantenimiento  -->
-                        <!-- ========================================== -->
-                        <tr> <!-- Primera fila de datos -->
-                            <td class="fw-bold">PC-LAB-012</td> <!-- td = Table Data (celda de datos) -->
-                            <!-- fw-bold: Clase CSS que pone el texto en negrita (font-weight: bold) -->
-
-                            <td>Lab. Redes</td> <!-- Ubicación del equipo -->
-                            <td>Juan Cardenas</td> <!-- Nombre del técnico que hizo el mantenimiento -->
-                            <td>20/01/2022</td> <!-- Fecha del mantenimiento -->
-
-                            <!-- Badge (etiqueta) de color para el tipo de mantenimiento -->
-                            <td>
-                                <span class="badge badge-corr">Correctivo</span>
-                                <!-- badge-corr: Clase CSS que pone fondo rojo/naranja -->
-                            </td>
-
-                            <!-- Badge de color para el estado del equipo -->
-                            <td>
-                                <span class="badge badge-ok">Operativa</span>
-                                <!-- badge-ok: Clase CSS que pone fondo verde (equipo funcionando) -->
-                            </td>
-
-                            <td>Restauración de sistema operativo completa.</td> <!-- Descripción del trabajo -->
-
-                            <!-- Columna de acciones: Botones para ver detalles o descargar -->
-                            <td>
-                                <button class="btn-icon"> <!-- Botón pequeño con solo icono -->
-                                    <i class="fa-solid fa-eye"></i> <!-- Icono de ojo (ver detalles) -->
-                                </button>
-                                <button class="btn-icon">
-                                    <i class="fa-solid fa-download"></i> <!-- Icono de descarga -->
-                                </button>
-                            </td>
-                        </tr>
-
-                        <!-- ========================================== -->
-                        <!-- FILA 2: Segundo registro de mantenimiento -->
-                        <!-- ========================================== -->
-                        <tr>
-                            <td class="fw-bold">PC-LAB-015</td>
-                            <td>Lab. Software</td>
-                            <td>Maria Lopez</td>
-                            <td>15/02/2022</td>
-
-                            <!-- Badge de tipo preventivo (color azul/verde) -->
-                            <td>
-                                <span class="badge badge-prev">Preventivo</span>
-                            </td>
-
-                            <!-- Badge de estado "En Revisión" (color amarillo) -->
-                            <td>
-                                <span class="badge badge-maint">En Revisión</span>
-                            </td>
-
-                            <td>Limpieza interna y cambio de pasta térmica.</td>
-
-                            <td>
-                                <button class="btn-icon">
-                                    <i class="fa-solid fa-eye"></i>
-                                </button>
-                                <button class="btn-icon">
-                                    <i class="fa-solid fa-download"></i>
-                                </button>
-                            </td>
-                        </tr>
-
-                        <!-- ========================================== -->
-                        <!-- FILA 3: Tercer registro de mantenimiento  -->
-                        <!-- ========================================== -->
-                        <tr>
-                            <td class="fw-bold">PC-LAB-020</td>
-                            <td>Lab. Redes</td>
-                            <td>Pedro Diaz</td>
-                            <td>10/03/2022</td>
-
-                            <td>
-                                <span class="badge badge-prev">Preventivo</span>
-                            </td>
-
-                            <td>
-                                <span class="badge badge-ok">Operativa</span>
-                            </td>
-
-                            <td>Actualización de antivirus y drivers.</td>
-
-                            <td>
-                                <button class="btn-icon">
-                                    <i class="fa-solid fa-eye"></i>
-                                </button>
-                                <button class="btn-icon">
-                                    <i class="fa-solid fa-download"></i>
-                                </button>
-                            </td>
-                        </tr>
-
+                        
                     </tbody> <!-- Fin del cuerpo de la tabla -->
                 </table>
 
@@ -235,9 +108,7 @@
 
     </main> <!-- Fin del contenido principal -->
 
-    <!-- ========================================== -->
-    <!-- SECCIÓN 3: PIE DE PÁGINA (FOOTER)         -->
-    <!-- ========================================== -->
+    <!-- seccion de pie de pagina -->
     <footer class="main-footer"> <!-- Barra inferior de la página -->
         <div class="footer-logo">
             <!-- Texto del logo con estilos inline (directamente en el HTML) -->
@@ -250,51 +121,3 @@
 </body> <!-- Fin del cuerpo de la página -->
 
 </html> <!-- Fin del documento HTML -->
-
-<!-- ========================================== -->
-<!-- NOTAS IMPORTANTES PARA PRINCIPIANTES:     -->
-<!-- ========================================== -->
-
-<!-- 
-1. ESTRUCTURA BÁSICA DE HTML:
-   - <html>: Contenedor principal de todo
-   - <head>: Configuraciones (no se ven)
-   - <body>: Contenido visible
-   
-2. ETIQUETAS PRINCIPALES:
-   - <div>: Caja contenedora (como una carpeta)
-   - <h1>: Título grande
-   - <p>: Párrafo de texto
-   - <button>: Botón clickeable
-   - <table>: Tabla de datos
-   - <form>: Formulario para capturar datos
-   
-3. ATRIBUTOS:
-   - class="nombre": Asigna una clase CSS para estilos
-   - type="text": Define el tipo de campo (text, date, etc.)
-   - placeholder="texto": Texto de ejemplo en un campo
-   
-4. FONT AWESOME:
-   - <i class="fa-solid fa-user"></i>: Muestra un icono
-   - fa-solid: Estilo sólido
-   - fa-user: Tipo de icono (usuario)
-   
-5. TABLAS HTML:
-   - <table>: Contenedor de la tabla
-   - <thead>: Encabezado (títulos)
-   - <tbody>: Cuerpo (datos)
-   - <tr>: Fila
-   - <th>: Celda de encabezado
-   - <td>: Celda de datos
-   
-6. CLASES CSS USADAS:
-   - main-header: Barra superior
-   - filter-card: Tarjeta de filtros
-   - badge: Etiqueta de color
-   - btn-icon: Botón pequeño con icono
-   
-7. ESTE ARCHIVO ES UNA PLANTILLA ESTÁTICA:
-   - Los datos están "hardcodeados" (escritos directamente)
-   - En la versión real (index_ventana3.html), JavaScript
-     carga los datos dinámicamente desde el servidor
--->

@@ -38,7 +38,7 @@ async function cargarMaquinas() {
     try {
         // pide la lista de máquinas al backend
         const timestamp = new Date().getTime();
-        const response = await fetch(`/home/maquinas/listar?_t=${timestamp}`, {
+        const response = await fetch(`/api/maquinas/listar?_t=${timestamp}`, {
             method: 'GET',
             headers: {
                 'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -103,12 +103,12 @@ async function cargarMaquinas() {
 
 // redirige a la página de historial pasando el código de la máquina
 function verHistorial(codigo) {
-    window.location.href = `/home/maquinas/historial?codigo=${encodeURIComponent(codigo)}`;
+    window.location.href = `/pagina/maquinas/historial?codigo=${encodeURIComponent(codigo)}`;
 }
 
 // redirige al formulario de mantenimiento con el código pre-cargado
 function irAMantenimiento(codigo) {
-    window.location.href = `/home/maquinas/formulario/mantenimiento?codigo=${encodeURIComponent(codigo)}`;
+    window.location.href = `/pagina/maquinas/mantenimiento?codigo=${encodeURIComponent(codigo)}`;
 }
 
 // filtra las tarjetas según lo que el usuario escribe en el buscador

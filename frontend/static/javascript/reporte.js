@@ -33,8 +33,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const timestamp = new Date().getTime();
             // si hay código, lo envía como parámetro
             const url = codigo ?
-                `/home/mantenimiento/informe-general?codigo=${encodeURIComponent(codigo.trim())}&_t=${timestamp}` :
-                `/home/mantenimiento/informe-general?_t=${timestamp}`;
+                `/api/mantenimiento/informe-general?codigo=${encodeURIComponent(codigo.trim())}&_t=${timestamp}` :
+                `/api/mantenimiento/informe-general?_t=${timestamp}`;
 
             const response = await fetch(url, {
                 headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
@@ -136,7 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnReturn = document.getElementById("btn-return");
     if (btnReturn) {
         btnReturn.addEventListener("click", () => {
-            window.location.href = "/home/maquinas";
+            window.location.href = "/pagina/maquinas";
         });
     }
 

@@ -62,7 +62,6 @@ services:
     volumes:
       # Monta carpetas de tu PC dentro del contenedor (cambios en vivo)
       - ./backend:/app # Carpeta del backend se sincroniza con /app en el contenedor
-      - ./frontend:/app/frontend # Carpeta del frontend también se monta (para servir templates)
     depends_on:
       # Este contenedor solo inicia cuando MySQL y MongoDB estén "healthy"
       mysql:

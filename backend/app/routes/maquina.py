@@ -5,7 +5,7 @@ from app.services import ProyectoService
 from app.repositories import repo_instancia
 
 # Este archivo crea las rutas o URLs relacionadas con las máquinas
-router = APIRouter(prefix="/home/maquinas")
+router = APIRouter(prefix="/api/maquinas")
 
 # Usamos el repositorio unificado que ya incluye los DAOs y servicios
 service = ProyectoService(repo_instancia.maquina_dao, repo_instancia.mantenimiento_dao)

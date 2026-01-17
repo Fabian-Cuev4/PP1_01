@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 // si el login es exitoso, redirige al dashboard
                 if (response.ok) {
-                    window.location.href = "/home";
+                    window.location.href = "/pagina/inicio";
                 } else {
                     mostrarModal("Error de autenticación", "Usuario o contraseña incorrectos.");
                 }
@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // botón de registrarse: redirige a la página de registro
     if (btnRegister) {
         btnRegister.addEventListener("click", () => {
-            window.location.href = "/register";
+            window.location.href = "/pagina/registro";
         });
     }
 
@@ -81,6 +81,6 @@ const btnLogout = document.getElementById("btn-logout-off");
 if (btnLogout) {
     btnLogout.addEventListener("click", () => {
         // redirige al login (en un sistema real aquí se destruiría la sesión)
-        window.location.href = "/";
+        window.location.href = "/pagina/login";
     });
 }

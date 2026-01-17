@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     mostrarModal("¡Cuenta creada con éxito!", "success");
 
                     btnCerrarModal.onclick = () => {
-                        window.location.href = "/";
+                        window.location.href = "/pagina/login";
                     };
                 } else {
                     // si hubo error, muestra el mensaje del servidor

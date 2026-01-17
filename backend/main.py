@@ -2,15 +2,37 @@
 # Aquí configuramos FastAPI, las bases de datos y las rutas de la web.
 
 from fastapi import FastAPI
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from pathlib import Path
-from fastapi.staticfiles import StaticFiles
 # Importamos las rutas que hemos creado en otros archivos
-from app.routes import views, maquina, mantenimiento, auth 
+from app.routes import maquina, mantenimiento, auth 
 from app.database.mongodb import MongoDB
 from app.database.mysql import MySQLConnection
 
+# Middleware personalizado para manejar headers del proxy
+class ProxyHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        # Si viene de un proxy, usar los headers X-Forwarded-*
+        if "x-forwarded-proto" in request.headers:
+            request.scope["scheme"] = request.headers["x-forwarded-proto"]
+        if "x-forwarded-host" in request.headers:
+            request.scope["server"] = (request.headers["x-forwarded-host"], 
+                                       int(request.headers.get("x-forwarded-port", "80")))
+        if "x-forwarded-for" in request.headers:
+            request.scope["client"] = (request.headers["x-forwarded-for"].split(",")[0], 0)
+        response = await call_next(request)
+        return response
+
 # Creamos la instancia principal de la aplicación FastAPI
 app = FastAPI()
+
+# Agregar middlewares en el orden correcto
+app.add_middleware(ProxyHeadersMiddleware)
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=["*"]  # Permitir todas las hosts (por desarrollo)
+)
 
 # Este evento se ejecuta justo cuando el servidor se enciende (Startup)
 @app.on_event("startup")
@@ -36,28 +58,10 @@ def startup_db_client():
 @app.on_event("shutdown")
 def shutdown_db_client():
     
-    #erramos las conexiones de forma segura al apagar.
+    #Cerramos las conexiones de forma segura al apagar.
     MongoDB.cerrar()
 
-# Obtenemos la ruta de este archivo para saber dónde están las carpetas de fotos, CSS y HTML
-base_path = Path(__file__).resolve().parent
-
-# "Montamos" la carpeta static para que el navegador pueda bajar el CSS, las imágenes y el JS
-app.mount(
-    "/static", 
-    StaticFiles(directory=base_path / "frontend" / "static"), 
-    name="static"
-)
-
-# "Montamos" la carpeta templates aunque Nginx o FastAPI normalmente sirven el HTML por rutas
-app.mount(
-    "/templates", 
-    StaticFiles(directory=base_path / "frontend" / "templates"), 
-    name="templates"
-)
-
 # Registramos todas las rutas que el servidor va a entender
-app.include_router(views.route)           # Rutas para ver las páginas HTML
 app.include_router(maquina.router)        # Rutas para crear/borrar máquinas
 app.include_router(mantenimiento.router)  # Rutas para los mantenimientos
 app.include_router(auth.router)           # Rutas de login y seguridad

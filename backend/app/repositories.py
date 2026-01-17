@@ -107,7 +107,7 @@ class ProyectoRepository:
             return None
 
     def obtener_mantenimientos_por_maquina(self, codigo_maquina: str):
-        """Obtiene mantenimientos de una máquina desde MongoDB"""
+        #Obtiene mantenimientos de una máquina desde MongoDB
         try:
             # El DAO devuelve documentos de MongoDB, necesitamos convertirlos a objetos Mantenimiento
             mantenimientos_data = self.mantenimiento_dao.listar_por_maquina(codigo_maquina)

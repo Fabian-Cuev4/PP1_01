@@ -34,8 +34,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // cierra el modal al hacer clic en "entendido" y ejecuta callback si existe
         btnModalOk.onclick = () => {
+            console.log("Botón Entendido presionado");
             validationModal.classList.remove("active");
-            if (callback) callback();
+            if (callback) {
+                console.log("Ejecutando callback");
+                callback();
+            }
         };
     };
 
@@ -47,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // botón cancelar: regresa a la lista de máquinas
     if (btnCancelar) {
         btnCancelar.addEventListener("click", () => {
-            window.location.href = "/home/maquinas";
+            window.location.href = "/pagina/maquinas";
         });
     }
 
@@ -73,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             try {
                 // envía los datos al backend
-                const response = await fetch("/home/maquinas/agregar", {
+                const response = await fetch("/api/maquinas/agregar", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(datos)
@@ -84,7 +88,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 // si el servidor responde ok, muestra éxito y redirige
                 if (response.ok) {
                     mostrarModal('success', '¡Registro Exitoso!', 'La máquina ha sido registrada correctamente.', () => {
-                        window.location.href = "/home/maquinas?_refresh=" + new Date().getTime();
+                        console.log("Redirigiendo a /pagina/maquinas");
+                        window.location.href = "/pagina/maquinas";
                     });
                 } else {
                     // si hay error, muestra el mensaje
@@ -135,7 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             try {
                 // envía el mantenimiento al backend
-                const response = await fetch("/home/mantenimiento/agregar", {
+                const response = await fetch("/api/mantenimiento/agregar", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(datosMant)
@@ -144,7 +149,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 // si se guardó correctamente, muestra éxito y redirige
                 if (response.ok) {
                     mostrarModal('success', 'Mantenimiento Guardado', `Se registró el mantenimiento para ${codigoVinculado}.`, () => {
-                        window.location.href = "/home/maquinas?_refresh=" + new Date().getTime();
+                        console.log("Redirigiendo a /pagina/maquinas");
+                        window.location.href = "/pagina/maquinas";
                     });
                 } else {
                     mostrarModal('error', 'Error', "No se pudo registrar el mantenimiento.");

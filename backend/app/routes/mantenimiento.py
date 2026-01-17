@@ -4,7 +4,7 @@ from app.services import ProyectoService
 from app.repositories import repo_instancia
 
 # Este archivo crea las rutas relacionadas con los mantenimientos técnicos
-router = APIRouter(prefix="/home/mantenimiento")
+router = APIRouter(prefix="/api/mantenimiento")
 
 # Usamos el repositorio unificado que ya incluye los DAOs y servicios
 service = ProyectoService(repo_instancia.maquina_dao, repo_instancia.mantenimiento_dao)

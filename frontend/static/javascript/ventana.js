@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnAgregar = document.getElementById("btn-agregar-maquina");
     if (btnAgregar) {
         btnAgregar.addEventListener("click", () => {
-            window.location.href = "/home/maquinas/formulario";
+            window.location.href = "/pagina/maquinas/agregar";
         });
     }
 
@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnReportes = document.getElementById("btn-reportes");
     if (btnReportes) {
         btnReportes.addEventListener("click", () => {
-            window.location.href = "/home/maquinas/reporte";
+            window.location.href = "/pagina/maquinas/reportes";
         });
     }
 
@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnRegresar = document.getElementById("btn-regresar");
     if (btnRegresar) {
         btnRegresar.addEventListener("click", () => {
-            window.location.href = "/home";
+            window.location.href = "/pagina/inicio";
         });
     }
 });

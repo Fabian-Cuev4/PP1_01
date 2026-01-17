@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (btnVolver) {
         btnVolver.addEventListener("click", (e) => {
             e.preventDefault();
-            window.location.href = "/home/maquinas";
+            window.location.href = "/pagina/maquinas";
         });
     }
 
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
         // pide al backend el historial de mantenimientos de esta máquina
         const timestamp = new Date().getTime();
-        const response = await fetch(`/home/mantenimiento/listar/${encodeURIComponent(codigo)}?_t=${timestamp}`, {
+        const response = await fetch(`/api/mantenimiento/listar/${encodeURIComponent(codigo)}?_t=${timestamp}`, {
             headers: { 'Cache-Control': 'no-cache' }
         });
 

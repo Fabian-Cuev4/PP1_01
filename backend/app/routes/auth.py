@@ -21,9 +21,8 @@ class RegisterRequest(BaseModel):
 # Ruta para iniciar sesión (Login)
 @router.post("/api/login")
 async def login(datos: LoginRequest):
-    """
-    Recibe el usuario y clave del frontend y pregunta a la base de datos si son correctos.
-    """
+    
+    #Recibe el usuario y clave del frontend y pregunta a la base de datos si son correctos.
     # Buscamos en la base de datos usando el DAO (Data Access Object)
     usuario = UsuarioDAO.verificar_credenciales(datos.username, datos.password)
     
@@ -41,9 +40,9 @@ async def login(datos: LoginRequest):
 # ruta para registrar un nuevo usuario
 @router.post("/api/register")
 async def register(datos: RegisterRequest):
-    """
-    Recibe los datos del nuevo usuario y los guarda en MySQL.
-    """
+    
+    #Recibe los datos del nuevo usuario y los guarda en MySQL.
+    
     # Intentamos crear el usuario en la base de datos
     exito = UsuarioDAO.crear_usuario(datos.nombre_completo, datos.username, datos.password)
     
