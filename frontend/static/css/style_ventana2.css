@@ -230,9 +230,17 @@ body {
     background-color: #e74c3c;
 }
 
+.btn-red:hover {
+    background-color: #c0392b;
+}
+
 /* Borrar */
 .btn-green {
     background-color: #2ecc71;
+}
+
+.btn-green:hover {
+    background-color: #27ae60;
 }
 
 /* Actualizar */
@@ -240,9 +248,17 @@ body {
     background-color: #3498db;
 }
 
+.btn-blue-act:hover {
+    background-color: #2980b9;
+}
+
 /* Mantenimiento */
 .btn-yellow-history {
     background-color: #e4bc0b;
+}
+
+.btn-yellow-history:hover {
+    background-color: #d4ac0a;
 }
 
 /* Historial */

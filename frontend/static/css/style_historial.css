@@ -81,15 +81,55 @@ body {
     color: #444;
 }
 
-/* Alineación de los botones de la parte inferior a la derecha */
+/* Alineación de los botones de la parte inferior */
 .modal-footer {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 20px;
 }
 
-/* Botón de "Regresar" de color rojo llamativo */
-.btn-back {
+/* Botones de acción */
+.btn-action {
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+    color: white;
+}
+
+.btn-blue {
+    background-color: #3498db;
+}
+
+.btn-blue:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+}
+
+.btn-green {
+    background-color: #27ae60;
+}
+
+.btn-green:hover {
+    background-color: #229954;
+    transform: translateY(-2px);
+}
+
+.btn-red {
     background-color: #e74c3c;
+}
+
+.btn-red:hover {
+    background-color: #c0392b;
+    transform: translateY(-2px);
+}
+
+/* Botón de "Regresar" */
+.btn-back {
+    background-color: #95a5a6;
     color: white;
     border: none;
     padding: 12px 25px;
@@ -97,12 +137,9 @@ body {
     cursor: pointer;
     font-weight: bold;
     transition: 0.3s;
-    /* Tiempo que tarda en cambiar de color al pasar el mouse */
 }
 
-/* El botón rojo se oscurece y flota un poquito al poner el ratón encima */
 .btn-back:hover {
-    background-color: #c0392b;
+    background-color: #7f8c8d;
     transform: translateY(-2px);
-    /* Eleva el botón ligeramente */
 }

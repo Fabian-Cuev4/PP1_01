@@ -247,3 +247,26 @@ select:focus {
 }
 
 /* Amarillo */
+
+/* Estilos para campos deshabilitados (solo lectura) */
+input:disabled,
+select:disabled {
+    background-color: #e8e8e8 !important;
+    /* Fondo gris más oscuro para indicar que está deshabilitado */
+    color: #666 !important;
+    /* Texto gris */
+    cursor: not-allowed;
+    /* Cursor que indica que no se puede editar */
+    opacity: 0.7;
+    /* Hace que se vea un poco transparente */
+    border-color: #ccc !important;
+    /* Borde gris */
+}
+
+input:disabled:focus,
+select:disabled:focus {
+    box-shadow: none !important;
+    /* Sin sombra al hacer focus */
+    border-color: #ccc !important;
+    /* Mantiene el borde gris */
+}

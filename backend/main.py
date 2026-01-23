@@ -1,67 +1,53 @@
-# Este es el archivo principal que arranca todo el servidor (Backend)
-# Aquí configuramos FastAPI, las bases de datos y las rutas de la web.
+# Este es el archivo principal que inicia el servidor
+# Aquí se configura FastAPI y se registran todas las rutas
 
+# Importamos las librerías necesarias
 from fastapi import FastAPI
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
-from pathlib import Path
-# Importamos las rutas que hemos creado en otros archivos
+# Importamos las rutas que hemos creado
 from app.routes import maquina, mantenimiento, auth 
-from app.database.mongodb import MongoDB
-from app.database.mysql import MySQLConnection
+# Importamos el gestor de bases de datos
+from app.database.database_manager import DatabaseManager
 
-# Middleware personalizado para manejar headers del proxy
+# Esta clase maneja los headers cuando el servidor está detrás de un proxy (como Nginx)
 class ProxyHeadersMiddleware(BaseHTTPMiddleware):
+    # Este método se ejecuta en cada petición
     async def dispatch(self, request, call_next):
-        # Si viene de un proxy, usar los headers X-Forwarded-*
+        # Si el proxy envía información sobre el protocolo (http/https), la usamos
         if "x-forwarded-proto" in request.headers:
             request.scope["scheme"] = request.headers["x-forwarded-proto"]
+        # Si el proxy envía información sobre el host, la usamos
         if "x-forwarded-host" in request.headers:
             request.scope["server"] = (request.headers["x-forwarded-host"], 
                                        int(request.headers.get("x-forwarded-port", "80")))
+        # Si el proxy envía información sobre la IP del cliente, la usamos
         if "x-forwarded-for" in request.headers:
             request.scope["client"] = (request.headers["x-forwarded-for"].split(",")[0], 0)
+        # Continuamos con la petición
         response = await call_next(request)
         return response
 
-# Creamos la instancia principal de la aplicación FastAPI
+# Creamos la aplicación FastAPI
 app = FastAPI()
 
-# Agregar middlewares en el orden correcto
+# Agregamos los middlewares (componentes que se ejecutan en cada petición)
 app.add_middleware(ProxyHeadersMiddleware)
-app.add_middleware(
-    TrustedHostMiddleware,
-    allowed_hosts=["*"]  # Permitir todas las hosts (por desarrollo)
-)
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=["*"])
 
-# Este evento se ejecuta justo cuando el servidor se enciende (Startup)
+# Este evento se ejecuta cuando el servidor arranca
 @app.on_event("startup")
 def startup_db_client():
-    
-    #Función que inicializa las conexiones a las bases de datos al arrancar.
-    # Intentamos inicializar MySQL (crear la base de datos y las tablas)
-    try:
-        # Llama a la función que crea todo en MySQL si no existe
-        MySQLConnection.inicializar_base_datos()
-    except Exception as e:
-        # Si falla (por ejemplo, el motor no está listo), mostramos un aviso pero no detenemos el servidor
-        print(f"Advertencia: No se pudo inicializar MySQL en el startup: {e}")
-        print("La aplicación continuará intentándolo más tarde.")
-    
-    # Intentamos conectar con MongoDB para los logs y otros datos no relacionales
-    try:
-        MongoDB.conectar()
-    except Exception as e:
-        print(f"Advertencia: No se pudo conectar a MongoDB en el startup: {e}")
+    # Inicializamos las conexiones a las bases de datos
+    DatabaseManager.inicializar()
 
-# Este evento se ejecuta cuando apagamos el servidor
+# Este evento se ejecuta cuando el servidor se apaga
 @app.on_event("shutdown")
 def shutdown_db_client():
-    
-    #Cerramos las conexiones de forma segura al apagar.
-    MongoDB.cerrar()
+    # Cerramos las conexiones a las bases de datos
+    DatabaseManager.cerrar()
 
-# Registramos todas las rutas que el servidor va a entender
-app.include_router(maquina.router)        # Rutas para crear/borrar máquinas
-app.include_router(mantenimiento.router)  # Rutas para los mantenimientos
-app.include_router(auth.router)           # Rutas de login y seguridad
+# Registramos todas las rutas (URLs) que el servidor va a manejar
+app.include_router(maquina.router)        # Rutas para máquinas (/api/maquinas/*)
+app.include_router(mantenimiento.router)  # Rutas para mantenimientos (/api/mantenimiento/*)
+app.include_router(auth.router)           # Rutas para autenticación (/api/login, /api/register)

@@ -1,19 +1,18 @@
-# Representa un evento de revisión técnica para una máquina
+# Representa un mantenimiento realizado a una máquina
 class Mantenimiento:
-    def __init__(self, maquina_objeto, empresa, tecnico, tipo, fecha, observaciones):
-        self.maquina = maquina_objeto # Objeto de la máquina a la que se le hace el trabajo
-        self.empresa = empresa       # Empresa que realiza el trabajo
-        self.tecnico = tecnico       # Nombre del técnico responsable
-        self.tipo = tipo             # Si fue correctivo o preventivo
-        self.fecha = fecha           # Fecha del trabajo
-        self.observaciones = observaciones # Comentarios adicionales
+    def __init__(self, maquina_objeto, empresa, tecnico, tipo, fecha, observaciones, usuario=None):
+        self.maquina = maquina_objeto
+        self.empresa = empresa
+        self.tecnico = tecnico
+        self.tipo = tipo
+        self.fecha = fecha
+        self.observaciones = observaciones
+        self.usuario = usuario  # Usuario asociado al mantenimiento
 
     @property
     def codigo_maquina_vinculada(self):
-        #Propiedad para acceder al código de la máquina vinculada
         return self.maquina.codigo_equipo
 
-    # Convierte este objeto en un diccionario simple para poder guardarlo en MongoDB
     def to_dict(self):
         return {
             "codigo_maquina": self.maquina.codigo_equipo,
@@ -21,5 +20,6 @@ class Mantenimiento:
             "tecnico": self.tecnico,
             "tipo": self.tipo,
             "fecha": self.fecha,
-            "observaciones": self.observaciones
+            "observaciones": self.observaciones,
+            "usuario": self.usuario
         }

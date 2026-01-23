@@ -1,54 +1,75 @@
+# Este archivo define las rutas (URLs) relacionadas con los mantenimientos
+# Las rutas son las direcciones que el frontend usa para comunicarse con el backend
+
+# Importamos las librerías necesarias
 from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel
 from app.services import ProyectoService
 from app.repositories import repo_instancia
 
-# Este archivo crea las rutas relacionadas con los mantenimientos técnicos
+# Creamos un router para agrupar todas las rutas de mantenimientos
+# El prefix significa que todas las rutas empezarán con /api/mantenimiento
 router = APIRouter(prefix="/api/mantenimiento")
 
-# Usamos el repositorio unificado que ya incluye los DAOs y servicios
+# Creamos una instancia del servicio que maneja la lógica
 service = ProyectoService(repo_instancia.maquina_dao, repo_instancia.mantenimiento_dao)
 
-# Modelo de los datos que debe enviar el formulario de mantenimiento
+# Definimos cómo deben ser los datos que recibimos del frontend
 class MantenimientoSchema(BaseModel):
-    codigo_maquina: str
-    empresa: str
-    tecnico: str
-    tipo: str
-    fecha: str
-    observaciones: str
+    codigo_maquina: str      # Código de la máquina a la que se le hace mantenimiento
+    empresa: str              # Nombre de la empresa que hizo el mantenimiento
+    tecnico: str              # Nombre del técnico
+    tipo: str                 # Tipo: preventivo o correctivo
+    fecha: str                # Fecha en que se hizo el mantenimiento
+    observaciones: str        # Comentarios sobre el mantenimiento
+    usuario: str = None       # Usuario que registró el mantenimiento (opcional)
 
-# Ruta para guardar un nuevo registro de mantenimiento
+# Esta ruta se ejecuta cuando el frontend hace POST a /api/mantenimiento/agregar
 @router.post("/agregar")
 async def agregar(datos: MantenimientoSchema):
-    # Pedimos al servicio que guarde la información en MongoDB
+    # Convertimos los datos a un diccionario y los enviamos al servicio
     resultado, error = service.registrar_mantenimiento(datos.model_dump())
+    
+    # Si hubo un error, retornamos un error HTTP 400
     if error:
         raise HTTPException(status_code=400, detail=error)
+    
+    # Si todo salió bien, retornamos un mensaje de éxito
     return {"mensaje": "Mantenimiento guardado exitosamente"}
 
-# Ruta para ver el HISTORIAL de mantenimientos de una máquina específica
+# Esta ruta se ejecuta cuando el frontend hace GET a /api/mantenimiento/listar/{codigo}
+# El {codigo} es un parámetro que viene en la URL
 @router.get("/listar/{codigo}")
 async def listar_mantenimientos_equipo(codigo: str, response: Response):
-    # Evitamos que el navegador guarde versiones viejas de esta lista
+    # Configuramos los headers para que el navegador no guarde una copia en caché
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     
-    # Buscamos en MongoDB todos los registros de ese código
+    # Pedimos al servicio que nos traiga todos los mantenimientos de esa máquina
     registros = service.obtener_historial_por_maquina(codigo)
-    # Convertimos los IDs extraños de MongoDB a texto normal para el frontend
+    
+    # MongoDB guarda los IDs de forma especial, los convertimos a string
+    # para que se puedan enviar como JSON
     for r in registros:
         if "_id" in r:
             r["_id"] = str(r["_id"])
+    
+    # Retornamos la lista de mantenimientos
     return registros
 
-# Ruta para el REPORTE GENERAL de todos los mantenimientos (Buscador grande)
+# Esta ruta se ejecuta cuando el frontend hace GET a /api/mantenimiento/informe-general
+# Puede recibir un código opcional como parámetro para filtrar
 @router.get("/informe-general")
 async def informe_general(codigo: str = None):
-    # Pedimos al servicio que junte datos de MySQL y MongoDB en un solo reporte
+    # Pedimos al servicio que genere el reporte completo
     resultado, error = service.obtener_informe_completo(codigo)
+    
+    # Si hubo un error, retornamos un error HTTP 404
     if error:
         raise HTTPException(status_code=404, detail=error)
+    
+    # Si no hay resultados, retornamos un error
     if resultado is None:
         raise HTTPException(status_code=404, detail="No se encontraron datos")
     
-    return resultado # Enviamos el reporte completo al frontend
+    # Retornamos el reporte
+    return resultado

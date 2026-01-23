@@ -1,146 +1,236 @@
+# Este archivo contiene la lógica principal del negocio
+# Aquí se procesan los datos antes de guardarlos en la base de datos
+
+# Importamos las clases que necesitamos
 from app.models.Computadora import Computadora
 from app.models.Impresora import Impresora
 from app.models.Mantenimiento import Mantenimiento
 from app.dtos.informe_dto import InformeMaquinaDTO
 
-# Esta clase es como el "jefe de cocina" de la aplicación.
-# Recibe las órdenes de las rutas y decide qué ingredientes (modelos) usar y cómo guardarlos.
+# Esta clase coordina todas las operaciones del sistema
 class ProyectoService:
+    # El constructor recibe los objetos que acceden a las bases de datos
     def __init__(self, maquina_dao, mantenimiento_dao):
-        # Guardamos las herramientas para guardar datos (DAOs)
-        self._dao_maq = maquina_dao
-        self._dao_mtto = mantenimiento_dao
+        # Guardamos las referencias para usarlas después
+        self._dao_maq = maquina_dao  # Objeto para acceder a la tabla de máquinas
+        self._dao_mtto = mantenimiento_dao  # Objeto para acceder a la tabla de mantenimientos
 
-    # Esta función se encarga de crear una máquina nueva (PC o Impresora)
     def registrar_maquina(self, datos_dict):
+        # Esta función registra una nueva máquina en el sistema
+        # Recibe un diccionario con los datos de la máquina
+        
+        # Primero obtenemos el código de la máquina
         codigo = datos_dict.get("codigo_equipo")
         
-        # Primero revisamos que no exista otra máquina con el mismo código
-        maquina_existente = self._dao_maq.buscar_por_codigo(codigo)
-        if maquina_existente:
-            return None, f"El código '{codigo}' ya existe. El código debe ser único."
+        # Verificamos que no exista otra máquina con el mismo código
+        # Si ya existe, retornamos un error
+        if self._dao_maq.buscar_por_codigo(codigo):
+            return None, f"El código '{codigo}' ya existe."
         
+        # Obtenemos el tipo de máquina (PC o IMP) y lo convertimos a mayúsculas
         tipo = datos_dict.get("tipo_equipo", "").upper()
-        # Según el tipo que eligió el usuario, creamos el objeto correcto
+        # Obtenemos el usuario que está registrando la máquina
+        usuario = datos_dict.get("usuario")
+        
+        # Según el tipo, creamos un objeto diferente
         if tipo == "PC":
+            # Si es una computadora, creamos un objeto Computadora
             nueva = Computadora(
                 datos_dict.get("codigo_equipo"), 
                 datos_dict.get("estado_actual"), 
                 datos_dict.get("area"), 
-                datos_dict.get("fecha")
+                datos_dict.get("fecha"),
+                usuario
             )
         elif tipo == "IMP":
+            # Si es una impresora, creamos un objeto Impresora
             nueva = Impresora(
                 datos_dict.get("codigo_equipo"), 
                 datos_dict.get("estado_actual"), 
                 datos_dict.get("area"), 
-                datos_dict.get("fecha")
+                datos_dict.get("fecha"),
+                usuario
             )
         else:
+            # Si el tipo no es válido, retornamos un error
             return None, f"Tipo de equipo '{tipo}' no válido."
         
-        # Le pedimos al DAO que guarde la máquina física en la base de datos MySQL
+        # Intentamos guardar la máquina en la base de datos
         try:
             self._dao_maq.guardar(nueva)
+            # Si todo salió bien, retornamos la máquina creada
             return nueva, None
         except Exception as e:
-            return None, f"Error al guardar la máquina: {str(e)}"
+            # Si hubo un error, retornamos el mensaje de error
+            return None, f"Error al guardar: {str(e)}"
 
-    # Esta función se encarga de anotar un mantenimiento para una máquina
-    def registrar_mantenimiento(self, datos_dict):
-        codigo = datos_dict.get("codigo_maquina")
-        # Primero buscamos si la máquina existe en nuestra base de datos
+    def actualizar_maquina(self, datos_dict):
+        # Esta función actualiza los datos de una máquina existente
+        # Recibe un diccionario con los nuevos datos
+        
+        # Obtenemos el código de la máquina a actualizar
+        codigo = datos_dict.get("codigo_equipo")
+        # Buscamos la máquina en la base de datos
         maquina_db = self._dao_maq.buscar_por_codigo(codigo)
-        if not maquina_db: 
+        
+        # Si no encontramos la máquina, retornamos un error
+        if not maquina_db:
+            return None, f"La máquina {codigo} no existe."
+        
+        # Obtenemos los datos nuevos, si no vienen usamos los antiguos
+        tipo = datos_dict.get("tipo_equipo", "").upper() or maquina_db.get('tipo', '').upper()
+        estado = datos_dict.get("estado_actual") or maquina_db.get('estado')
+        area = datos_dict.get("area") or maquina_db.get('area')
+        fecha = datos_dict.get("fecha") or maquina_db.get('fecha')
+        usuario = datos_dict.get("usuario") or maquina_db.get('usuario')
+        
+        # Creamos el objeto máquina según su tipo
+        if tipo in ['COMPUTADORA', 'PC']:
+            maquina_obj = Computadora(codigo, estado, area, fecha, usuario)
+        elif tipo in ['IMPRESORA', 'IMP']:
+            maquina_obj = Impresora(codigo, estado, area, fecha, usuario)
+        else:
+            return None, "Tipo de máquina no reconocido."
+        
+        # Intentamos actualizar en la base de datos
+        if self._dao_maq.actualizar(maquina_obj):
+            return maquina_obj, None
+        return None, "Error al actualizar la máquina."
+
+    def eliminar_maquina(self, codigo):
+        # Esta función elimina una máquina y todos sus mantenimientos
+        # Primero verificamos que la máquina exista
+        if not self._dao_maq.buscar_por_codigo(codigo):
+            return False, "La máquina no existe."
+        
+        # Eliminamos primero todos los mantenimientos de esa máquina
+        self._dao_mtto.eliminar_por_maquina(codigo)
+        
+        # Luego eliminamos la máquina
+        if self._dao_maq.eliminar(codigo):
+            return True, None
+        return False, "Error al eliminar la máquina."
+
+    def registrar_mantenimiento(self, datos_dict):
+        # Esta función registra un nuevo mantenimiento para una máquina
+        # Obtenemos el código de la máquina
+        codigo = datos_dict.get("codigo_maquina")
+        # Buscamos la máquina en la base de datos
+        maquina_db = self._dao_maq.buscar_por_codigo(codigo)
+        
+        # Si no existe la máquina, retornamos un error
+        if not maquina_db:
             return None, f"La máquina {codigo} no existe."
 
-        # Identificamos qué tipo de máquina es para reconstruir el objeto
+        # Obtenemos el tipo de máquina para crear el objeto correcto
         tipo_maquina = maquina_db.get('tipo', '').upper()
+        
+        # Creamos el objeto máquina según su tipo
         if tipo_maquina in ['COMPUTADORA', 'PC']:
             maquina_obj = Computadora(
-                maquina_db['codigo'], maquina_db['estado'], maquina_db['area'], maquina_db['fecha']
+                maquina_db['codigo'],
+                maquina_db['estado'],
+                maquina_db['area'],
+                maquina_db['fecha'],
+                maquina_db.get('usuario')
             )
         elif tipo_maquina in ['IMPRESORA', 'IMP']:
             maquina_obj = Impresora(
-                maquina_db['codigo'], maquina_db['estado'], maquina_db['area'], maquina_db['fecha']
+                maquina_db['codigo'],
+                maquina_db['estado'],
+                maquina_db['area'],
+                maquina_db['fecha'],
+                maquina_db.get('usuario')
             )
         else:
-            return None, f"Tipo de máquina no reconocido."
+            return None, "Tipo de máquina no reconocido."
 
-        # Creamos el registro de mantenimiento vinculado a esa máquina
+        # Usamos el usuario del mantenimiento o el de la máquina
+        usuario = datos_dict.get("usuario") or maquina_db.get('usuario')
+        
+        # Creamos el objeto mantenimiento con todos los datos
         nuevo_mtto = Mantenimiento(
             maquina_objeto=maquina_obj,
             empresa=datos_dict.get("empresa"),
             tecnico=datos_dict.get("tecnico"),
             tipo=datos_dict.get("tipo"),
             fecha=datos_dict.get("fecha"),
-            observaciones=datos_dict.get("observaciones")
+            observaciones=datos_dict.get("observaciones"),
+            usuario=usuario
         )
-        # Guardamos el mantenimiento en MongoDB (porque es una lista que crece mucho)
+        
+        # Guardamos el mantenimiento en la base de datos
         self._dao_mtto.guardar(nuevo_mtto)
         return nuevo_mtto, None
 
-    # Trae todos los mantenimientos de una máquina específica
-    def obtener_historial_por_maquina(self, codigo: str):
+    def obtener_historial_por_maquina(self, codigo):
+        # Esta función obtiene todos los mantenimientos de una máquina
+        # Simplemente le pedimos al DAO que busque los mantenimientos
         return self._dao_mtto.listar_por_maquina(codigo)
 
-    # Crea el reporte resumido de máquinas con sus respectivos mantenimientos
     def obtener_informe_completo(self, codigo=None):
-        """
-        Genera el reporte cruzando datos de MySQL y MongoDB.
-        Unificamos la lógica para que 'Ver Todo' y 'Buscar' usen siempre la misma fuente de datos.
-        """
-        # Obtenemos TODAS las máquinas (Fuente única de verdad)
+        # Esta función genera un reporte completo de máquinas y mantenimientos
+        # Primero obtenemos todas las máquinas
         todas_las_maquinas = self._dao_maq.listar_todas()
         
-        # Filtramos en memoria si el usuario envió un código
+        # Si nos dieron un código, filtramos solo esa máquina
         if codigo:
-            filtro = str(codigo).strip().lower()
-            maquinas_db = [
-                m for m in todas_las_maquinas 
-                if filtro in str(m.get("codigo", "")).lower()
-            ]
+            codigo_buscar = str(codigo).strip().lower()
+            maquinas_db = []
+            # Recorremos todas las máquinas
+            for m in todas_las_maquinas:
+                codigo_maq = str(m.get("codigo", "")).lower()
+                # Si el código coincide, la agregamos a la lista
+                if codigo_buscar in codigo_maq:
+                    maquinas_db.append(m)
         else:
+            # Si no nos dieron código, usamos todas las máquinas
             maquinas_db = todas_las_maquinas
 
+        # Si no hay máquinas, retornamos una lista vacía
         if not maquinas_db:
             return [], None
 
-        # Obtenemos TODOS los mantenimientos registrados en MongoDB
+        # Obtenemos todos los mantenimientos de todas las máquinas
         todos_mttos = self._dao_mtto.listar_todos() or []
         
-        # Creamos un mapa de mantenimientos agrupados por código normalizado
-        mttos_map = {}
+        # Agrupamos los mantenimientos por código de máquina
+        # Usamos un diccionario donde la clave es el código de la máquina
+        mttos_por_maquina = {}
         for mt in todos_mttos:
-            # Buscamos el código en campos comunes para mayor seguridad
-            raw_c = mt.get("codigo_maquina") or mt.get("codigo")
-            if raw_c:
-                key = str(raw_c).strip().lower()
-                if key not in mttos_map:
-                    mttos_map[key] = []
-                
-                # Preparamos el registro para el JSON
-                mt["_id"] = str(mt["_id"])
-                # Aseguramos campo 'tipo' por compatibilidad
+            # Obtenemos el código de la máquina del mantenimiento
+            codigo_mt = mt.get("codigo_maquina") or mt.get("codigo")
+            if codigo_mt:
+                # Normalizamos el código (minúsculas y sin espacios)
+                codigo_key = str(codigo_mt).strip().lower()
+                # Si no existe esa clave, creamos una lista vacía
+                if codigo_key not in mttos_por_maquina:
+                    mttos_por_maquina[codigo_key] = []
+                # Convertimos el ID de MongoDB a string (para que se pueda enviar como JSON)
+                if "_id" in mt:
+                    mt["_id"] = str(mt["_id"])
+                # Si no tiene tipo, le ponemos "N/A"
                 if "tipo" not in mt:
-                    mt["tipo"] = mt.get("_tipo", "N/A")
-                
-                mttos_map[key].append(mt)
+                    mt["tipo"] = "N/A"
+                # Agregamos el mantenimiento a la lista de esa máquina
+                mttos_por_maquina[codigo_key].append(mt)
 
-        # Cruzamos los datos para armar el reporte final
-        resultado_reporte = []
+        # Construimos el reporte final
+        resultado = []
         for maq in maquinas_db:
-            # Usamos el código oficial de la máquina para buscar en el mapa
-            k_maq = str(maq.get("codigo", "")).strip().lower()
-            mttos_encontrados = mttos_map.get(k_maq, [])
+            # Obtenemos el código de la máquina normalizado
+            codigo_maq = str(maq.get("codigo", "")).strip().lower()
+            # Obtenemos los mantenimientos de esa máquina (si tiene)
+            mttos = mttos_por_maquina.get(codigo_maq, [])
             
-            # Empaquetamos en el DTO oficial
-            resultado_reporte.append(InformeMaquinaDTO(
+            # Creamos un objeto DTO con la información de la máquina y sus mantenimientos
+            resultado.append(InformeMaquinaDTO(
                 codigo=maq["codigo"],
                 tipo=maq["tipo"],
                 area=maq["area"],
                 estado=maq["estado"],
-                mantenimientos=mttos_encontrados
+                mantenimientos=mttos
             ))
         
-        return resultado_reporte, None
+        # Retornamos el resultado
+        return resultado, None

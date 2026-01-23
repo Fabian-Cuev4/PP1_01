@@ -21,7 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnModalOk = document.getElementById("btnModalOk");
 
     // muestra el modal con el tipo (success/error/warning), título y mensaje
-    const mostrarModal = (tipo, titulo, mensaje, callback = null) => {
+    // Esta función se hace global para que otros archivos puedan usarla
+    window.mostrarModal = (tipo, titulo, mensaje, callback = null) => {
         let iconHtml = '';
         if (tipo === 'success') iconHtml = '<i class="fa-solid fa-circle-check icon-success"></i>';
         else if (tipo === 'error') iconHtml = '<i class="fa-solid fa-circle-xmark icon-error"></i>';
@@ -31,6 +32,9 @@ document.addEventListener("DOMContentLoaded", () => {
         modalTitle.textContent = titulo;
         modalMessage.textContent = mensaje;
         validationModal.classList.add("active");
+        
+        // Guardar también en una variable local para compatibilidad
+        const mostrarModal = window.mostrarModal;
 
         // cierra el modal al hacer clic en "entendido" y ejecuta callback si existe
         btnModalOk.onclick = () => {
@@ -61,12 +65,14 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault(); // evita que la página se recargue
 
             // recopila los datos del formulario
+            const username = localStorage.getItem('username') || null;
             const datos = {
                 tipo_equipo: document.getElementById("tipo_equipo").value,
                 codigo_equipo: document.getElementById("codigo").value,
                 estado_actual: document.getElementById("estado_actual").value,
                 area: document.getElementById("area").value,
-                fecha: document.getElementById("fecha").value
+                fecha: document.getElementById("fecha").value,
+                usuario: username
             };
 
             // valida que los campos obligatorios estén llenos
@@ -123,13 +129,15 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             // recopila los datos del mantenimiento
+            const username = localStorage.getItem('username') || null;
             const datosMant = {
                 codigo_maquina: codigoVinculado,
                 empresa: document.getElementById("mant-empresa").value,
                 tecnico: document.getElementById("mant-tecnico").value,
                 tipo: document.getElementById("mant-tipo").value,
                 fecha: document.getElementById("mant-fecha").value,
-                observaciones: document.getElementById("mant-observaciones").value
+                observaciones: document.getElementById("mant-observaciones").value,
+                usuario: username
             };
 
             // valida campos obligatorios

@@ -1,59 +1,96 @@
-# Este archivo es el DAO (Data Access Object) para Usuarios.
-# Su misión es hablar con la base de datos MySQL para guardar o buscar usuarios.
+# Este archivo se encarga de guardar y buscar usuarios en la base de datos MySQL
+# DAO significa "Data Access Object" (Objeto de Acceso a Datos)
 
+# Importamos las clases necesarias
 from app.database.mysql import MySQLConnection
+from app.utils.encryption import Encryption
 
 class UsuarioDAO:
-    
+    # Esta función crea un nuevo usuario en la base de datos
     @staticmethod
     def crear_usuario(nombre, username, password):
-        
-        #Guarda un nuevo usuario en la tabla 'usuarios' de MySQL.
-        
-        # Abrimos conexión con la base de datos MySQL
+        # Obtenemos una conexión a la base de datos
         conn = MySQLConnection.conectar()
         if not conn:
             return False
         
         try:
-            # Es el encargado de ejecutar las órdenes de SQL
+            # Encriptamos la contraseña antes de guardarla por seguridad
+            password_encriptado = Encryption.encriptar_password(password)
+            
+            # Creamos un cursor para ejecutar comandos SQL
             cursor = conn.cursor()
-            # Definimos la orden (INSERT) y usamos %s para que sea seguro
+            # Definimos la consulta SQL para insertar un usuario
             query = "INSERT INTO usuarios (nombre_completo, username, password) VALUES (%s, %s, %s)"
-            # Ejecutamos pasándole los datos reales
-            cursor.execute(query, (nombre, username, password))
-            # Confirmamos que queremos guardar los cambios (Commit)
+            # Ejecutamos la consulta pasándole los datos
+            cursor.execute(query, (nombre, username, password_encriptado))
+            # Confirmamos los cambios
             conn.commit()
             return True
         except Exception as e:
-            # Si hay un error (ej. usuario ya existe), lo mostramos en consola
+            # Si hay un error (por ejemplo, el usuario ya existe), lo imprimimos
             print(f"Error al crear usuario: {e}")
             return False
         finally:
-            # Siempre cerramos todo para no dejar conexiones abiertas
+            # Siempre cerramos el cursor y la conexión, aunque haya un error
             cursor.close()
             conn.close()
 
+    # Esta función verifica si el usuario y contraseña son correctos
     @staticmethod
     def verificar_credenciales(username, password):
-        
-        #Busca un usuario por su nombre y clave para dejarlo entrar al sistema.
+        # Obtenemos una conexión a la base de datos
         conn = MySQLConnection.conectar()
         if not conn:
             return None
         
         try:
-            # dictionary=True hace que el resultado sea fácil de leer (como un objeto JSON)
-            cursor = conn.cursor(dictionary=True) 
-            query = "SELECT * FROM usuarios WHERE username = %s AND password = %s"
-            cursor.execute(query, (username, password))
-            # Traemos el primer resultado que coincida
+            # Creamos un cursor que retorna diccionarios
+            cursor = conn.cursor(dictionary=True)
+            # Buscamos el usuario por su nombre de usuario
+            query = "SELECT * FROM usuarios WHERE username = %s"
+            cursor.execute(query, (username,))
+            # Obtenemos el primer resultado (si existe)
             usuario = cursor.fetchone()
-            return usuario
+            
+            # Si encontramos el usuario, verificamos la contraseña
+            if usuario and Encryption.verificar_password(password, usuario['password']):
+                # Si la contraseña es correcta, retornamos los datos del usuario
+                return usuario
+            # Si no encontramos el usuario o la contraseña es incorrecta, retornamos None
+            return None
         except Exception as e:
+            # Si hay un error, lo imprimimos y retornamos None
             print(f"Error en login: {e}")
             return None
         finally:
+            # Siempre cerramos el cursor y la conexión
+            if conn.is_connected():
+                cursor.close()
+                conn.close()
+    
+    # Esta función obtiene un usuario por su nombre de usuario
+    @staticmethod
+    def obtener_usuario_por_username(username):
+        # Obtenemos una conexión a la base de datos
+        conn = MySQLConnection.conectar()
+        if not conn:
+            return None
+        
+        try:
+            # Creamos un cursor que retorna diccionarios
+            cursor = conn.cursor(dictionary=True)
+            # Buscamos el usuario por su nombre de usuario
+            query = "SELECT * FROM usuarios WHERE username = %s"
+            cursor.execute(query, (username,))
+            # Obtenemos el primer resultado (si existe)
+            return cursor.fetchone()
+        except Exception as e:
+            # Si hay un error, lo imprimimos y retornamos None
+            print(f"Error al buscar usuario: {e}")
+            return None
+        finally:
+            # Siempre cerramos el cursor y la conexión
             if conn.is_connected():
                 cursor.close()
                 conn.close()

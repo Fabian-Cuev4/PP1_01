@@ -1,54 +1,52 @@
-# Este archivo maneja la seguridad: el inicio de sesión (Login) y la creación de cuentas (Registro).
+# Este archivo maneja la autenticación: login y registro de usuarios
+# Las rutas son las direcciones que el frontend usa para comunicarse con el backend
 
+# Importamos las librerías necesarias
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from app.daos.usuario_dao import UsuarioDAO
 
-# Creamos el router para las rutas de autenticación
+# Creamos un router para agrupar todas las rutas de autenticación
 router = APIRouter()
 
-# Modelos de datos
-# Definimos qué datos esperamos recibir del formulario de la web (JS)
+# Definimos cómo deben ser los datos que recibimos del frontend para login
 class LoginRequest(BaseModel):
-    username: str # El nombre de usuario que escribe el cliente
-    password: str # La contraseña
+    username: str  # Nombre de usuario
+    password: str  # Contraseña
 
+# Definimos cómo deben ser los datos que recibimos del frontend para registro
 class RegisterRequest(BaseModel):
-    nombre_completo: str # Nombre real de la persona
-    username: str        # Nombre de usuario único
-    password: str        # Su clave
+    nombre_completo: str  # Nombre completo de la persona
+    username: str         # Nombre de usuario único
+    password: str         # Contraseña
 
-# Ruta para iniciar sesión (Login)
+# Esta ruta se ejecuta cuando el frontend hace POST a /api/login
 @router.post("/api/login")
 async def login(datos: LoginRequest):
-    
-    #Recibe el usuario y clave del frontend y pregunta a la base de datos si son correctos.
-    # Buscamos en la base de datos usando el DAO (Data Access Object)
+    # Llamamos al DAO para verificar si el usuario y contraseña son correctos
     usuario = UsuarioDAO.verificar_credenciales(datos.username, datos.password)
     
+    # Si encontramos el usuario, retornamos sus datos
     if usuario:
-        # Si lo encuentra, enviamos un mensaje de éxito con sus datos
         return {
             "mensaje": "Login exitoso", 
             "usuario": usuario['nombre_completo'], 
+            "username": usuario['username'],
             "rol": usuario['rol']
         }
     else:
-        # Si NO lo encuentra, enviamos un error 401 (No autorizado)
+        # Si no encontramos el usuario, retornamos un error HTTP 401 (No autorizado)
         raise HTTPException(status_code=401, detail="Usuario o contraseña incorrectos")
 
-# ruta para registrar un nuevo usuario
+# Esta ruta se ejecuta cuando el frontend hace POST a /api/register
 @router.post("/api/register")
 async def register(datos: RegisterRequest):
-    
-    #Recibe los datos del nuevo usuario y los guarda en MySQL.
-    
-    # Intentamos crear el usuario en la base de datos
+    # Llamamos al DAO para crear el nuevo usuario
     exito = UsuarioDAO.crear_usuario(datos.nombre_completo, datos.username, datos.password)
     
+    # Si se creó correctamente, retornamos un mensaje de éxito
     if exito:
-        # Si se guardó bien
         return {"mensaje": "Usuario creado correctamente"}
     else:
-        # Si falló (por ejemplo, si el nombre de usuario ya está ocupado)
+        # Si falló (por ejemplo, el usuario ya existe), retornamos un error HTTP 400
         raise HTTPException(status_code=400, detail="Error al crear usuario (quizás el usuario ya existe)")

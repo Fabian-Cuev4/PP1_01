@@ -1,51 +1,64 @@
-# Este archivo es el DAO para los Mantenimientos.
-# A diferencia de los otros, este usa MongoDB porque los registros pueden ser muy variados.
+# Este archivo se encarga de guardar y buscar mantenimientos en la base de datos MongoDB
+# DAO significa "Data Access Object" (Objeto de Acceso a Datos)
 
+# Importamos la clase que maneja la conexión a MongoDB
 from app.database.mongodb import MongoDB
 
 class MantenimientoDAO:
-    
+    # El constructor se ejecuta cuando creamos un objeto de esta clase
     def __init__(self):
-        # Nos conectamos a la base de datos de MongoDB usando nuestra clase personalizada
+        # Obtenemos la conexión a MongoDB
         self.db = MongoDB.conectar()
-        # Seleccionamos la colección (tabla en Mongo) de 'mantenimientos'
+        # Seleccionamos la colección (tabla) de mantenimientos
         self.collection = self.db["mantenimientos"]
 
+    # Esta función guarda un mantenimiento en MongoDB
     def guardar(self, mantenimiento):
-        
-        #Recibe un objeto mantenimiento y lo guarda como un documento en MongoDB.
-        
         try:
-            # Usamos el método to_dict del objeto mantenimiento para obtener los datos limpiamente
+            # Convertimos el objeto mantenimiento a un diccionario
             documento = mantenimiento.to_dict()
-            
-            # Insertamos el documento en la base de datos Mongo
+            # Insertamos el documento en la colección de MongoDB
             self.collection.insert_one(documento)
-            print(f"Mantenimiento guardado en MongoDB para el equipo: {mantenimiento.maquina.codigo_equipo}")
+            # Imprimimos un mensaje de confirmación
+            print(f"Mantenimiento guardado para: {mantenimiento.maquina.codigo_equipo}")
         except Exception as e:
-            print(f"Error al guardar mantenimiento en MongoDB: {e}")
+            # Si hay un error, lo imprimimos
+            print(f"Error al guardar mantenimiento: {e}")
 
-    def listar_por_maquina(self, codigo):
-        
-        #Busca todos los registros de mantenimiento de una máquina específica.
+    # Esta función elimina todos los mantenimientos de una máquina
+    def eliminar_por_maquina(self, codigo_maquina):
         try:
-            # Buscamos en Mongo los documentos que tengan ese código de máquina
-            # sorted by fecha descending (las más nuevas primero)
+            # Buscamos y eliminamos todos los mantenimientos que tengan ese código de máquina
+            resultado = self.collection.delete_many({"codigo_maquina": codigo_maquina})
+            # Retornamos cuántos documentos se eliminaron
+            return resultado.deleted_count
+        except Exception as e:
+            # Si hay un error, lo imprimimos y retornamos 0
+            print(f"Error al eliminar mantenimientos: {e}")
+            return 0
+
+    # Esta función obtiene todos los mantenimientos de una máquina específica
+    def listar_por_maquina(self, codigo):
+        try:
+            # Creamos un filtro para buscar solo los mantenimientos de esa máquina
             query = {"codigo_maquina": codigo}
+            # Buscamos y ordenamos por fecha descendente (los más recientes primero)
             cursor = self.collection.find(query).sort("fecha", -1)
+            # Convertimos el cursor a una lista y la retornamos
             return list(cursor)
         except Exception as e:
-            print(f"Error al buscar historial en Mongo: {e}")
+            # Si hay un error, lo imprimimos y retornamos una lista vacía
+            print(f"Error al buscar historial: {e}")
             return []
 
+    # Esta función obtiene todos los mantenimientos de todas las máquinas
     def listar_todos(self):
-        
-        #Trae todos los mantenimientos de todas las máquinas.
-        
         try:
-            # El find() vacío nos trae todo lo que hay en la colección
+            # Buscamos todos los documentos en la colección (sin filtro)
             cursor = self.collection.find()
+            # Convertimos el cursor a una lista y la retornamos
             return list(cursor)
         except Exception as e:
-            print(f"Error al traer todos los mantenimientos: {e}")
+            # Si hay un error, lo imprimimos y retornamos una lista vacía
+            print(f"Error al listar mantenimientos: {e}")
             return []

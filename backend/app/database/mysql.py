@@ -41,7 +41,6 @@ class MySQLConnection:
                 cursor.execute(f"USE {MySQLConnection.DATABASE}")
 
                 # Creamos la tabla de usuarios
-                # id: número único, nombre_completo: texto, username: nombre único de usuario, password: su clave, rol: rol del usuario.
                 cursor.execute("""
                     CREATE TABLE IF NOT EXISTS usuarios (
                         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -52,23 +51,38 @@ class MySQLConnection:
                     )
                 """)
                 
+                # Actualizamos la contraseña del admin por defecto si existe (encriptada)
+                try:
+                    from app.utils.encryption import Encryption
+                    admin_password = Encryption.encriptar_password('admin123')
+                    cursor.execute("UPDATE usuarios SET password = %s, nombre_completo = 'admin' WHERE username = 'admin'", (admin_password,))
+                except:
+                    pass
+                
                 # Creamos la tabla de máquinas
-                # Guardamos código, tipo (laptop, pc, etc), estado, área y fecha.
                 cursor.execute("""
                     CREATE TABLE IF NOT EXISTS maquinas (
                         codigo VARCHAR(50) PRIMARY KEY,
                         tipo VARCHAR(20) NOT NULL,
                         estado VARCHAR(50) NOT NULL,
                         area VARCHAR(100) NOT NULL,
-                        fecha DATE NOT NULL
+                        fecha DATE NOT NULL,
+                        usuario VARCHAR(50)
                     )
                 """)
+                
+                # Agregamos la columna usuario si no existe (para bases de datos antiguas)
+                try:
+                    cursor.execute("ALTER TABLE maquinas ADD COLUMN usuario VARCHAR(50)")
+                except:
+                    pass  # La columna ya existe
 
                 # Creamos un administrador por defecto
-                # Esto es para que puedas entrar la primera vez con 'admin' y '12345'
                 cursor.execute("SELECT * FROM usuarios WHERE username = 'admin'")
                 if not cursor.fetchone():
-                    cursor.execute("INSERT INTO usuarios (nombre_completo, username, password, rol) VALUES ('Administrador', 'admin', '12345', 'admin')")
+                    from app.utils.encryption import Encryption
+                    admin_password = Encryption.encriptar_password('admin123')
+                    cursor.execute("INSERT INTO usuarios (nombre_completo, username, password, rol) VALUES ('admin', 'admin', %s, 'admin')", (admin_password,))
 
                 # Guardamos los cambios
                 conn.commit()

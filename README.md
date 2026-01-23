@@ -1,207 +1,137 @@
-# 🏢 SIGLAB - Sistema de Gestión de Inventario y Mantenimiento de Laboratorios
+# SIGLAB - Sistema de Gestión de Laboratorios
 
-**Sistema web profesional para la gestión integral de equipos de laboratorio y su historial de mantenimiento técnico.**
+Sistema web para gestionar máquinas (computadoras e impresoras) y sus mantenimientos en laboratorios de la Universidad Central del Ecuador.
 
----
+## ¿Qué hace este sistema?
 
-## 📑 Tabla de Contenidos
+Este sistema permite:
+- **Registrar máquinas**: Agregar computadoras e impresoras al inventario
+- **Ver historial**: Consultar todos los mantenimientos realizados a cada máquina
+- **Agregar mantenimientos**: Registrar cuando se hace mantenimiento a una máquina
+- **Actualizar estado**: Cambiar el estado de una máquina (operativa, fuera de servicio, etc.)
+- **Eliminar máquinas**: Borrar máquinas y todos sus mantenimientos
+- **Generar reportes**: Ver reportes completos de todas las máquinas y sus mantenimientos
 
-1. [Descripción del Proyecto](#-descripción-del-proyecto)
-2. [Arquitectura del Sistema](#-arquitectura-del-sistema)
-3. [Tecnologías y Dependencias](#-tecnologías-y-dependencias)
-4. [Estructura del Proyecto](#-estructura-del-proyecto)
-5. [Contenedores Docker](#-contenedores-docker)
-6. [Instalación y Configuración](#-instalación-y-configuración)
-7. [Problemas Resueltos](#-problemas-resueltos-durante-el-desarrollo)
-8. [Comandos Útiles](#-comandos-útiles)
+## Tecnologías usadas
 
----
+### Backend (Servidor)
+- **Python 3.11**: Lenguaje de programación
+- **FastAPI**: Framework para crear la API (interfaz de comunicación)
+- **MySQL**: Base de datos para guardar máquinas y usuarios
+- **MongoDB**: Base de datos para guardar los mantenimientos
 
-## 🎯 Descripción del Proyecto
+### Frontend (Interfaz de usuario)
+- **HTML**: Estructura de las páginas
+- **CSS**: Estilos y diseño visual
+- **JavaScript**: Lógica y comunicación con el servidor
+- **Nginx**: Servidor web que muestra las páginas
 
-**SIGLAB** es un sistema web completo diseñado para gestionar el inventario y mantenimientos de la **Universidad Central del Ecuador (UCE)**.
+## Cómo instalar y usar
 
-### Características Principales
+### Requisitos
+- Tener instalado **Docker Desktop** (Windows/Mac) o Docker (Linux)
 
-- ✅ **Gestión de Inventario**: Registro y administración de equipos (PCs, Impresoras, etc.).
-- ✅ **Historial de Mantenimiento**: Registro detallado de mantenimientos preventivos y correctivos, almacenados en **MongoDB** para flexibilidad.
-- ✅ **Reportes Dinámicos**: Cruce de datos relacionales (MySQL) con no-relacionales (MongoDB) para generar informes consolidados.
-- ✅ **Arquitectura Desacoplada**: Frontend estático servido por Nginx y Backend API REST puro en FastAPI.
-- ✅ **Diseño Moderno**: Interfaz limpia y responsive (Vanilla JS + CSS).
+### Pasos para iniciar
 
----
+1. **Abrir la terminal** en la carpeta del proyecto
 
-## 🏗️ Arquitectura del Sistema
-
-El sistema utiliza una **arquitectura basada en microservicios/contenedores** con una clara separación entre Cliente y Servidor.
-
-### Diagrama de Flujo
-
-```mermaid
-graph TD
-    User[Usuario (Navegador)] -->|HTTP Request| Frontend[Nginx (Puerto 18080)]
-    Frontend -->|Sirve HTML/CSS/JS| User
-    
-    User -->|API Calls (AJAX/Fetch)| Frontend
-    Frontend -->|Proxy Pass /api/*| Backend[FastAPI Backend (Puerto 18000)]
-    
-    Backend -->|CRUD Relacional| MySQL[(MySQL 8.0)]
-    Backend -->|Historial No-SQL| MongoDB[(MongoDB)]
-```
-
-### Componentes
-
-1.  **Frontend (Nginx + Static Files)**:
-    -   Nginx actúa como servidor web y proxy reverso.
-    -   Sirve archivos estáticos (`.html`, `.css`, `.js`) directamente.
-    -   Redirige las peticiones `/api/*` al backend.
-    -   Maneja el enrutamiento visual (URL Rewriting).
-
-2.  **Backend (FastAPI)**:
-    -   **API REST** pura (devuelve JSON, no HTML).
-    -   Patrón **Controller-Service-DAO/Repository**.
-    -   **Modelos**: Uso de Abstract Factory para instancias de equipos (Computadora, Impresora).
-
-3.  **Persistencia Híbrida**:
-    -   **MySQL**: Datos estructurales rígidos (Usuarios, Maquinas).
-    -   **MongoDB**: Datos volátiles y de historial (Mantenimientos).
-
----
-
-## 🛠️ Tecnologías y Dependencias
-
-### Backend (Python 3.11+)
-| Librería | Versión | Uso |
-|:---|:---|:---|
-| **FastAPI** | 0.104.1 | Framework principal de la API. |
-| **Uvicorn** | 0.24.0 | Servidor ASGI. |
-| **MySQL Connector** | 8.2.0 | Conexión a MySQL. |
-| **PyMongo** | 4.6.0 | Conexión a MongoDB. |
-| **Pydantic** | Core | Validación de datos. |
-
-### Frontend
-- **HTML5 / CSS3**: Diseño personalizado y responsivo.
-- **JavaScript (Vanilla)**: Lógica del cliente, fetch a APIs, validaciones.
-- **Nginx**: Servidor de producción y Proxy.
-
-### Infraestructura
-- **Docker**: Contenedorización de todos los servicios.
-- **Docker Compose**: Orquestación de la red `siglab_network`.
-
----
-
-## 📁 Estructura del Proyecto
-
-La estructura ha sido organizada para separar responsabilidades claramente:
-
-```
-PP1_01/
-│
-├── backend/                          # 🐍 Backend (API REST)
-│   ├── app/
-│   │   ├── daos/                     # Data Access Objects (Acceso directo a BD)
-│   │   ├── database/                 # Conexiones Singleton (MySQL/Mongo)
-│   │   ├── dtos/                     # Data Transfer Objects
-│   │   ├── models/                   # Modelos de Negocio
-│   │   │   └── abstrac_factory/      # Patrón de creación de objetos
-│   │   ├── routes/                   # Endpoints de la API
-│   │   ├── repositories.py           # Repositorio (Abstracción sobre DAOs)
-│   │   └── services.py               # Lógica de Negocio (Coordina DAOs y Modelos)
-│   ├── main.py                       # Punto de entrada FastAPI
-│   ├── requirements.txt              # Dependencias
-│   └── Dockerfile                    # Configuración de imagen Backend
-│
-├── frontend/                         # 🎨 Frontend (Estático + Nginx)
-│   ├── static/                       # Assets públicos
-│   │   ├── css/                      # Estilos
-│   │   ├── javascript/               # Lógica de cliente (AJAX, DOM)
-│   │   └── img/                      # Imágenes
-│   ├── templates/                    # Archivos HTML (Vistas)
-│   ├── nginx.conf                    # Configuración del servidor web
-│   └── Dockerfile                    # Configuración de imagen Frontend
-│
-├── docker-compose.yml                # Orquestador de servicios
-└── SOLUCION_ERRORES.md               # Bitácora de problemas resueltos
-```
-
----
-
-## 🐳 Contenedores Docker
-
-El proyecto corre sobre 4 contenedores orquestados:
-
-| Servicio | Nombre Contenedor | Puerto Host | Puerto Interno | Descripción |
-|:---|:---|:---|:---|:---|
-| **Frontend** | `frontend_siglab` | **18080** | 80 | Servidor Web y Proxy. Punto de entrada del usuario. |
-| **Backend** | `backend_siglab` | **18000** | 8000 | API REST. Procesa lógica y datos. |
-| **MySQL** | `mysql_siglab` | **13306** | 3306 | BD Relacional (Tablas: maquinas, usuarios). |
-| **MongoDB** | `mongo_siglab` | **27018** | 27017 | BD Documental (Colección: mantenimientos). |
-
----
-
-## 🚀 Instalación y Configuración
-
-Sigue estos pasos para desplegar el proyecto desde cero.
-
-### 1. Requisitos
-- Tener instalado **Docker Desktop** (Windows/Mac) o Docker Engine (Linux).
-
-### 2. Clonar y Desplegar
+2. **Ejecutar este comando** para iniciar todos los servicios:
 ```bash
-# Entrar a la carpeta del proyecto
-cd PP1_01
-
-# Levantar los servicios (construye las imágenes si no existen)
 docker-compose up -d --build
 ```
 
-### 3. Verificar Despliegue
-Ejecuta el siguiente comando para asegurarte que los 4 servicios están "Up" y "Healthy":
-```bash
-docker-compose ps
+3. **Esperar unos minutos** mientras se descargan e instalan todas las dependencias
+
+4. **Abrir el navegador** y ir a: **http://localhost:18080**
+
+5. **Iniciar sesión** con:
+   - Usuario: `admin`
+   - Contraseña: `admin123`
+
+## Estructura del proyecto
+
+```
+PP1_01/
+├── backend/              # Código del servidor (Python)
+│   ├── app/
+│   │   ├── daos/        # Acceso a las bases de datos
+│   │   ├── database/    # Configuración de MySQL y MongoDB
+│   │   ├── models/      # Modelos de datos (Máquina, Mantenimiento)
+│   │   ├── routes/      # Rutas de la API (endpoints)
+│   │   └── services.py  # Lógica de negocio
+│   └── main.py         # Archivo principal que inicia el servidor
+│
+├── frontend/            # Código de la interfaz (HTML, CSS, JS)
+│   ├── static/         # Archivos estáticos (CSS, JavaScript, imágenes)
+│   ├── templates/      # Páginas HTML
+│   └── nginx.conf      # Configuración del servidor web
+│
+└── docker-compose.yml  # Configuración de todos los servicios
 ```
 
-### 4. Acceder al Sistema
-Abre tu navegador (Chrome/Edge/Firefox) y ve a:
-👉 **[http://localhost:18080](http://localhost:18080)**
+## Cómo funciona
 
-## 🔁 Cambios recientes (Separación Frontend / Backend)
-- Hemos separado claramente el frontend del backend: **Nginx** sirve las páginas estáticas y actúa como proxy hacia la **API** (FastAPI).
-- Rutas principales ahora son:
-  - Páginas: `/pagina/*`  (ej. `/pagina/login`, `/pagina/maquinas`)
-  - API REST: `/api/*` (ej. `POST /api/maquinas/agregar`, `GET /api/maquinas/listar`)
-  - Estáticos: `/static/*` (CSS, JS, imágenes)
-- Se eliminó el renderizado de plantillas desde FastAPI (se removió `views.py`) para evitar conflictos de rutas.
-- Backend: FastAPI expone solo APIs y cuenta con `ProxyHeadersMiddleware` para respetar `X-Forwarded-*` y `TrustedHostMiddleware` para confiar en Nginx.
-- Frontend: Nginx se configuró para preservar puerto (ej. `absolute_redirect off`, `port_in_redirect off`), servir páginas sin redirecciones HTTP y aplicar headers `no-cache` a `.js` para evitar problemas de caché. Además usamos versionado en los assets (`formulario.js?v=2.2`) para forzar recarga cuando es necesario.
-- Puertos relevantes: frontend en **18080**, backend en **18000**, MySQL en **13306**, MongoDB en **27018**.
-- Nota práctica: después de cambios en JS estático, limpia el caché del navegador (Ctrl+Shift+Suprimir) o incrementa el `?v=` del archivo para forzar la actualización.
+1. **El usuario** abre el navegador y va a `http://localhost:18080`
+2. **Nginx** (servidor web) muestra la página de login
+3. **El usuario** ingresa sus credenciales
+4. **JavaScript** envía los datos al backend mediante una petición HTTP
+5. **FastAPI** (backend) verifica las credenciales en MySQL
+6. **Si es correcto**, el usuario puede ver y gestionar máquinas
+7. **Al agregar una máquina**, se guarda en MySQL
+8. **Al agregar un mantenimiento**, se guarda en MongoDB
+9. **Los reportes** combinan datos de ambas bases de datos
 
----
+## Comandos útiles
 
-## 🔧 Comandos Útiles
-
-**Ver logs en tiempo real (Backend):**
+**Ver los logs del servidor:**
 ```bash
 docker-compose logs -f backend
 ```
 
-**Ver logs en tiempo real (MySQL):**
-```bash
-docker-compose logs -f mysql
-```
-
-**Reiniciar servicios:**
-```bash
-docker-compose restart
-```
-
-**Apagar todo (Mantiene datos):**
+**Detener todos los servicios:**
 ```bash
 docker-compose stop
 ```
 
-**Eliminar todo (Borra contenedores y redes):**
+**Iniciar los servicios de nuevo:**
+```bash
+docker-compose start
+```
+
+**Eliminar todo y empezar de cero:**
 ```bash
 docker-compose down
 ```
+
+## Usuarios por defecto
+
+Al iniciar el sistema por primera vez, se crea automáticamente un usuario administrador:
+- **Usuario**: `admin`
+- **Contraseña**: `admin123`
+
+## Puertos utilizados
+
+- **18080**: Frontend (página web)
+- **18000**: Backend (API)
+- **13306**: MySQL (base de datos)
+- **27018**: MongoDB (base de datos)
+
+## Características principales
+
+- ✅ **Encriptación de contraseñas**: Las contraseñas se guardan de forma segura usando bcrypt
+- ✅ **Asociación de usuarios**: Cada máquina y mantenimiento está asociado al usuario que lo creó
+- ✅ **Validaciones**: El sistema valida que los datos sean correctos antes de guardarlos
+- ✅ **Manejo de errores**: Muestra mensajes claros cuando algo sale mal
+
+## Notas importantes
+
+- Si cambias código JavaScript, limpia la caché del navegador (Ctrl+Shift+Suprimir)
+- Los datos se guardan en contenedores Docker, si los eliminas se pierden los datos
+- Para desarrollo, puedes modificar los archivos y recargar la página
+
+## Soporte
+
+Si tienes problemas:
+1. Revisa los logs con `docker-compose logs -f backend`
+2. Verifica que todos los servicios estén corriendo con `docker-compose ps`
+3. Reinicia los servicios con `docker-compose restart`

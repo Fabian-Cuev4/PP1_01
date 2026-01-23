@@ -26,8 +26,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     body: JSON.stringify({ username, password })
                 });
 
-                // si el login es exitoso, redirige al dashboard
+                // si el login es exitoso, guarda el username y redirige
                 if (response.ok) {
+                    const data = await response.json();
+                    // Guardar el username en localStorage para usarlo después
+                    if (data.username) {
+                        localStorage.setItem('username', data.username);
+                    }
                     window.location.href = "/pagina/inicio";
                 } else {
                     mostrarModal("Error de autenticación", "Usuario o contraseña incorrectos.");
