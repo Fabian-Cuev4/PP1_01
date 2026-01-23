@@ -205,12 +205,3 @@ docker-compose stop
 ```bash
 docker-compose down
 ```
-
----
-
-## 🐛 Problemas Resueltos Durante el Desarrollo
-
-Consulta el archivo [SOLUCION_ERRORES.md](./SOLUCION_ERRORES.md) para ver detalles técnicos sobre:
-1. **Healthchecks de MySQL**: Configuración de `start_period` para evitar fallos de inicio.
-2. **Nginx Loops**: Configuración correcta de `proxy_pass` y `try_files`.
-3. **Persistencia**: Uso de volúmenes Docker para no perder datos al reiniciar.

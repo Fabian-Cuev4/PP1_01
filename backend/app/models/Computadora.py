@@ -7,6 +7,7 @@ class Computadora(Maquina):
         super().__init__(codigo_equipo, "Computadora", estado_actual, area, fecha)
 
     # Prueba
-    # Puede tener comportamientos específicos de una PC si se deseara
+    """
     def encender(self):
-        return f"La computadora {self.codigo_equipo} está encendiendo..."
+        return f"La computadora {self.codigo_equipo} está encendiendo...
+    """

@@ -11,6 +11,7 @@ class Maquina(ABC):
         self.fecha = fecha                 # Cuándo se registró
 
     # Prueba
-    # Función común para mostrar los datos básicos de cualquier equipo
+    """
     def mostrar_detalle(self):
         return f"Equipo: {self.codigo_equipo} | Tipo: {self.tipo_equipo} | Ubicado en: {self.area}"
+    """

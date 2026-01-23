@@ -7,6 +7,7 @@ class Impresora(Maquina):
         super().__init__(codigo_equipo, "Impresora", estado_actual, area, fecha)
 
     # Prueba
-    # Comportamiento específico que solo las impresoras tendrían
+    """
     def imprimir_prueba(self):
         return f"La impresora {self.codigo_equipo} está imprimiendo una página de prueba."
+    """
