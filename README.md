@@ -81,6 +81,81 @@ PP1_01/
 8. **Al agregar un mantenimiento**, se guarda en MongoDB
 9. **Los reportes** combinan datos de ambas bases de datos
 
+## Guía rápida (preguntas comunes)
+
+### 1) Flujo completo (de punta a punta)
+
+Cuando el usuario hace una acción en la web, normalmente pasa esto:
+
+1. **Frontend (JavaScript)** hace un `fetch("/api/..." )`
+2. **Nginx (frontend)** recibe `/api/...` y lo reenvía al backend (reverse proxy)
+3. **Routes (FastAPI)** recibe la petición y valida datos (Pydantic)
+4. **Service (`services.py`)** aplica reglas y orquesta la operación
+5. **DAO (`daos/*.py`)** guarda/lee datos en MySQL o MongoDB
+6. **Database (`database/*.py`)** maneja la conexión/pool (encapsulado)
+
+### 2) ¿Qué diferencia hay entre `factory.py` y `Maquina.py`?
+
+- **`Maquina.py`** (clase base): define qué es una máquina (campos/estructura). Se hereda en `Computadora` e `Impresora`.
+- **`factory.py`** (fábrica): decide qué clase crear (Computadora o Impresora) según el `tipo_equipo`.
+
+Idea simple:
+- `Maquina` = el “molde”
+- `MaquinaFactory` = el “selector/constructor” que crea el objeto correcto
+
+### 3) ¿Se encapsulan las bases de datos?
+
+Sí, porque el proyecto NO abre conexiones en las rutas.
+
+- **MySQL**:
+  - `app/database/mysql.py` encapsula conexión + pool + creación de tablas
+  - Los DAOs usan `MySQLConnection.conectar()`
+- **MongoDB**:
+  - `app/database/mongodb.py` encapsula cliente + reintentos + `conectar()`/`cerrar()`
+  - `MantenimientoDAO` usa `MongoDB.conectar()`
+- **Orquestación**:
+  - `app/database/database_manager.py` centraliza `inicializar()` y `cerrar()`
+  - `main.py` lo llama en `startup`/`shutdown`
+
+### 4) ¿Qué es “reverse proxy” en este proyecto?
+
+En `frontend/nginx.conf` existe:
+
+- `location /api/ { proxy_pass http://backend:8000; }`
+
+Esto significa:
+
+- El navegador entra a **Frontend**: `http://localhost:18080`
+- Cuando el frontend llama `/api/...`, **Nginx** reenvía esa petición al contenedor **backend**
+- El navegador no necesita saber el puerto del backend
+
+### 5) ¿Para qué sirven los headers `X-Forwarded-*` y el `ProxyHeadersMiddleware`?
+
+Nginx agrega headers como:
+
+- `X-Forwarded-Proto` (http/https)
+- `X-Forwarded-Host` y `X-Forwarded-Port` (host/puerto real)
+- `X-Forwarded-For` (IP del cliente)
+
+El `ProxyHeadersMiddleware` en `backend/main.py` sirve para que FastAPI use esa información “real” cuando el backend está detrás de Nginx.
+
+Nota: para el CRUD básico normalmente no es obligatorio, pero es correcto tenerlo en este proyecto porque sí hay reverse proxy.
+
+### 6) ¿Para qué sirve `Cache-Control: no-cache` en `/api/mantenimiento/listar/{codigo}`?
+
+En algunos endpoints se envía:
+
+- `Cache-Control: no-cache, no-store, must-revalidate`
+
+Sirve para que el navegador NO muestre una respuesta vieja (cacheada) y siempre pida el historial actualizado.
+
+## Apuntes (para ir agregando)
+
+En esta sección puedes ir anotando dudas/respuestas del proyecto.
+
+- Tema:
+  - Explicación:
+
 ## Comandos útiles
 
 **Ver los logs del servidor:**
