@@ -58,12 +58,12 @@
     </div>
 
     <!-- Ventana flotante que aparece para avisar si algo salió bien o mal -->
-    <div id="modal-notificacion" class="modal-overlay"> <!-- Fondo semitransparente -->
+    <div id="modal-notificacion" class="modal-overlay hidden"> <!-- Fondo semitransparente -->
         <div class="modal-content"> <!-- Caja blanca flotante con el aviso -->
             <!-- Ícono que advierte al usuario (!) -->
             <span class="modal-icon"><i class="fas fa-exclamation-circle"></i></span>
             <h3 id="modal-titulo">Atención</h3> <!-- Título de la notificación -->
-            <p id="modal-mensaje">Mensaje de prueba</p> <!-- Aquí se escribe el error real por JS -->
+            <p id="modal-mensaje"></p> <!-- Aquí se escribe el error real por JS -->
             <!-- Botón para cerrar esta notificación -->
             <button type="button" id="btn-modal-cerrar" class="btn-modal">Entendido</button>
         </div>

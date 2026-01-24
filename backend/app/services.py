@@ -70,7 +70,12 @@ class ProyectoService:
         
         # Obtenemos el código de la máquina a actualizar
         codigo = datos_dict.get("codigo_equipo")
-        # Buscamos la máquina en la base de datos
+        
+        # Validamos que se proporcionó un código
+        if not codigo:
+            return None, "El código de la máquina es obligatorio."
+        
+        # Buscamos la máquina en la base de datos para verificar que existe
         maquina_db = self._dao_maq.buscar_por_codigo(codigo)
         
         # Si no encontramos la máquina, retornamos un error

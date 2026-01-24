@@ -2,13 +2,21 @@
 // Solo permite cambiar el estado, el resto de campos están bloqueados
 
 document.addEventListener("DOMContentLoaded", async () => {
+    // Manejador del botón cancelar
+    const btnCancelar = document.getElementById("btn-cancel-action");
+    if (btnCancelar) {
+        btnCancelar.addEventListener("click", () => {
+            window.location.href = "http://localhost:18080/pagina/maquinas";
+        });
+    }
+
     // Obtener el código de la máquina desde la URL
     const urlParams = new URLSearchParams(window.location.search);
     const codigo = urlParams.get("codigo");
 
     if (!codigo) {
         // Si no hay código, volver a la lista
-        window.location.href = "/pagina/maquinas";
+        window.location.href = "http://localhost:18080/pagina/maquinas";
         return;
     }
 
@@ -21,7 +29,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (!maquina) {
             // Si no se encuentra, mostrar error y volver
             alert("No se encontró la máquina.");
-            window.location.href = "/pagina/maquinas";
+            window.location.href = "http://localhost:18080/pagina/maquinas";
             return;
         }
 
@@ -102,7 +110,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                 if (response.ok) {
                     mostrarModal('success', '¡Actualización Exitosa!', 'El estado de la máquina ha sido actualizado correctamente.', () => {
-                        window.location.href = "/pagina/maquinas";
+                        window.location.href = "http://localhost:18080/pagina/maquinas";
                     });
                 } else {
                     const error = await response.json();
@@ -114,6 +122,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     } catch (error) {
         alert("Error al cargar los datos de la máquina.");
-        window.location.href = "/pagina/maquinas";
+        window.location.href = "http://localhost:18080/pagina/maquinas";
     }
 });

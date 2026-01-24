@@ -1,5 +1,12 @@
 // maneja el inicio de sesión de usuarios
 document.addEventListener("DOMContentLoaded", () => {
+    // Asegurar que el modal esté oculto al cargar
+    const modal = document.getElementById("modal-notificacion");
+    if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("show");
+    }
+    
     const btnLogin = document.getElementById("btn-signin-on");
     const btnRegister = document.getElementById("btn-register-redirect");
 
@@ -33,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (data.username) {
                         localStorage.setItem('username', data.username);
                     }
-                    window.location.href = "/pagina/inicio";
+                    window.location.href = "http://localhost:18080/pagina/inicio";
                 } else {
                     mostrarModal("Error de autenticación", "Usuario o contraseña incorrectos.");
                 }
@@ -47,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // botón de registrarse: redirige a la página de registro
     if (btnRegister) {
         btnRegister.addEventListener("click", () => {
-            window.location.href = "/pagina/registro";
+            window.location.href = "http://localhost:18080/pagina/registro";
         });
     }
 
@@ -62,22 +69,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // función para mostrar el modal de notificación
 function mostrarModal(titulo, mensaje) {
+    console.log("mostrarModal llamado con:", titulo, mensaje);
     const modal = document.getElementById("modal-notificacion");
     const tituloElement = document.getElementById("modal-titulo");
     const mensajeElement = document.getElementById("modal-mensaje");
 
+    console.log("Elementos encontrados:", {
+        modal: !!modal,
+        tituloElement: !!tituloElement,
+        mensajeElement: !!mensajeElement
+    });
+
     if (modal && tituloElement && mensajeElement) {
         tituloElement.textContent = titulo;
         mensajeElement.textContent = mensaje;
-        modal.style.display = "flex";
+        
+        console.log("Clases antes:", modal.className);
+        // Mostrar el modal
+        modal.classList.remove("hidden");
+        modal.classList.add("show");
+        console.log("Clases después:", modal.className);
+        console.log("Estilos computados:", {
+            display: window.getComputedStyle(modal).display,
+            visibility: window.getComputedStyle(modal).visibility,
+            opacity: window.getComputedStyle(modal).opacity,
+            zIndex: window.getComputedStyle(modal).zIndex
+        });
+    } else {
+        console.error("No se encontraron los elementos del modal");
     }
 }
 
 // función para ocultar el modal de notificación
 function ocultarModal() {
+    console.log("ocultarModal llamado");
     const modal = document.getElementById("modal-notificacion");
     if (modal) {
-        modal.style.display = "none";
+        console.log("Clases antes:", modal.className);
+        // Ocultar el modal
+        modal.classList.remove("show");
+        modal.classList.add("hidden");
     }
 }
 
@@ -86,6 +117,6 @@ const btnLogout = document.getElementById("btn-logout-off");
 if (btnLogout) {
     btnLogout.addEventListener("click", () => {
         // redirige al login (en un sistema real aquí se destruiría la sesión)
-        window.location.href = "/pagina/login";
+        window.location.href = "http://localhost:18080/pagina/login";
     });
 }

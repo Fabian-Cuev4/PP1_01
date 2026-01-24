@@ -114,7 +114,7 @@ h2 {
     margin-bottom: 10px;
 }
 
-/* overlay del modal (fondo oscuro) */
+/* overlay del modal (fondo oscuro) - Oculto por defecto pero visible cuando se necesita */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -123,10 +123,42 @@ h2 {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     display: none;
+    visibility: hidden;
+    opacity: 0;
+    z-index: -9999;
+    pointer-events: none;
+    /* Fallback para navegadores que no soportan backdrop-filter */
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
     justify-content: center;
     align-items: center;
-    z-index: 1000;
-    backdrop-filter: blur(2px);
+}
+
+/* Clase para ocultar modal - Estado por defecto */
+.modal-overlay.hidden {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    z-index: -9999 !important;
+    pointer-events: none !important;
+}
+
+/* Clase para mostrar el modal - Cuando hay errores o éxitos */
+.modal-overlay.show {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 1000 !important;
+    pointer-events: auto !important;
+    justify-content: center !important;
+    align-items: center !important;
+    /* Soporte para navegadores antiguos */
+    display: -webkit-box !important;
+    display: -ms-flexbox !important;
+    -webkit-box-pack: center !important;
+    -ms-flex-pack: center !important;
+    -webkit-box-align: center !important;
+    -ms-flex-align: center !important;
 }
 
 /* contenido del modal (caja blanca) */

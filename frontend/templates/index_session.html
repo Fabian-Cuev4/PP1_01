@@ -48,12 +48,12 @@
     </div>
 
     <!-- Esta es la ventana flotante que sale solo cuando hay un aviso o error -->
-    <div id="modal-notificacion" class="modal-overlay"> <!-- Fondo oscuro que tapa todo -->
+    <div id="modal-notificacion" class="modal-overlay hidden"> <!-- Fondo oscuro que tapa todo -->
         <div class="modal-content"> <!-- Cajita blanca flotante -->
             <!-- Ícono de alerta que cambia de color según el aviso -->
             <span class="modal-icon"><i class="fas fa-exclamation-circle"></i></span>
             <h3 id="modal-titulo">Atención</h3> <!-- Título llamativo -->
-            <p id="modal-mensaje">Mensaje de prueba</p> <!-- Aquí se escribirá el error real -->
+            <p id="modal-mensaje"></p> <!-- Aquí se escribirá el mensaje real -->
             <!-- Botón para cerrar esta ventana flotante -->
             <button type="button" id="btn-modal-cerrar" class="btn-modal">Entendido</button>
         </div>

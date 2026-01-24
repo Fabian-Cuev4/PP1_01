@@ -92,7 +92,6 @@ async function cargarMaquinas() {
                         <button class="btn-action btn-yellow-history" onclick="verHistorial('${m.codigo}')">Historial mantenimiento</button>
                         <button class="btn-action btn-blue-act" onclick="irAMantenimiento('${m.codigo}')">Agregar mantenimiento</button>
                         <button class="btn-action btn-green" onclick="actualizarMaquina('${m.codigo}')">Actualizar</button>
-                        <button class="btn-action btn-red" onclick="eliminarMaquina('${m.codigo}')">Borrar</button>
                     </div>
                 </div>
             `;
@@ -118,94 +117,6 @@ function actualizarMaquina(codigo) {
     window.location.href = `/pagina/maquinas/actualizar?codigo=${encodeURIComponent(codigo)}`;
 }
 
-// elimina una máquina y sus mantenimientos usando el modal
-async function eliminarMaquina(codigo) {
-    // Crear el modal si no existe
-    if (!document.getElementById("validationModal")) {
-        const modalHTML = `
-        <div id="validationModal" class="validation-modal-overlay">
-            <div class="validation-card">
-                <div id="modalIcon" class="modal-icon"></div>
-                <h3 id="modalTitle" class="modal-title"></h3>
-                <p id="modalMessage" class="modal-message"></p>
-                <button id="btnModalOk" class="btn-modal-ok">Entendido</button>
-                <button id="btnModalCancel" class="btn-modal-cancel" style="display:none;">Cancelar</button>
-            </div>
-        </div>`;
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
-    }
-
-    const validationModal = document.getElementById("validationModal");
-    const modalIcon = document.getElementById("modalIcon");
-    const modalTitle = document.getElementById("modalTitle");
-    const modalMessage = document.getElementById("modalMessage");
-    const btnModalOk = document.getElementById("btnModalOk");
-    const btnModalCancel = document.getElementById("btnModalCancel");
-
-    // Mostrar modal de confirmación
-    modalIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation icon-warning"></i>';
-    modalTitle.textContent = 'Confirmar Eliminación';
-    modalMessage.textContent = `¿Está seguro de eliminar la máquina ${codigo} y todos sus mantenimientos? Esta acción no se puede deshacer.`;
-    btnModalCancel.style.display = "inline-block";
-    validationModal.classList.add("active");
-
-    // Esperar la respuesta del usuario
-    return new Promise((resolve) => {
-        btnModalOk.onclick = async () => {
-            validationModal.classList.remove("active");
-            btnModalCancel.style.display = "none";
-            
-            try {
-                const response = await fetch(`/api/maquinas/eliminar/${encodeURIComponent(codigo)}`, {
-                    method: 'DELETE'
-                });
-
-                if (response.ok) {
-                    modalIcon.innerHTML = '<i class="fa-solid fa-circle-check icon-success"></i>';
-                    modalTitle.textContent = 'Eliminación Exitosa';
-                    modalMessage.textContent = 'La máquina y sus mantenimientos han sido eliminados correctamente.';
-                    btnModalCancel.style.display = "none";
-                    validationModal.classList.add("active");
-                    
-                    btnModalOk.onclick = () => {
-                        validationModal.classList.remove("active");
-                        cargarMaquinas();
-                        resolve();
-                    };
-                } else {
-                    const error = await response.json();
-                    modalIcon.innerHTML = '<i class="fa-solid fa-circle-xmark icon-error"></i>';
-                    modalTitle.textContent = 'Error';
-                    modalMessage.textContent = error.detail || "No se pudo eliminar la máquina.";
-                    btnModalCancel.style.display = "none";
-                    validationModal.classList.add("active");
-                    
-                    btnModalOk.onclick = () => {
-                        validationModal.classList.remove("active");
-                        resolve();
-                    };
-                }
-            } catch (error) {
-                modalIcon.innerHTML = '<i class="fa-solid fa-circle-xmark icon-error"></i>';
-                modalTitle.textContent = 'Error de Conexión';
-                modalMessage.textContent = 'No se pudo contactar con el servidor.';
-                btnModalCancel.style.display = "none";
-                validationModal.classList.add("active");
-                
-                btnModalOk.onclick = () => {
-                    validationModal.classList.remove("active");
-                    resolve();
-                };
-            }
-        };
-
-        btnModalCancel.onclick = () => {
-            validationModal.classList.remove("active");
-            btnModalCancel.style.display = "none";
-            resolve();
-        };
-    });
-}
 
 // filtra las tarjetas según lo que el usuario escribe en el buscador
 function filtrarMaquinas() {
