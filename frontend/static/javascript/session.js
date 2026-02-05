@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (data.username) {
                         localStorage.setItem('username', data.username);
                     }
-                    window.location.href = "http://localhost:18080/pagina/inicio";
+                    window.location.href = "http://localhost:8080/pagina/inicio";
                 } else {
                     mostrarModal("Error de autenticación", "Usuario o contraseña incorrectos.");
                 }
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // botón de registrarse: redirige a la página de registro
     if (btnRegister) {
         btnRegister.addEventListener("click", () => {
-            window.location.href = "http://localhost:18080/pagina/registro";
+            window.location.href = "http://localhost:8080/pagina/registro";
         });
     }
 
@@ -117,6 +117,6 @@ const btnLogout = document.getElementById("btn-logout-off");
 if (btnLogout) {
     btnLogout.addEventListener("click", () => {
         // redirige al login (en un sistema real aquí se destruiría la sesión)
-        window.location.href = "http://localhost:18080/pagina/login";
+        window.location.href = "http://localhost:8080/pagina/login";
     });
 }

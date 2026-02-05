@@ -2,11 +2,16 @@
 # Las rutas son las direcciones que el frontend usa para comunicarse con el backend
 
 # Importamos las librerías necesarias
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Response, Request
 from pydantic import BaseModel
 from datetime import date
 from app.services import ProyectoService
 from app.repositories import repo_instancia
+import logging
+
+# Configurar logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Creamos un router para agrupar todas las rutas de máquinas
 # El prefix significa que todas las rutas empezarán con /api/maquinas
@@ -26,12 +31,20 @@ class MaquinaSchema(BaseModel):
 
 # Esta ruta se ejecuta cuando el frontend hace POST a /api/maquinas/agregar
 @router.post("/agregar")
-async def agregar_maquina(datos: MaquinaSchema):
+async def agregar_maquina(datos: MaquinaSchema, request: Request):
+    # Obtener IP del cliente
+    client_ip = request.client.host
+    client_port = request.client.port
+    
     # Convertimos los datos a un diccionario y los enviamos al servicio
     nueva, error = service.registrar_maquina(datos.model_dump())
     
+    # Log de la petición
+    logger.info(f"{client_ip}:{client_port} - \"POST /api/maquinas/agregar HTTP/1.0\" 200 OK")
+    
     # Si hubo un error, retornamos un error HTTP 400
     if error:
+        logger.info(f"{client_ip}:{client_port} - \"POST /api/maquinas/agregar HTTP/1.0\" 400 Bad Request")
         raise HTTPException(status_code=400, detail=error)
     
     # Si todo salió bien, retornamos un mensaje de éxito
@@ -39,12 +52,20 @@ async def agregar_maquina(datos: MaquinaSchema):
 
 # Esta ruta se ejecuta cuando el frontend hace PUT a /api/maquinas/actualizar
 @router.put("/actualizar")
-async def actualizar_maquina(datos: MaquinaSchema):
+async def actualizar_maquina(datos: MaquinaSchema, request: Request):
+    # Obtener IP del cliente
+    client_ip = request.client.host
+    client_port = request.client.port
+    
     # Enviamos los datos al servicio para actualizar
     actualizada, error = service.actualizar_maquina(datos.model_dump())
     
+    # Log de la petición
+    logger.info(f"{client_ip}:{client_port} - \"PUT /api/maquinas/actualizar HTTP/1.0\" 200 OK")
+    
     # Si hubo un error, retornamos un error HTTP 400
     if error:
+        logger.info(f"{client_ip}:{client_port} - \"PUT /api/maquinas/actualizar HTTP/1.0\" 400 Bad Request")
         raise HTTPException(status_code=400, detail=error)
     
     # Si todo salió bien, retornamos un mensaje de éxito
@@ -53,12 +74,20 @@ async def actualizar_maquina(datos: MaquinaSchema):
 # Esta ruta se ejecuta cuando el frontend hace DELETE a /api/maquinas/eliminar/{codigo}
 # El {codigo} es un parámetro que viene en la URL
 @router.delete("/eliminar/{codigo}")
-async def eliminar_maquina(codigo: str):
+async def eliminar_maquina(codigo: str, request: Request):
+    # Obtener IP del cliente
+    client_ip = request.client.host
+    client_port = request.client.port
+    
     # Llamamos al servicio para eliminar la máquina
     exito, error = service.eliminar_maquina(codigo)
     
+    # Log de la petición
+    logger.info(f"{client_ip}:{client_port} - \"DELETE /api/maquinas/eliminar/{codigo} HTTP/1.0\" 200 OK")
+    
     # Si hubo un error, retornamos un error HTTP 400
     if error:
+        logger.info(f"{client_ip}:{client_port} - \"DELETE /api/maquinas/eliminar/{codigo} HTTP/1.0\" 400 Bad Request")
         raise HTTPException(status_code=400, detail=error)
     
     # Si todo salió bien, retornamos un mensaje de éxito
@@ -66,7 +95,11 @@ async def eliminar_maquina(codigo: str):
 
 # Esta ruta se ejecuta cuando el frontend hace GET a /api/maquinas/listar
 @router.get("/listar")
-async def listar_maquinas(response: Response):
+async def listar_maquinas(response: Response, request: Request):
+    # Obtener IP del cliente
+    client_ip = request.client.host
+    client_port = request.client.port
+    
     # Configuramos los headers para que el navegador no guarde una copia en caché
     # Esto asegura que siempre obtengamos los datos más recientes
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
@@ -74,9 +107,14 @@ async def listar_maquinas(response: Response):
     try:
         # Pedimos al DAO que nos traiga todas las máquinas
         maquinas = repo_instancia.maquina_dao.listar_todas()
+        
+        # Log de la petición
+        logger.info(f"{client_ip}:{client_port} - \"GET /api/maquinas/listar HTTP/1.0\" 200 OK")
+        
         # Retornamos la lista de máquinas
         return maquinas
     except Exception as e:
         # Si hay un error, lo imprimimos y retornamos una lista vacía
         print(f"Error al listar máquinas: {e}")
+        logger.info(f"{client_ip}:{client_port} - \"GET /api/maquinas/listar HTTP/1.0\" 500 Internal Server Error")
         return []

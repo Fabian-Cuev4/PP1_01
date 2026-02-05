@@ -93,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     mostrarModal("¡Cuenta creada con éxito!", "success");
 
                     btnCerrarModal.onclick = () => {
-                        window.location.href = "http://localhost:18080/pagina/login";
+                        window.location.href = "http://localhost:8080/pagina/login";
                     };
                 } else {
                     // si hubo error, muestra el mensaje del servidor
