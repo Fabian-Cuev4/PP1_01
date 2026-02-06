@@ -99,21 +99,44 @@ document.addEventListener("DOMContentLoaded", () => {
                     body: JSON.stringify(datosMaquina)
                 });
 
-                const resultado = await respuesta.json();
-
-                // ÉXITO: Mostrar confirmación y redirigir
+                // ÉXITO: Verificar respuesta.ok ANTES de procesar JSON
                 if (respuesta.ok) {
+                    const resultado = await respuesta.json();
                     mostrarModal('success', '¡Registro Exitoso!', 'La máquina ha sido registrada correctamente.', () => {
                         console.log("Redirigiendo a /pagina/maquinas");
                         window.location.href = "/pagina/maquinas";
                     });
                 } else {
-                    // ERROR: Analizar el tipo de error y mostrar mensaje apropiado
-                    let mensajeError = "No se pudo guardar la máquina.";
-                    if (JSON.stringify(resultado).toLowerCase().includes("ya existe")) {
-                        mensajeError = `El código "${datosMaquina.codigo_equipo}" ya está en uso.`;
+                    // ERROR: Procesar el error del backend
+                    let errorPayload = null;
+                    try {
+                        errorPayload = await respuesta.json();
+                    } catch (e) {
+                        errorPayload = null;
                     }
-                    mostrarModal('error', 'Error al Guardar', mensajeError);
+
+                    let msg = "No se pudo guardar la máquina.";
+                    if (errorPayload && errorPayload.detail !== undefined && errorPayload.detail !== null) {
+                        if (typeof errorPayload.detail === 'string') {
+                            msg = errorPayload.detail;
+                        } else {
+                            try {
+                                msg = JSON.stringify(errorPayload.detail);
+                            } catch (e) {
+                                msg = String(errorPayload.detail);
+                            }
+                        }
+                    } else {
+                        try {
+                            const txt = await respuesta.text();
+                            if (txt) {
+                                msg = txt;
+                            }
+                        } catch (e) {
+                        }
+                    }
+
+                    mostrarModal('error', 'Error al Guardar', msg);
                 }
             } catch (error) {
                 // ERROR DE CONEXIÓN: Problemas de red o servidor caído
@@ -170,13 +193,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 // ÉXITO: Mostrar confirmación y redirigir
                 if (respuesta.ok) {
+                    const resultado = await respuesta.json();
                     mostrarModal('success', 'Mantenimiento Guardado', `Se registró el mantenimiento para ${codigoMaquinaSeleccionada}.`, () => {
                         console.log("Redirigiendo a /pagina/maquinas");
                         window.location.href = "/pagina/maquinas";
                     });
                 } else {
-                    // ERROR: Mostrar mensaje genérico de error
-                    mostrarModal('error', 'Error', "No se pudo registrar el mantenimiento.");
+                    // ERROR: Procesar el error del backend
+                    let errorPayload = null;
+                    try {
+                        errorPayload = await respuesta.json();
+                    } catch (e) {
+                        errorPayload = null;
+                    }
+
+                    let msg = "No se pudo registrar el mantenimiento.";
+                    if (errorPayload && errorPayload.detail !== undefined && errorPayload.detail !== null) {
+                        if (typeof errorPayload.detail === 'string') {
+                            msg = errorPayload.detail;
+                        } else {
+                            try {
+                                msg = JSON.stringify(errorPayload.detail);
+                            } catch (e) {
+                                msg = String(errorPayload.detail);
+                            }
+                        }
+                    } else {
+                        try {
+                            const txt = await respuesta.text();
+                            if (txt) {
+                                msg = txt;
+                            }
+                        } catch (e) {
+                        }
+                    }
+
+                    mostrarModal('error', 'Error al Guardar Mantenimiento', msg);
                 }
             } catch (error) {
                 // ERROR DE CONEXIÓN: Problemas de red o servidor caído

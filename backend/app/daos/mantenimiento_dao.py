@@ -1,5 +1,6 @@
 # Este archivo se encarga de guardar y buscar mantenimientos en la base de datos MongoDB
 # DAO significa "Data Access Object" (Objeto de Acceso a Datos)
+# Su única función es ejecutar operaciones de base de datos, sin lógica de negocio
 
 # Importamos la clase que maneja la conexión a MongoDB
 from app.database.mongodb import MongoDB
@@ -13,19 +14,22 @@ class MantenimientoDAO:
         self.collection = self.db["mantenimientos"]
 
     # Esta función guarda un mantenimiento en MongoDB
+    # Recibe un objeto mantenimiento con todos los datos listos para guardar
     def guardar(self, mantenimiento):
         try:
             # Convertimos el objeto mantenimiento a un diccionario
             documento = mantenimiento.to_dict()
             # Insertamos el documento en la colección de MongoDB
             self.collection.insert_one(documento)
-            # Imprimimos un mensaje de confirmación
-            print(f"Mantenimiento guardado para: {mantenimiento.maquina.codigo_equipo}")
+            # Retornamos True para indicar éxito
+            return True
         except Exception as e:
-            # Si hay un error, lo imprimimos
+            # Si hay un error, lo imprimimos y retornamos False
             print(f"Error al guardar mantenimiento: {e}")
+            return False
 
     # Esta función elimina todos los mantenimientos de una máquina
+    # Recibe el código de la máquina y retorna la cantidad eliminada
     def eliminar_por_maquina(self, codigo_maquina):
         try:
             # Buscamos y eliminamos todos los mantenimientos que tengan ese código de máquina
@@ -38,6 +42,7 @@ class MantenimientoDAO:
             return 0
 
     # Esta función obtiene todos los mantenimientos de una máquina específica
+    # Recibe el código de la máquina y retorna una lista de mantenimientos
     def listar_por_maquina(self, codigo):
         try:
             # Creamos un filtro para buscar solo los mantenimientos de esa máquina
@@ -52,6 +57,7 @@ class MantenimientoDAO:
             return []
 
     # Esta función obtiene todos los mantenimientos de todas las máquinas
+    # Retorna una lista con todos los mantenimientos del sistema
     def listar_todos(self):
         try:
             # Buscamos todos los documentos en la colección (sin filtro)

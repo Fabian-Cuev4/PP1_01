@@ -1,13 +1,19 @@
 # Este archivo maneja la autenticación: login y registro de usuarios
 # Las rutas son las direcciones que el frontend usa para comunicarse con el backend
+# Router solo llama al Service, no conoce la base de datos ni cómo se encripta
 
 # Importamos las librerías necesarias
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from app.daos.usuario_dao import UsuarioDAO
+from app.services.usuario_service import UsuarioService
+from app.repositories.proyecto_repository import get_repository
 
 # Creamos un router para agrupar todas las rutas de autenticación
 router = APIRouter()
+
+# Obtenemos la instancia del repository y creamos el service
+repository = get_repository()
+usuario_service = UsuarioService(repository.get_usuario_dao())
 
 # Definimos cómo deben ser los datos que recibimos del frontend para login
 class LoginRequest(BaseModel):
@@ -23,30 +29,30 @@ class RegisterRequest(BaseModel):
 # Esta ruta se ejecuta cuando el frontend hace POST a /api/login
 @router.post("/api/login")
 async def login(datos: LoginRequest):
-    # Llamamos al DAO para verificar si el usuario y contraseña son correctos
-    usuario = UsuarioDAO.verificar_credenciales(datos.username, datos.password)
+    # Llamamos al Service para verificar las credenciales
+    usuario, mensaje = usuario_service.login_usuario(datos.username, datos.password)
     
     # Si encontramos el usuario, retornamos sus datos
     if usuario:
         return {
-            "mensaje": "Login exitoso", 
+            "mensaje": mensaje, 
             "usuario": usuario['nombre_completo'], 
             "username": usuario['username'],
-            "rol": usuario['rol']
+            "rol": usuario.get('rol', 'usuario')
         }
     else:
         # Si no encontramos el usuario, retornamos un error HTTP 401 (No autorizado)
-        raise HTTPException(status_code=401, detail="Usuario o contraseña incorrectos")
+        raise HTTPException(status_code=401, detail=mensaje)
 
 # Esta ruta se ejecuta cuando el frontend hace POST a /api/register
 @router.post("/api/register")
 async def register(datos: RegisterRequest):
-    # Llamamos al DAO para crear el nuevo usuario
-    exito = UsuarioDAO.crear_usuario(datos.nombre_completo, datos.username, datos.password)
+    # Llamamos al Service para crear el nuevo usuario con validaciones
+    exito, mensaje = usuario_service.registrar_usuario(datos.nombre_completo, datos.username, datos.password)
     
     # Si se creó correctamente, retornamos un mensaje de éxito
     if exito:
-        return {"mensaje": "Usuario creado correctamente"}
+        return {"mensaje": mensaje}
     else:
         # Si falló (por ejemplo, el usuario ya existe), retornamos un error HTTP 400
-        raise HTTPException(status_code=400, detail="Error al crear usuario (quizás el usuario ya existe)")
+        raise HTTPException(status_code=400, detail=mensaje)

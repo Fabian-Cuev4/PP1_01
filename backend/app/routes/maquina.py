@@ -1,19 +1,21 @@
 # Este archivo define las rutas (URLs) relacionadas con las máquinas
 # Las rutas son las direcciones que el frontend usa para comunicarse con el backend
+# Router solo llama al Service, no conoce la base de datos ni cómo se validan los datos
 
 # Importamos las librerías necesarias
 from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel
 from datetime import date
-from app.services import ProyectoService
-from app.repositories import repo_instancia
+from app.services.maquina_service import MaquinaService
+from app.repositories.proyecto_repository import get_repository
 
 # Creamos un router para agrupar todas las rutas de máquinas
 # El prefix significa que todas las rutas empezarán con /api/maquinas
 router = APIRouter(prefix="/api/maquinas")
 
-# Creamos una instancia del servicio que maneja la lógica
-service = ProyectoService(repo_instancia.maquina_dao, repo_instancia.mantenimiento_dao)
+# Obtenemos la instancia del repository y creamos el service
+repository = get_repository()
+maquina_service = MaquinaService(repository.get_maquina_dao())
 
 # Definimos cómo deben ser los datos que recibimos del frontend
 class MaquinaSchema(BaseModel):
@@ -28,10 +30,10 @@ class MaquinaSchema(BaseModel):
 @router.post("/agregar")
 async def agregar_maquina(datos: MaquinaSchema):
     # Convertimos los datos a un diccionario y los enviamos al servicio
-    nueva, error = service.registrar_maquina(datos.model_dump())
+    nueva, error = maquina_service.registrar_maquina(datos.model_dump())
     
-    # Si hubo un error, retornamos un error HTTP 400
-    if error:
+    # Si hubo un error (nueva es None), retornamos un error HTTP 400
+    if error and nueva is None:
         raise HTTPException(status_code=400, detail=error)
     
     # Si todo salió bien, retornamos un mensaje de éxito
@@ -41,10 +43,10 @@ async def agregar_maquina(datos: MaquinaSchema):
 @router.put("/actualizar")
 async def actualizar_maquina(datos: MaquinaSchema):
     # Enviamos los datos al servicio para actualizar
-    actualizada, error = service.actualizar_maquina(datos.model_dump())
+    actualizada, error = maquina_service.actualizar_maquina(datos.model_dump())
     
-    # Si hubo un error, retornamos un error HTTP 400
-    if error:
+    # Si hubo un error (actualizada es None), retornamos un error HTTP 400
+    if error and actualizada is None:
         raise HTTPException(status_code=400, detail=error)
     
     # Si todo salió bien, retornamos un mensaje de éxito
@@ -55,7 +57,7 @@ async def actualizar_maquina(datos: MaquinaSchema):
 @router.delete("/eliminar/{codigo}")
 async def eliminar_maquina(codigo: str):
     # Llamamos al servicio para eliminar la máquina
-    exito, error = service.eliminar_maquina(codigo)
+    exito, error = maquina_service.eliminar_maquina(codigo)
     
     # Si hubo un error, retornamos un error HTTP 400
     if error:
@@ -71,12 +73,13 @@ async def listar_maquinas(response: Response):
     # Esto asegura que siempre obtengamos los datos más recientes
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     
-    try:
-        # Pedimos al DAO que nos traiga todas las máquinas
-        maquinas = repo_instancia.maquina_dao.listar_todas()
-        # Retornamos la lista de máquinas
-        return maquinas
-    except Exception as e:
-        # Si hay un error, lo imprimimos y retornamos una lista vacía
-        print(f"Error al listar máquinas: {e}")
+    # Pedimos al service que nos traiga todas las máquinas
+    maquinas, error = maquina_service.listar_todas_las_maquinas()
+    
+    # Si hubo un error, lo imprimimos y retornamos una lista vacía
+    if error:
+        print(f"Error al listar máquinas: {error}")
         return []
+    
+    # Retornamos la lista de máquinas
+    return maquinas

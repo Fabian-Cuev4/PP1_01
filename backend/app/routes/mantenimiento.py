@@ -1,18 +1,23 @@
 # Este archivo define las rutas (URLs) relacionadas con los mantenimientos
 # Las rutas son las direcciones que el frontend usa para comunicarse con el backend
+# Router solo llama al Service, no conoce la base de datos ni cómo se validan los datos
 
 # Importamos las librerías necesarias
 from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel
-from app.services import ProyectoService
-from app.repositories import repo_instancia
+from app.services.mantenimiento_service import MantenimientoService
+from app.repositories.proyecto_repository import get_repository
 
 # Creamos un router para agrupar todas las rutas de mantenimientos
 # El prefix significa que todas las rutas empezarán con /api/mantenimiento
 router = APIRouter(prefix="/api/mantenimiento")
 
-# Creamos una instancia del servicio que maneja la lógica
-service = ProyectoService(repo_instancia.maquina_dao, repo_instancia.mantenimiento_dao)
+# Obtenemos la instancia del repository y creamos el service
+repository = get_repository()
+mantenimiento_service = MantenimientoService(
+    repository.get_mantenimiento_dao(), 
+    repository.get_maquina_dao()
+)
 
 # Definimos cómo deben ser los datos que recibimos del frontend
 class MantenimientoSchema(BaseModel):
@@ -28,10 +33,10 @@ class MantenimientoSchema(BaseModel):
 @router.post("/agregar")
 async def agregar(datos: MantenimientoSchema):
     # Convertimos los datos a un diccionario y los enviamos al servicio
-    resultado, error = service.registrar_mantenimiento(datos.model_dump())
+    resultado, error = mantenimiento_service.registrar_mantenimiento(datos.model_dump())
     
-    # Si hubo un error, retornamos un error HTTP 400
-    if error:
+    # Si hubo un error (resultado es None), retornamos un error HTTP 400
+    if error and resultado is None:
         raise HTTPException(status_code=400, detail=error)
     
     # Si todo salió bien, retornamos un mensaje de éxito
@@ -45,7 +50,11 @@ async def listar_mantenimientos_equipo(codigo: str, response: Response):
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     
     # Pedimos al servicio que nos traiga todos los mantenimientos de esa máquina
-    registros = service.obtener_historial_por_maquina(codigo)
+    registros, error = mantenimiento_service.obtener_historial_por_maquina(codigo)
+    
+    # Si hubo un error, retornamos un error HTTP 400
+    if error:
+        raise HTTPException(status_code=400, detail=error)
     
     # MongoDB guarda los IDs de forma especial, los convertimos a string
     # para que se puedan enviar como JSON
@@ -61,7 +70,7 @@ async def listar_mantenimientos_equipo(codigo: str, response: Response):
 @router.get("/informe-general")
 async def informe_general(codigo: str = None):
     # Pedimos al servicio que genere el reporte completo
-    resultado, error = service.obtener_informe_completo(codigo)
+    resultado, error = mantenimiento_service.obtener_informe_completo(codigo)
     
     # Si hubo un error, retornamos un error HTTP 404
     if error:
