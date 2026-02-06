@@ -142,4 +142,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // carga todos los datos al iniciar la página
     cargarDatos();
+
+    // === AGREGAMOS EL POLLING AQUÍ ===
+    // Recargar la tabla automáticamente cada 3 segundos
+    setInterval(() => {
+        // Solo recarga si el usuario NO está escribiendo una búsqueda
+        if (!inputCodigo || inputCodigo.value.trim() === "") {
+            console.log("🔄 Polling: Actualizando tabla...");
+            cargarDatos();
+        }
+    }, 3000); // 3000 ms = 3 segundos
 });

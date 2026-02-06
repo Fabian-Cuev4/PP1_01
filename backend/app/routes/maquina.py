@@ -3,15 +3,15 @@ from pydantic import BaseModel
 from datetime import date
 from app.services import ProyectoService
 from app.repositories import repo_instancia
-# Importamos el manager para acceder a Redis
+# IMPORTAMOS EL MANAGER PARA USAR REDIS
 from app.database.database_manager import DatabaseManager
+import json
 
 router = APIRouter(prefix="/api/maquinas")
 service = ProyectoService(repo_instancia.maquina_dao, repo_instancia.mantenimiento_dao)
-redis = DatabaseManager.obtener_redis() # Obtenemos el cliente Redis
 
-# CLAVE DE CACHÉ: Nombre único para guardar la lista de máquinas
-CACHE_KEY_LISTA = "maquinas_lista_completa"
+# CLAVE PARA GUARDAR EN REDIS
+KEY_CACHE_MAQUINAS = "cache_lista_maquinas"
 
 class MaquinaSchema(BaseModel):
     codigo_equipo: str
@@ -27,8 +27,9 @@ async def agregar_maquina(datos: MaquinaSchema):
     if error:
         raise HTTPException(status_code=400, detail=error)
     
-    # INVALIDACIÓN DE CACHÉ: Como agregamos algo nuevo, borramos la caché vieja
-    redis.delete(CACHE_KEY_LISTA)
+    # SI CAMBIAN LOS DATOS, BORRAMOS LA CACHÉ VIEJA
+    redis = DatabaseManager.obtener_redis()
+    redis.delete(KEY_CACHE_MAQUINAS)
     
     return {"mensaje": "Máquina guardada", "codigo": nueva.codigo_equipo}
 
@@ -38,8 +39,9 @@ async def actualizar_maquina(datos: MaquinaSchema):
     if error:
         raise HTTPException(status_code=400, detail=error)
     
-    # INVALIDACIÓN DE CACHÉ: Hubo un cambio, borramos la caché vieja
-    redis.delete(CACHE_KEY_LISTA)
+    # SI CAMBIAN LOS DATOS, BORRAMOS LA CACHÉ VIEJA
+    redis = DatabaseManager.obtener_redis()
+    redis.delete(KEY_CACHE_MAQUINAS)
 
     return {"mensaje": "Máquina actualizada", "codigo": actualizada.codigo_equipo}
 
@@ -49,32 +51,38 @@ async def eliminar_maquina(codigo: str):
     if error:
         raise HTTPException(status_code=400, detail=error)
     
-    # INVALIDACIÓN DE CACHÉ: Borramos algo, limpiamos la caché
-    redis.delete(CACHE_KEY_LISTA)
+    # SI CAMBIAN LOS DATOS, BORRAMOS LA CACHÉ VIEJA
+    redis = DatabaseManager.obtener_redis()
+    redis.delete(KEY_CACHE_MAQUINAS)
 
     return {"mensaje": "Máquina y mantenimientos eliminados"}
 
 @router.get("/listar")
 async def listar_maquinas(response: Response):
-    # 1. INTENTO LEER DE REDIS
-    datos_en_cache = redis.get(CACHE_KEY_LISTA)
-    if datos_en_cache:
-        print("⚡ Sirviendo desde Redis (Caché Hit)")
-        return datos_en_cache
+    # EVITAR QUE EL NAVEGADOR GUARDE CACHÉ (Queremos que el polling funcione real)
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    
+    redis = DatabaseManager.obtener_redis()
+    
+    # 1. INTENTAR LEER DE REDIS
+    datos_cache = redis.get(KEY_CACHE_MAQUINAS)
+    if datos_cache:
+        print("⚡ CACHÉ HIT: Sirviendo desde Redis")
+        return datos_cache
 
-    # 2. SI NO ESTÁ EN REDIS, VOY A MYSQL
-    print("🐢 Consultando MySQL (Caché Miss)")
+    # 2. SI NO HAY CACHÉ, LEER DE MYSQL
+    print("🐢 CACHÉ MISS: Consultando base de datos...")
     try:
         maquinas = repo_instancia.maquina_dao.listar_todas()
         
-        # Convertimos los objetos a diccionarios para poder guardarlos en JSON
-        # (Asumiendo que listar_todas devuelve objetos, si devuelve dicts, esto varía levemente)
-        lista_dicts = [m.__dict__ for m in maquinas] if maquinas else []
+        # Convertimos objetos a diccionarios para poder enviarlos
+        # Ajuste rápido: asumiendo que maquinas es una lista de objetos
+        lista_final = [m.__dict__ for m in maquinas] if maquinas else []
         
-        # 3. GUARDO EN REDIS POR 10 SEGUNDOS (Polling Interval)
-        redis.set(CACHE_KEY_LISTA, lista_dicts, expire=10)
+        # 3. GUARDAR EN REDIS (EXPIRA EN 10 SEGUNDOS)
+        redis.set(KEY_CACHE_MAQUINAS, lista_final, expire=10)
         
-        return lista_dicts
+        return lista_final
     except Exception as e:
-        print(f"Error al listar máquinas: {e}")
+        print(f"Error: {e}")
         return []
