@@ -5,6 +5,7 @@
 // =============================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
+    mostrarNombreUsuario();
     // Aseguramos que el modal esté oculto al cargar la página
     const modalNotificacion = document.getElementById("modal-notificacion");
     if (modalNotificacion) {
@@ -44,16 +45,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     const datosRespuesta = await respuesta.json();
                     // Usar el username devuelto por el servidor, o el enviado si no hay respuesta
                     const nombreUsuarioEfectivo = (datosRespuesta && datosRespuesta.username) ? datosRespuesta.username : nombreUsuario;
+                    const nombreCompleto = (datosRespuesta && datosRespuesta.usuario) ? datosRespuesta.usuario : nombreUsuarioEfectivo;
                     
                     if (nombreUsuarioEfectivo === "admin") {
                         // USUARIO ADMIN: Guardar sesión y redirigir al dashboard
                         sessionStorage.setItem('is_admin', '1');
                         sessionStorage.setItem('username', nombreUsuarioEfectivo);
+                        sessionStorage.setItem('nombre_completo', nombreCompleto);
                         window.location.href = "http://localhost:8080/pagina/dashboard";
                     } else {
                         // USUARIO NORMAL: Guardar sesión y redirigir a página principal
                         sessionStorage.setItem('is_admin', '0');
                         sessionStorage.setItem('username', nombreUsuarioEfectivo);
+                        sessionStorage.setItem('nombre_completo', nombreCompleto);
                         window.location.href = "http://localhost:8080/pagina/inicio";
                     }
                 } else {
@@ -151,6 +155,7 @@ if (botonCerrarSesion) {
             // Eliminar datos de usuario y tipo de usuario
             sessionStorage.removeItem('is_admin');
             sessionStorage.removeItem('username');
+            sessionStorage.removeItem('nombre_completo');
         } catch (error) {
             console.error("No se pudo limpiar storage:", error);
         }
@@ -158,4 +163,14 @@ if (botonCerrarSesion) {
         // Redirigir a la página de login
         window.location.href = "http://localhost:8080/pagina/login";
     });
+}
+
+// FUNCIÓN: Muestra el nombre del usuario en el header
+function mostrarNombreUsuario() {
+    const nombreUsuario = sessionStorage.getItem('nombre_completo');
+    const elementoNombreUsuario = document.getElementById('nombre-completo');
+    
+    if (nombreUsuario && elementoNombreUsuario) {
+        elementoNombreUsuario.textContent = nombreUsuario;
+    }
 }

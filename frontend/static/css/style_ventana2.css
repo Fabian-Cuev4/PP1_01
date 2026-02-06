@@ -61,6 +61,12 @@ body {
     object-fit: cover;
 }
 
+.user-profile #nombre-completo {
+    color: white;
+    font-size: 16px;
+    padding-left: 10px;
+}
+
 /* Sección del botón de cerrar sesión en la derecha */
 .logout-section {
     display: flex;
