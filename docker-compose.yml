@@ -38,6 +38,21 @@ services:
       retries: 3
       start_period: 15s
 
+  # SERVICIO 2.5: Redis - Caché de alta velocidad
+  redis:
+    image: redis:alpine
+    container_name: redis_siglab
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - siglab_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # SERVICIO 3: API Backend 1 - Primera instancia del servidor de API
   api_back_1:
     build:

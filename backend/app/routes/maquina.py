@@ -1,82 +1,80 @@
-# Este archivo define las rutas (URLs) relacionadas con las máquinas
-# Las rutas son las direcciones que el frontend usa para comunicarse con el backend
-
-# Importamos las librerías necesarias
 from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel
 from datetime import date
 from app.services import ProyectoService
 from app.repositories import repo_instancia
+# Importamos el manager para acceder a Redis
+from app.database.database_manager import DatabaseManager
 
-# Creamos un router para agrupar todas las rutas de máquinas
-# El prefix significa que todas las rutas empezarán con /api/maquinas
 router = APIRouter(prefix="/api/maquinas")
-
-# Creamos una instancia del servicio que maneja la lógica
 service = ProyectoService(repo_instancia.maquina_dao, repo_instancia.mantenimiento_dao)
+redis = DatabaseManager.obtener_redis() # Obtenemos el cliente Redis
 
-# Definimos cómo deben ser los datos que recibimos del frontend
+# CLAVE DE CACHÉ: Nombre único para guardar la lista de máquinas
+CACHE_KEY_LISTA = "maquinas_lista_completa"
+
 class MaquinaSchema(BaseModel):
-    codigo_equipo: str      # Código único de la máquina
-    tipo_equipo: str         # Tipo: PC o IMP
-    estado_actual: str       # Estado: operativa, fuera de servicio, etc.
-    area: str                # Área donde está ubicada
-    fecha: date              # Fecha de adquisición
-    usuario: str = None      # Usuario que registró la máquina (opcional)
+    codigo_equipo: str
+    tipo_equipo: str
+    estado_actual: str
+    area: str
+    fecha: date
+    usuario: str = None
 
-# Esta ruta se ejecuta cuando el frontend hace POST a /api/maquinas/agregar
 @router.post("/agregar")
 async def agregar_maquina(datos: MaquinaSchema):
-    # Convertimos los datos a un diccionario y los enviamos al servicio
     nueva, error = service.registrar_maquina(datos.model_dump())
-    
-    # Si hubo un error, retornamos un error HTTP 400
     if error:
         raise HTTPException(status_code=400, detail=error)
     
-    # Si todo salió bien, retornamos un mensaje de éxito
+    # INVALIDACIÓN DE CACHÉ: Como agregamos algo nuevo, borramos la caché vieja
+    redis.delete(CACHE_KEY_LISTA)
+    
     return {"mensaje": "Máquina guardada", "codigo": nueva.codigo_equipo}
 
-# Esta ruta se ejecuta cuando el frontend hace PUT a /api/maquinas/actualizar
 @router.put("/actualizar")
 async def actualizar_maquina(datos: MaquinaSchema):
-    # Enviamos los datos al servicio para actualizar
     actualizada, error = service.actualizar_maquina(datos.model_dump())
-    
-    # Si hubo un error, retornamos un error HTTP 400
     if error:
         raise HTTPException(status_code=400, detail=error)
     
-    # Si todo salió bien, retornamos un mensaje de éxito
+    # INVALIDACIÓN DE CACHÉ: Hubo un cambio, borramos la caché vieja
+    redis.delete(CACHE_KEY_LISTA)
+
     return {"mensaje": "Máquina actualizada", "codigo": actualizada.codigo_equipo}
 
-# Esta ruta se ejecuta cuando el frontend hace DELETE a /api/maquinas/eliminar/{codigo}
-# El {codigo} es un parámetro que viene en la URL
 @router.delete("/eliminar/{codigo}")
 async def eliminar_maquina(codigo: str):
-    # Llamamos al servicio para eliminar la máquina
     exito, error = service.eliminar_maquina(codigo)
-    
-    # Si hubo un error, retornamos un error HTTP 400
     if error:
         raise HTTPException(status_code=400, detail=error)
     
-    # Si todo salió bien, retornamos un mensaje de éxito
+    # INVALIDACIÓN DE CACHÉ: Borramos algo, limpiamos la caché
+    redis.delete(CACHE_KEY_LISTA)
+
     return {"mensaje": "Máquina y mantenimientos eliminados"}
 
-# Esta ruta se ejecuta cuando el frontend hace GET a /api/maquinas/listar
 @router.get("/listar")
 async def listar_maquinas(response: Response):
-    # Configuramos los headers para que el navegador no guarde una copia en caché
-    # Esto asegura que siempre obtengamos los datos más recientes
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    
+    # 1. INTENTO LEER DE REDIS
+    datos_en_cache = redis.get(CACHE_KEY_LISTA)
+    if datos_en_cache:
+        print("⚡ Sirviendo desde Redis (Caché Hit)")
+        return datos_en_cache
+
+    # 2. SI NO ESTÁ EN REDIS, VOY A MYSQL
+    print("🐢 Consultando MySQL (Caché Miss)")
     try:
-        # Pedimos al DAO que nos traiga todas las máquinas
         maquinas = repo_instancia.maquina_dao.listar_todas()
-        # Retornamos la lista de máquinas
-        return maquinas
+        
+        # Convertimos los objetos a diccionarios para poder guardarlos en JSON
+        # (Asumiendo que listar_todas devuelve objetos, si devuelve dicts, esto varía levemente)
+        lista_dicts = [m.__dict__ for m in maquinas] if maquinas else []
+        
+        # 3. GUARDO EN REDIS POR 10 SEGUNDOS (Polling Interval)
+        redis.set(CACHE_KEY_LISTA, lista_dicts, expire=10)
+        
+        return lista_dicts
     except Exception as e:
-        # Si hay un error, lo imprimimos y retornamos una lista vacía
         print(f"Error al listar máquinas: {e}")
         return []
