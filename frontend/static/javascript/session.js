@@ -1,47 +1,63 @@
-// maneja el inicio de sesión de usuarios
+// =============================================================================
+// SESIÓN SIGLAB - Manejo de Autenticación de Usuarios
+// Autor: Estudiante de Programación Avanzada
+// Propósito: Controlar el inicio de sesión, registro y cierre de sesión
+// =============================================================================
+
 document.addEventListener("DOMContentLoaded", () => {
-    // Asegurar que el modal esté oculto al cargar
-    const modal = document.getElementById("modal-notificacion");
-    if (modal) {
-        modal.classList.add("hidden");
-        modal.classList.remove("show");
+    // Aseguramos que el modal esté oculto al cargar la página
+    const modalNotificacion = document.getElementById("modal-notificacion");
+    if (modalNotificacion) {
+        modalNotificacion.classList.add("hidden");
+        modalNotificacion.classList.remove("show");
     }
     
-    const btnLogin = document.getElementById("btn-signin-on");
-    const btnRegister = document.getElementById("btn-register-redirect");
+    // Referencias a los botones principales de la página de login
+    const botonIniciarSesion = document.getElementById("btn-signin-on");
+    const botonIrRegistro = document.getElementById("btn-register-redirect");
 
-    // botón de login: valida credenciales y redirige al dashboard
-    if (btnLogin) {
-        btnLogin.addEventListener("click", async (e) => {
-            e.preventDefault();
+    // BOTÓN INICIAR SESIÓN: Valida credenciales y redirige según el tipo de usuario
+    if (botonIniciarSesion) {
+        botonIniciarSesion.addEventListener("click", async (evento) => {
+            evento.preventDefault();
 
-            // captura los datos del formulario
-            const username = document.getElementById("usuario").value;
-            const password = document.getElementById("password").value;
+            // Capturar datos del formulario de login
+            const nombreUsuario = document.getElementById("usuario").value;
+            const contrasena = document.getElementById("password").value;
 
-            // valida que los campos no estén vacíos
-            if (!username || !password) {
+            // VALIDACIÓN: Verificar que los campos no estén vacíos
+            if (!nombreUsuario || !contrasena) {
                 mostrarModal("Campos incompletos", "Por favor, completa todos los campos.");
                 return;
             }
 
             try {
-                // envía las credenciales al backend
-                const response = await fetch("/api/login", {
+                // AUTENTICACIÓN: Enviar credenciales al backend para validación
+                const respuesta = await fetch("/api/login", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({ username: nombreUsuario, password: contrasena })
                 });
 
-                // si el login es exitoso, guarda el username y redirige
-                if (response.ok) {
-                    const data = await response.json();
-                    // Guardar el username en localStorage para usarlo después
-                    if (data.username) {
-                        localStorage.setItem('username', data.username);
+                // ÉXITO: Procesar respuesta y redirigir según tipo de usuario
+                if (respuesta.ok) {
+                    const datosRespuesta = await respuesta.json();
+                    // Usar el username devuelto por el servidor, o el enviado si no hay respuesta
+                    const nombreUsuarioEfectivo = (datosRespuesta && datosRespuesta.username) ? datosRespuesta.username : nombreUsuario;
+                    
+                    if (nombreUsuarioEfectivo === "admin") {
+                        // USUARIO ADMIN: Guardar sesión y redirigir al dashboard
+                        sessionStorage.setItem('is_admin', '1');
+                        sessionStorage.setItem('username', nombreUsuarioEfectivo);
+                        window.location.href = "http://localhost:8080/pagina/dashboard";
+                    } else {
+                        // USUARIO NORMAL: Guardar sesión y redirigir a página principal
+                        sessionStorage.setItem('is_admin', '0');
+                        sessionStorage.setItem('username', nombreUsuarioEfectivo);
+                        window.location.href = "http://localhost:8080/pagina/inicio";
                     }
-                    window.location.href = "http://localhost:18080/pagina/inicio";
                 } else {
+                    // ERROR: Credenciales incorrectas
                     mostrarModal("Error de autenticación", "Usuario o contraseña incorrectos.");
                 }
             } catch (error) {
@@ -51,72 +67,95 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // botón de registrarse: redirige a la página de registro
-    if (btnRegister) {
-        btnRegister.addEventListener("click", () => {
-            window.location.href = "http://localhost:18080/pagina/registro";
+    // BOTÓN REGISTRARSE: Redirige a la página de registro de nuevos usuarios
+    if (botonIrRegistro) {
+        botonIrRegistro.addEventListener("click", () => {
+            window.location.href = "http://localhost:8080/pagina/registro";
         });
     }
 
-    // botón para cerrar el modal de notificación
-    const btnCerrarModal = document.getElementById("btn-modal-cerrar");
-    if (btnCerrarModal) {
-        btnCerrarModal.addEventListener("click", () => {
+    // BOTÓN CERRAR MODAL: Cierra la notificación cuando el usuario hace clic
+    const botonCerrarModal = document.getElementById("btn-modal-cerrar");
+    if (botonCerrarModal) {
+        botonCerrarModal.addEventListener("click", () => {
             ocultarModal();
         });
     }
 });
 
-// función para mostrar el modal de notificación
+// FUNCIÓN: Muestra el modal de notificación con título y mensaje
+// Parámetros: titulo - Texto del encabezado, mensaje - Contenido del modal
 function mostrarModal(titulo, mensaje) {
     console.log("mostrarModal llamado con:", titulo, mensaje);
-    const modal = document.getElementById("modal-notificacion");
-    const tituloElement = document.getElementById("modal-titulo");
-    const mensajeElement = document.getElementById("modal-mensaje");
+    const modalNotificacion = document.getElementById("modal-notificacion");
+    const elementoTitulo = document.getElementById("modal-titulo");
+    const elementoMensaje = document.getElementById("modal-mensaje");
 
     console.log("Elementos encontrados:", {
-        modal: !!modal,
-        tituloElement: !!tituloElement,
-        mensajeElement: !!mensajeElement
+        modalNotificacion: !!modalNotificacion,
+        elementoTitulo: !!elementoTitulo,
+        elementoMensaje: !!elementoMensaje
     });
 
-    if (modal && tituloElement && mensajeElement) {
-        tituloElement.textContent = titulo;
-        mensajeElement.textContent = mensaje;
+    if (modalNotificacion && elementoTitulo && elementoMensaje) {
+        elementoTitulo.textContent = titulo;
+        elementoMensaje.textContent = mensaje;
         
-        console.log("Clases antes:", modal.className);
-        // Mostrar el modal
-        modal.classList.remove("hidden");
-        modal.classList.add("show");
-        console.log("Clases después:", modal.className);
+        console.log("Clases antes de mostrar:", modalNotificacion.className);
+        // Mostrar el modal cambiando las clases CSS
+        modalNotificacion.classList.remove("hidden");
+        modalNotificacion.classList.add("show");
+        console.log("Clases después de mostrar:", modalNotificacion.className);
         console.log("Estilos computados:", {
-            display: window.getComputedStyle(modal).display,
-            visibility: window.getComputedStyle(modal).visibility,
-            opacity: window.getComputedStyle(modal).opacity,
-            zIndex: window.getComputedStyle(modal).zIndex
+            display: window.getComputedStyle(modalNotificacion).display,
+            visibility: window.getComputedStyle(modalNotificacion).visibility,
+            opacity: window.getComputedStyle(modalNotificacion).opacity,
+            zIndex: window.getComputedStyle(modalNotificacion).zIndex
         });
     } else {
         console.error("No se encontraron los elementos del modal");
     }
 }
 
-// función para ocultar el modal de notificación
+// FUNCIÓN: Oculta el modal de notificación
 function ocultarModal() {
     console.log("ocultarModal llamado");
-    const modal = document.getElementById("modal-notificacion");
-    if (modal) {
-        console.log("Clases antes:", modal.className);
-        // Ocultar el modal
-        modal.classList.remove("show");
-        modal.classList.add("hidden");
+    const modalNotificacion = document.getElementById("modal-notificacion");
+    if (modalNotificacion) {
+        console.log("Clases antes de ocultar:", modalNotificacion.className);
+        // Ocultar el modal cambiando las clases CSS
+        modalNotificacion.classList.remove("show");
+        modalNotificacion.classList.add("hidden");
     }
 }
 
-// maneja el cierre de sesión
-const btnLogout = document.getElementById("btn-logout-off");
-if (btnLogout) {
-    btnLogout.addEventListener("click", () => {
-        // redirige al login (en un sistema real aquí se destruiría la sesión)
-        window.location.href = "http://localhost:18080/pagina/login";
+// CIERRE DE SESIÓN: Maneja el logout del usuario
+// Limpiamos cookies y sessionStorage para cerrar completamente la sesión
+const botonCerrarSesion = document.getElementById("btn-logout-off");
+if (botonCerrarSesion) {
+    botonCerrarSesion.addEventListener("click", async () => {
+        try {
+            // Limpiar cookie de sesión en el backend
+            await fetch("/sticky/logout", { method: "GET", cache: "no-store" });
+        } catch (error) {
+            console.error("No se pudo borrar cookie sticky:", error);
+        }
+
+        try {
+            // Limpiar datos de sesión del frontend
+            const nombreUsuario = sessionStorage.getItem('username');
+            if (nombreUsuario) {
+                // Eliminar flag de ping si existe
+                sessionStorage.removeItem(`ping_${nombreUsuario}`);
+            }
+            // Eliminar datos de usuario y tipo de usuario
+            sessionStorage.removeItem('is_admin');
+            sessionStorage.removeItem('username');
+        } catch (error) {
+            console.error("No se pudo limpiar storage:", error);
+        }
+
+        // Redirigir a la página de login
+        window.location.href = "http://localhost:8080/pagina/login";
     });
 }

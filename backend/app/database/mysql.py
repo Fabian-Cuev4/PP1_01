@@ -10,7 +10,7 @@ class MySQLConnection:
     # Si no existen, usamos unos valores por defecto.
     USER = os.getenv('MYSQL_USER', 'root')
     PASSWORD = os.getenv('MYSQL_PASSWORD', 'Clubpengui1')
-    HOST = os.getenv('MYSQL_HOST', 'mysql')
+    HOST = os.getenv('MYSQL_HOST', 'mysql_db')  # EXPLICACIÓN: Actualizado para Docker
     DATABASE = os.getenv('MYSQL_DATABASE', 'proyecto_maquinas')
 
     @staticmethod
@@ -25,6 +25,9 @@ class MySQLConnection:
         
         for attempt in range(max_retries):
             try:
+                # EXPLICACIÓN: Log de intento de conexión al archivador central MySQL
+                print(f"🔌 Intentando conectar al archivador central MySQL (intento {attempt + 1}/{max_retries})...")
+                
                 # Intentamos entrar al servidor de MySQL (sin especificar base de datos todavía)
                 conn = mysql.connector.connect(
                     host=MySQLConnection.HOST,
@@ -86,7 +89,7 @@ class MySQLConnection:
 
                 # Guardamos los cambios
                 conn.commit()
-                print("¡ÉXITO! MySQL configurado correctamente. :V")
+                print("✅ ¡Conectado exitosamente al archivador central (MySQL)!")
                 
                 # Cerramos la conexión temporal
                 cursor.close()
@@ -96,10 +99,10 @@ class MySQLConnection:
             except (Error, Exception) as e:
                 # Si falla, esperamos un poco y volvemos a intentar
                 if attempt < max_retries - 1:
-                    print(f"Intento {attempt + 1}/{max_retries} fallido. Reintentando... Error: {e}")
+                    print(f"❌ Intento {attempt + 1}/{max_retries} fallido. Reintentando... Error: {e}")
                     time.sleep(retry_delay)
                 else:
-                    print(f"ERROR: No se pudo conectar a MySQL tras muchos intentos.")
+                    print(f"🚫 ERROR: No se pudo conectar al archivador central MySQL tras muchos intentos.")
 
     # El 'Pool' es como una reserva de conexiones abiertas para no tener que abrir una nueva cada vez.
     _pool = None

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard SIGLAB - Alta Disponibilidad</title>
+    <!-- Vinculamos el CSS externo para mejor organización -->
+    <link rel="stylesheet" href="/static/css/index_dashboard.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Dashboard SIGLAB</h1>
+            <p>Monitoreo de Alta Disponibilidad en Tiempo Real</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Load Balancer -->
+            <div class="server-card load-balancer-card">
+                <div class="server-header">
+                    <div class="server-name">Load Balancer</div>
+                </div>
+                <div class="metrics">
+                    <div class="lb-servers">
+                        <div class="lb-server" id="server1">
+                            <div class="server-header">
+                                <div class="server-name">API Servidor 1</div>
+                                <div class="server-status status-up" id="status1">UP</div>
+                            </div>
+                        </div>
+
+                        <div class="lb-server" id="server2">
+                            <div class="server-header">
+                                <div class="server-name">API Servidor 2</div>
+                                <div class="server-status status-up" id="status2">UP</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="total-requests">0</div>
+                            <div class="stat-label">Total Usuarios</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="active-servers">2</div>
+                            <div class="stat-label">Servidores Activos</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="uptime">100%</div>
+                            <div class="stat-label">Disponibilidad</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="refresh-info">
+            <span class="icon">🔄</span>
+            Actualizando automáticamente cada 5 segundos
+        </div>
+    </div>
+
+    <script src="/static/javascript/dashboard.js"></script>
+</body>
+</html>

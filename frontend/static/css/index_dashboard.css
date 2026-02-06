@@ -1,0 +1,325 @@
+/* =============================================================================
+   ESTILOS DASHBOARD SIGLAB - Alta Disponibilidad
+   Autor: Estudiante de Programación Avanzada
+   Propósito: Monitoreo en tiempo real de servidores y load balancer
+   ============================================================================= */
+
+/* Reset básico para consistencia */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Estilos generales del cuerpo */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #ffffff;
+    min-height: 100vh;
+    padding: 20px;
+    color: #333;
+}
+
+/* Contenedor principal centrado */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Cabecera del dashboard */
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    text-shadow: none;
+}
+
+.header p {
+    font-size: 1.1rem;
+    opacity: 1;
+    color: #566573;
+}
+
+/* Grid principal para las tarjetas de servidores */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+/* Tarjetas individuales de servidor */
+.server-card {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Efecto hover para las tarjetas */
+.server-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+}
+
+/* Barra de estado superior en las tarjetas */
+.server-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: #ddd;
+}
+
+/* Animación para servidores activos (verde) */
+.server-card.up::before {
+    background: linear-gradient(90deg, #28a745, #20c997);
+    animation: pulse-green 2s infinite;
+}
+
+/* Animación para servidores caídos (rojo) */
+.server-card.down::before {
+    background: linear-gradient(90deg, #dc3545, #c82333);
+    animation: pulse-red 2s infinite;
+}
+
+/* Animaciones de pulso para indicadores de estado */
+@keyframes pulse-green {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@keyframes pulse-red {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Cabecera de cada tarjeta de servidor */
+.server-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Nombre del servidor */
+.server-name {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Indicador de estado (UP/DOWN) */
+.server-status {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Estilos para estado activo */
+.status-up {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+/* Estilos para estado caído */
+.status-down {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Contenedor de métricas */
+.metrics {
+    margin-top: 20px;
+}
+
+/* Ítems individuales de métricas */
+.metric-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+/* Etiqueta de la métrica */
+.metric-label {
+    font-weight: 600;
+    color: #666;
+}
+
+/* Valor de la métrica */
+.metric-value {
+    font-weight: bold;
+    color: #333;
+}
+
+/* Barra de progreso para tráfico */
+.traffic-bar {
+    width: 100%;
+    height: 30px;
+    background: #e9ecef;
+    border-radius: 15px;
+    overflow: hidden;
+    margin: 15px 0;
+    position: relative;
+}
+
+/* Relleno animado de la barra de tráfico */
+.traffic-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #007bff, #0056b3);
+    transition: width 1s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+/* Estilos especiales para la tarjeta del Load Balancer */
+.load-balancer-card {
+    background-color: #f8f9fa;
+    border: 1px solid #d6dbdf;
+    color: #2c3e50;
+    grid-column: 1 / -1;
+}
+
+/* Grid para servidores dentro del Load Balancer */
+.lb-servers {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+/* Servidores individuales del Load Balancer */
+.lb-server {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 15px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #d6dbdf;
+}
+
+/* Barra de estado para servidores del LB */
+.lb-server::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #d6dbdf;
+}
+
+/* Estados para servidores del LB */
+.lb-server.up::before {
+    background: linear-gradient(90deg, #28a745, #20c997);
+    animation: pulse-green 2s infinite;
+}
+
+.lb-server.down::before {
+    background: linear-gradient(90deg, #dc3545, #c82333);
+    animation: pulse-red 2s infinite;
+}
+
+/* Ajustes de color para elementos del Load Balancer */
+.lb-server .server-name {
+    color: #2c3e50;
+}
+
+.load-balancer-card .server-name,
+.load-balancer-card .metric-label {
+    color: #2c3e50;
+}
+
+.load-balancer-card .metric-item {
+    background: #ffffff;
+    border: 1px solid #d6dbdf;
+}
+
+/* Información de actualización automática */
+.refresh-info {
+    text-align: center;
+    color: #566573;
+    margin-top: 20px;
+    font-size: 0.9rem;
+}
+
+/* Icono giratorio de actualización */
+.refresh-info .icon {
+    display: inline-block;
+    animation: spin 2s linear infinite;
+    margin-right: 5px;
+}
+
+/* Animación de rotación para el icono */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Grid para estadísticas generales */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* Ítems individuales de estadísticas */
+.stat-item {
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    border: 1px solid #d6dbdf;
+}
+
+/* Valor numérico de estadística */
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+/* Etiqueta de estadística */
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* Responsive Design para móviles */
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 2rem;
+    }
+    
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .load-balancer-card {
+        grid-column: 1;
+    }
+}

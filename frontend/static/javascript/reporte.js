@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // si no se encontró nada, muestra mensaje personalizado
             if (data.length === 0) {
-                tablaBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: #333; font-weight: bold;">⚠️ Equipo no encontrado</td></tr>`;
+                tablaBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: #333; font-weight: bold;">Equipo no encontrado</td></tr>`;
                 return;
             }
 

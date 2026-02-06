@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const btnCancelar = document.getElementById("btn-cancel-action");
     if (btnCancelar) {
         btnCancelar.addEventListener("click", () => {
-            window.location.href = "http://localhost:18080/pagina/maquinas";
+            window.location.href = "http://localhost:8080/pagina/maquinas";
         });
     }
 
@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (!codigo) {
         // Si no hay código, volver a la lista
-        window.location.href = "http://localhost:18080/pagina/maquinas";
+        window.location.href = "http://localhost:8080/pagina/maquinas";
         return;
     }
 
@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (!maquina) {
             // Si no se encuentra, mostrar error y volver
             alert("No se encontró la máquina.");
-            window.location.href = "http://localhost:18080/pagina/maquinas";
+            window.location.href = "http://localhost:8080/pagina/maquinas";
             return;
         }
 
@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             };
 
             // Preparar los datos para actualizar
-            const username = localStorage.getItem('username') || null;
+            const username = sessionStorage.getItem('username') || null;
             const datos = {
                 codigo_equipo: maquina.codigo,
                 tipo_equipo: maquina.tipo === "Computadora" ? "PC" : "IMP",
@@ -110,11 +110,39 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                 if (response.ok) {
                     mostrarModal('success', '¡Actualización Exitosa!', 'El estado de la máquina ha sido actualizado correctamente.', () => {
-                        window.location.href = "http://localhost:18080/pagina/maquinas";
+                        window.location.href = "http://localhost:8080/pagina/maquinas";
                     });
                 } else {
-                    const error = await response.json();
-                    mostrarModal('error', 'Error al Actualizar', error.detail || "No se pudo actualizar la máquina.");
+                    let errorPayload = null;
+                    try {
+                        errorPayload = await response.json();
+                    } catch (e) {
+                        errorPayload = null;
+                    }
+
+                    let msg = "No se pudo actualizar la máquina.";
+
+                    if (errorPayload && errorPayload.detail !== undefined && errorPayload.detail !== null) {
+                        if (typeof errorPayload.detail === 'string') {
+                            msg = errorPayload.detail;
+                        } else {
+                            try {
+                                msg = JSON.stringify(errorPayload.detail);
+                            } catch (e) {
+                                msg = String(errorPayload.detail);
+                            }
+                        }
+                    } else {
+                        try {
+                            const txt = await response.text();
+                            if (txt) {
+                                msg = txt;
+                            }
+                        } catch (e) {
+                        }
+                    }
+
+                    mostrarModal('error', 'Error al Actualizar', msg);
                 }
             } catch (error) {
                 mostrarModal('error', 'Error de Conexión', 'No se pudo contactar con el servidor.');
@@ -122,6 +150,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     } catch (error) {
         alert("Error al cargar los datos de la máquina.");
-        window.location.href = "http://localhost:18080/pagina/maquinas";
+        window.location.href = "http://localhost:8080/pagina/maquinas";
     }
 });

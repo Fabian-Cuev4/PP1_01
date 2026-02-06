@@ -1,17 +1,15 @@
-# Usamos nginx en versión alpine (ligera) como base para servir archivos web
+# EXPLICACIÓN: Usamos nginx estándar para load balancing
 FROM nginx:alpine
 
-# Copiamos los archivos CSS, JS e imágenes al contenedor
+# EXPLICACIÓN: Copiamos archivos estáticos y templates
 COPY static /usr/share/nginx/html/static
-
-# Copiamos las páginas HTML al contenedor
 COPY templates /usr/share/nginx/html/templates
 
-# Copiamos la configuración personalizada de nginx (rutas y proxy al backend)
+# EXPLICACIÓN: Copiamos configuración con load balancer
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Exponemos el puerto 80 para que nginx pueda recibir peticiones HTTP
-EXPOSE 80
+# EXPLICACIÓN: Exponemos puertos para aplicación y dashboard simple
+EXPOSE 81 8083
 
-# Iniciamos nginx en primer plano (daemon off es necesario para que Docker no lo detenga)
+# EXPLICACIÓN: Iniciamos nginx
 CMD ["nginx", "-g", "daemon off;"]
