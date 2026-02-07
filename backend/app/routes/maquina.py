@@ -63,22 +63,32 @@ async def eliminar_maquina(codigo: str):
     # Retornamos mensaje de éxito
     return {"mensaje": "Máquina y mantenimientos eliminados"}
 
-# Endpoint para listar todas las máquinas
+# Endpoint para listar todas las máquinas (soporta polling)
 @router.get("/listar")
-async def listar_maquinas(response: Response):
-    # Configuramos headers para evitar caché
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    
-    # Obtenemos todas las máquinas desde el servicio
+async def listar_maquinas(response: Response, polling: bool = False):
+    # Obtenemos todas las máquinas (usará caché si disponible)
     maquinas, error = maquina_service.listar_todas_las_maquinas()
     
-    # Si hay error, imprimimos y retornamos lista vacía
+    # Manejo de errores según contexto
     if error:
-        print(f"Error al listar máquinas: {error}")
-        return []
+        if polling:
+            return {"status": "error", "mensaje": error, "datos": []}
+        else:
+            raise HTTPException(status_code=400, detail=error)
     
-    # Retornamos lista de máquinas
-    return maquinas
+    # Formato según contexto
+    if polling:
+        # Configuración específica para polling
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        return {
+            "status": "ok",
+            "datos": maquinas,
+            "timestamp": str(date.today())
+        }
+    else:
+        # Ruta normal - devuelve datos directos
+        return maquinas
 
 # Rutas de polling para actualizaciones en tiempo real
 
@@ -124,33 +134,6 @@ async def polling_dashboard(response: Response):
         
     except Exception as e:
         print(f"Error general en polling dashboard: {e}")
-        return {"status": "error", "mensaje": str(e), "datos": []}
-
-# Endpoint de polling para lista actualizada de máquinas
-@router.get("/polling/lista")
-async def polling_lista_maquinas(response: Response):
-    """Endpoint de polling para lista de máquinas con actualizaciones frecuentes"""
-    # Configuramos headers para polling
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    
-    try:
-        # Obtenemos todas las máquinas (usará caché si disponible)
-        maquinas, error = maquina_service.listar_todas_las_maquinas()
-        
-        if error:
-            print(f"Error en polling lista: {error}")
-            return {"status": "error", "mensaje": error, "datos": []}
-        
-        return {
-            "status": "ok",
-            "timestamp": str(date.today()),
-            "total": len(maquinas),
-            "datos": maquinas
-        }
-        
-    except Exception as e:
-        print(f"Error general en polling lista: {e}")
         return {"status": "error", "mensaje": str(e), "datos": []}
 
 # Endpoint de polling para búsqueda de máquinas en tiempo real

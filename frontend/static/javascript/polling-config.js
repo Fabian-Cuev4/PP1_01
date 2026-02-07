@@ -9,17 +9,17 @@ const POLLING_CONFIG = {
         LENTO: 10000      // 10 segundos para datos secundarios
     },
     
-    // Endpoints para polling
+    // Endpoints para polling (ahora unificados)
     ENDPOINTS: {
         MAQUINAS: {
-            LISTAR: "/api/maquinas/polling/lista",
+            LISTAR: "/api/maquinas/listar?polling=true",
             DASHBOARD: "/api/maquinas/polling/dashboard",
             BUSCAR: "/api/maquinas/polling/buscar"
         },
         MANTENIMIENTO: {
-            HISTORIAL: "/api/mantenimiento/polling/historial",
-            INFORME: "/api/mantenimiento/polling/informe",
-            TODOS: "/api/mantenimiento/polling/todos"
+            HISTORIAL: "/api/mantenimiento/listar/{codigo}?polling=true",
+            INFORME: "/api/mantenimiento/informe-general?polling=true",
+            INFORME_ESTADISTICAS: "/api/mantenimiento/polling/informe"
         },
         SISTEMA: {
             HEALTH: "/api/health",

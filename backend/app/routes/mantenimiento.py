@@ -41,83 +41,79 @@ async def agregar(datos: MantenimientoSchema):
     # Retornamos mensaje de éxito
     return {"mensaje": "Mantenimiento guardado exitosamente"}
 
-# Endpoint para listar mantenimientos de una máquina específica
+# Endpoint para listar mantenimientos de una máquina específica (soporta polling)
 @router.get("/listar/{codigo}")
-async def listar_mantenimientos_equipo(codigo: str, response: Response):
-    # Configuramos headers para evitar caché
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    
+async def listar_mantenimientos_equipo(codigo: str, response: Response, polling: bool = False):
     # Obtenemos mantenimientos desde el servicio
     registros, error = mantenimiento_service.obtener_historial_por_maquina(codigo)
     
-    # Si hay error, retornamos HTTP 400
+    # Manejo de errores según contexto
     if error:
-        raise HTTPException(status_code=400, detail=error)
+        if polling:
+            return {"status": "error", "mensaje": error, "datos": []}
+        else:
+            raise HTTPException(status_code=400, detail=error)
     
     # Convertimos IDs de MongoDB a string para JSON
     for r in registros:
         if "_id" in r:
             r["_id"] = str(r["_id"])
     
-    # Retornamos lista de mantenimientos
-    return registros
+    # Formato según contexto
+    if polling:
+        # Configuración específica para polling
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        return {
+            "status": "ok",
+            "datos": registros,
+            "timestamp": str(date.today())
+        }
+    else:
+        # Ruta normal - devuelve datos directos
+        return registros
 
-# Endpoint para informe general de mantenimientos
+# Endpoint para informe general de mantenimientos (soporta polling)
 @router.get("/informe-general")
-async def informe_general(codigo: str = None):
+async def informe_general(response: Response, codigo: str = None, polling: bool = False):
     # Generamos reporte completo desde el servicio
     resultado, error = mantenimiento_service.obtener_informe_completo(codigo)
     
-    # Si hay error, retornamos HTTP 404
+    # Manejo de errores según contexto
     if error:
-        raise HTTPException(status_code=404, detail=error)
-    
-    # Si no hay resultados, retornamos HTTP 404
-    if resultado is None:
-        raise HTTPException(status_code=404, detail="No se encontraron datos")
-    
-    # Retornamos reporte
-    return resultado
-
-# Rutas de polling para actualizaciones en tiempo real
-
-# Endpoint de polling para historial de mantenimientos de máquina específica
-@router.get("/polling/historial/{codigo_maquina}")
-async def polling_historial_mantenimientos(codigo_maquina: str, response: Response):
-    """Endpoint de polling para historial de mantenimientos en tiempo real"""
-    # Configuramos headers para polling
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    
-    try:
-        # Obtenemos historial (usará caché si disponible)
-        registros, error = mantenimiento_service.obtener_historial_por_maquina(codigo_maquina)
-        
-        if error:
-            print(f"Error en polling historial: {error}")
+        if polling:
             return {"status": "error", "mensaje": error, "datos": []}
-        
-        # Convertimos IDs de MongoDB a string para JSON
-        for r in registros:
-            if "_id" in r:
-                r["_id"] = str(r["_id"])
-        
+        else:
+            raise HTTPException(status_code=404, detail=error)
+    
+    # Si no hay resultados, manejar según contexto
+    if resultado is None:
+        if polling:
+            return {"status": "ok", "datos": [], "mensaje": "No se encontraron datos"}
+        else:
+            raise HTTPException(status_code=404, detail="No se encontraron datos")
+    
+    # Formato según contexto
+    if polling:
+        # Configuración específica para polling
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Access-Control-Allow-Origin"] = "*"
         return {
             "status": "ok",
-            "timestamp": str(date.today()),
-            "codigo_maquina": codigo_maquina,
-            "total": len(registros),
-            "datos": registros
+            "datos": resultado,
+            "timestamp": str(date.today())
         }
-        
-    except Exception as e:
-        print(f"Error general en polling historial: {e}")
-        return {"status": "error", "mensaje": str(e), "datos": []}
+    else:
+        # Ruta normal - devuelve datos directos
+        return resultado
 
-# Endpoint de polling para informe completo de mantenimientos
+# Rutas de polling para actualizaciones en tiempo real
+# (Endpoints específicos que necesitan formato diferente)
+
+# Endpoint de polling para informe completo con estadísticas
 @router.get("/polling/informe")
 async def polling_informe_mantenimientos(response: Response, codigo: str = None):
-    """Endpoint de polling para informe completo de mantenimientos"""
+    """Endpoint de polling para informe completo con estadísticas"""
     # Configuramos headers para polling
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Access-Control-Allow-Origin"] = "*"
