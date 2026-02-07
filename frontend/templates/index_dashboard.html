@@ -24,31 +24,37 @@
                     <div class="lb-servers">
                         <div class="lb-server" id="server1">
                             <div class="server-header">
-                                <div class="server-name">API Servidor 1</div>
+                                <div class="server-name" id="name1">Servidor API 1</div>
                                 <div class="server-status status-up" id="status1">UP</div>
                             </div>
                         </div>
 
                         <div class="lb-server" id="server2">
                             <div class="server-header">
-                                <div class="server-name">API Servidor 2</div>
+                                <div class="server-name" id="name2">Servidor API 2</div>
                                 <div class="server-status status-up" id="status2">UP</div>
+                            </div>
+                        </div>
+
+                        <div class="lb-server" id="server3">
+                            <div class="server-header">
+                                <div class="server-name" id="name3">Servidor API 3</div>
+                                <div class="server-status status-up" id="status3">UP</div>
                             </div>
                         </div>
                     </div>
 
                     <div class="stats-grid">
-                        <div class="stat-item">
-                            <div class="stat-value" id="total-requests">0</div>
-                            <div class="stat-label">Total Usuarios</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value" id="active-servers">2</div>
-                            <div class="stat-label">Servidores Activos</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value" id="uptime">100%</div>
-                            <div class="stat-label">Disponibilidad</div>
+                        <div class="stat-item speed-meter">
+                            <div class="speed-meter-container">
+                                <div class="speed-bar-bg">
+                                    <div class="speed-fill" id="speed-fill">
+                                        <div class="speed-arrow" id="speed-arrow">→</div>
+                                    </div>
+                                </div>
+                                <div class="speed-value" id="speed-value">100</div>
+                                <div class="speed-label">Disponibilidad</div>
+                            </div>
                         </div>
                     </div>
                 </div>

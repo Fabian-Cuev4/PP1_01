@@ -5,21 +5,153 @@
 // =============================================================================
 
 // CONFIGURACIÓN: Tiempos de actualización y conexión
-const TIEMPO_ACTUALIZACION_MS = 3000;  // Cada 3 segundos se actualiza
-const TIEMPO_ESPERA_API_MS = 2000;     // 2 segundos timeout por petición
+const TIEMPO_ACTUALIZACION_MS = 1000;  // Reducido de 200ms a 1000ms (1 segundo)
+const TIEMPO_ESPERA_API_MS = 1500;     // Aumentado a 1500ms timeout por petición
 
-// ELEMENTOS DEL DOM: Servidores y tráfico
+// SISTEMA DE USUARIOS AUTOMÁTICO
+let usuarioActual = null;
+let sesionIniciada = false;
+
+// FUNCIÓN: Registrar login automático cuando un usuario entra al sistema
+function registrarUsuarioActivo(username) {
+    if (!username || username === 'admin') return;
+    
+    usuarioActual = username;
+    sesionIniciada = true;
+    
+    // Notificar al load balancer que el usuario ha iniciado sesión (sesiones persistentes)
+    fetch('/api/traffic/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `username=${encodeURIComponent(username)}&is_admin=0`,
+        credentials: 'include' // Para sticky sessions
+    }).catch(() => {}); // Ignorar errores
+    
+    console.log(`✅ Usuario ${username} ha iniciado sesión (persistente)`);
+}
+
+// FUNCIÓN: Registrar logout automático cuando un usuario sale del sistema
+function registrarUsuarioInactivo() {
+    if (!usuarioActual || !sesionIniciada) return;
+    
+    // Notificar al load balancer que el usuario ha cerrado sesión (sesiones persistentes)
+    fetch('/api/traffic/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `username=${encodeURIComponent(usuarioActual)}&is_admin=0`,
+        credentials: 'include' // Para sticky sessions
+    }).catch(() => {}); // Ignorar errores
+    
+    console.log(`❌ Usuario ${usuarioActual} ha cerrado sesión (persistente)`);
+    
+    usuarioActual = null;
+    sesionIniciada = false;
+}
+
+// FUNCIÓN: Detectar cuando un usuario entra al sistema (login)
+function detectarLoginUsuario() {
+    // Buscar formularios de login en la página
+    const loginForms = document.querySelectorAll('form');
+    const usernameInputs = document.querySelectorAll('input[type="text"], input[name*="user"], input[name*="username"]');
+    
+    loginForms.forEach(form => {
+        form.addEventListener('submit', (e) => {
+            const formData = new FormData(form);
+            const username = formData.get('username') || formData.get('user') || formData.get('email');
+            
+            if (username && username !== 'admin') {
+                registrarUsuarioActivo(username);
+            }
+        });
+    });
+    
+    // También detectar inputs de username para login automático
+    usernameInputs.forEach(input => {
+        input.addEventListener('change', (e) => {
+            const username = e.target.value;
+            if (username && username !== 'admin') {
+                setTimeout(() => registrarUsuarioActivo(username), 1000);
+            }
+        });
+    });
+}
+
+// FUNCIÓN: Detectar cuando un usuario sale del sistema (logout)
+function detectarLogoutUsuario() {
+    // Detectar botones de logout
+    const logoutButtons = document.querySelectorAll('button[onclick*="logout"], a[href*="logout"], button[onclick*="salir"], a[href*="salir"]');
+    
+    logoutButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            setTimeout(() => registrarUsuarioInactivo(), 500);
+        });
+    });
+    
+    // Detectar cuando el usuario cierra la pestaña o ventana
+    window.addEventListener('beforeunload', () => {
+        if (sesionIniciada) {
+            registrarUsuarioInactivo();
+        }
+    });
+    
+    // Detectar inactividad (no movimiento del mouse/teclado por 30 segundos)
+    let inactivityTimer;
+    function resetInactivityTimer() {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(() => {
+            if (sesionIniciada) {
+                console.log('🕐 Usuario inactivo por 30 segundos, cerrando sesión automáticamente');
+                registrarUsuarioInactivo();
+            }
+        }, 30000); // 30 segundos de inactividad
+    }
+    
+    // Reiniciar timer con cualquier actividad del usuario
+    document.addEventListener('mousemove', resetInactivityTimer);
+    document.addEventListener('keypress', resetInactivityTimer);
+    document.addEventListener('click', resetInactivityTimer);
+    document.addEventListener('scroll', resetInactivityTimer);
+    
+    resetInactivityTimer(); // Iniciar el timer
+}
+
+// ELEMENTOS DEL DOM: Servidores y medidor de velocidad
 const tarjetaServidor1 = document.getElementById('server1');
 const tarjetaServidor2 = document.getElementById('server2');
+const tarjetaServidor3 = document.getElementById('server3');
 const indicadorEstado1 = document.getElementById('status1');
 const indicadorEstado2 = document.getElementById('status2');
-const contadorUsuariosTotales = document.getElementById('total-requests');
-const contadorServidoresActivos = document.getElementById('active-servers');
-const indicadorDisponibilidad = document.getElementById('uptime');
+const indicadorEstado3 = document.getElementById('status3');
+const nombreServidor1 = document.getElementById('name1');
+const nombreServidor2 = document.getElementById('name2');
+const nombreServidor3 = document.getElementById('name3');
+const speedFill = document.getElementById('speed-fill');
+const speedValue = document.getElementById('speed-value');
+const speedArrow = document.getElementById('speed-arrow');
 
 // INICIALIZACIÓN: Iniciar el dashboard
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Dashboard cargado, iniciando monitoreo...');
+    console.log('Elementos encontrados:', {
+        tarjetaServidor1: !!tarjetaServidor1,
+        tarjetaServidor2: !!tarjetaServidor2,
+        tarjetaServidor3: !!tarjetaServidor3,
+        indicadorEstado1: !!indicadorEstado1,
+        indicadorEstado2: !!indicadorEstado2,
+        indicadorEstado3: !!indicadorEstado3,
+        nombreServidor1: !!nombreServidor1,
+        nombreServidor2: !!nombreServidor2,
+        nombreServidor3: !!nombreServidor3,
+        speedFill: !!speedFill,
+        speedValue: !!speedValue,
+        speedArrow: !!speedArrow
+    });
+    
+    // Iniciar sistema de detección automática de usuarios
+    detectarLoginUsuario();
+    detectarLogoutUsuario();
+    
+    // Iniciar el bucle de actualización
     bucleActualizacion();
 });
 
@@ -50,42 +182,146 @@ async function obtenerDatosAPI(url) {
     }
 }
 
-// FUNCIÓN: Verifica si los servidores API están activos o caídos
+// FUNCIÓN: Verifica si los servidores API están activos o caídos (3 servidores)
 async function verificarEstadoServidores() {
     console.log('Verificando estado de servidores...');
     
     const promesaServidor1 = verificarServidorIndividual('/api1/api/health');
     const promesaServidor2 = verificarServidorIndividual('/api2/api/health');
+    const promesaServidor3 = verificarServidorIndividual('/api3/api/health');
     
     try {
-        const [servidor1Activo, servidor2Activo] = await Promise.all([
+        const [servidor1Activo, servidor2Activo, servidor3Activo] = await Promise.allSettled([
             promesaServidor1,
-            promesaServidor2
+            promesaServidor2,
+            promesaServidor3
         ]);
         
-        console.log(`Estado servidores - Servidor 1: ${servidor1Activo}, Servidor 2: ${servidor2Activo}`);
+        const estadoServidores = {
+            up1: servidor1Activo.status === 'fulfilled' && servidor1Activo.value,
+            up2: servidor2Activo.status === 'fulfilled' && servidor2Activo.value,
+            up3: servidor3Activo.status === 'fulfilled' && servidor3Activo.value
+        };
+        
+        console.log(`Estado servidores - Servidor 1: ${estadoServidores.up1}, Servidor 2: ${estadoServidores.up2}, Servidor 3: ${estadoServidores.up3}`);
         
         // Actualizar la interfaz visual
-        actualizarVisualServidor(1, servidor1Activo);
-        actualizarVisualServidor(2, servidor2Activo);
+        actualizarVisualServidor(1, estadoServidores.up1);
+        actualizarVisualServidor(2, estadoServidores.up2);
+        actualizarVisualServidor(3, estadoServidores.up3);
 
-        // Calcular y mostrar estadísticas
-        const servidoresActivos = (servidor1Activo ? 1 : 0) + (servidor2Activo ? 1 : 0);
-        if (contadorServidoresActivos) {
-            contadorServidoresActivos.textContent = String(servidoresActivos);
-        }
+        // Actualizar nombres de servidores dinámicamente
+        await actualizarNombresServidores();
 
-        // Calcular porcentaje de disponibilidad
-        const porcentajeDisponibilidad = (servidoresActivos / 2) * 100;
-        if (indicadorDisponibilidad) {
-            indicadorDisponibilidad.textContent = `${porcentajeDisponibilidad.toFixed(0)}%`;
-        }
-
-        return { up1: servidor1Activo, up2: servidor2Activo };
+        // Calcular disponibilidad basada en 3 servidores
+        const servidoresActivos = (estadoServidores.up1 ? 1 : 0) + (estadoServidores.up2 ? 1 : 0) + (estadoServidores.up3 ? 1 : 0);
+        const disponibilidad = Math.round((servidoresActivos / 3) * 100);
+        
+        // Actualizar medidor de velocidad
+        actualizarMedidorVelocidad(disponibilidad);
+        
+        return estadoServidores;
     } catch (error) {
         console.error('Error verificando servidores:', error);
-        return { up1: false, up2: false };
+        return { up1: false, up2: false, up3: false };
     }
+}
+
+// FUNCIÓN: Actualiza los nombres de los servidores dinámicamente (uno por uno)
+async function actualizarNombresServidores() {
+    try {
+        // Actualizar nombre de cada servidor individualmente
+        await actualizarNombreServidorIndividual(1, '/api1/api/health', nombreServidor1);
+        await actualizarNombreServidorIndividual(2, '/api2/api/health', nombreServidor2);
+        await actualizarNombreServidorIndividual(3, '/api3/api/health', nombreServidor3);
+        
+        console.log('Nombres de servidores actualizados individualmente');
+    } catch (error) {
+        console.error('Error actualizando nombres de servidores:', error);
+    }
+}
+
+// FUNCIÓN: Actualiza el nombre de un servidor específico
+async function actualizarNombreServidorIndividual(numeroServidor, url, elementoNombre) {
+    try {
+        const nombre = await obtenerNombreServidor(url);
+        
+        // Actualizar nombre solo para este servidor específico
+        if (nombre && elementoNombre) {
+            elementoNombre.textContent = nombre;
+        } else {
+            elementoNombre.textContent = 'Servidor Desconectado';
+        }
+        
+        console.log(`Servidor ${numeroServidor}: ${nombre || 'Desconectado'}`);
+    } catch (error) {
+        console.log(`No se pudo obtener nombre del servidor ${numeroServidor}:`, error.message);
+        if (elementoNombre) {
+            elementoNombre.textContent = 'Servidor Desconectado';
+        }
+    }
+}
+
+// FUNCIÓN AUXILIAR: Obtiene el nombre de un servidor individual
+async function obtenerNombreServidor(url) {
+    try {
+        const datosServidor = await obtenerDatosAPI(url);
+        return datosServidor && datosServidor.server_id ? datosServidor.server_id.trim() : null;
+    } catch (error) {
+        console.log(`No se pudo obtener nombre de ${url}:`, error.message);
+        return null;
+    }
+}
+
+// FUNCIÓN: Actualiza la visualización de un servidor individual
+function actualizarVisualServidor(numeroServidor, estaActivo) {
+    const tarjetaServidor = numeroServidor === 1 ? tarjetaServidor1 : numeroServidor === 2 ? tarjetaServidor2 : tarjetaServidor3;
+    const indicadorEstado = numeroServidor === 1 ? indicadorEstado1 : numeroServidor === 2 ? indicadorEstado2 : indicadorEstado3;
+    
+    if (!tarjetaServidor || !indicadorEstado) {
+        console.error(`No se encontraron elementos para servidor ${numeroServidor}`);
+        return;
+    }
+    
+    if (estaActivo) {
+        // Servidor UP - verde
+        indicadorEstado.textContent = 'UP';
+        indicadorEstado.className = 'server-status status-up';
+        tarjetaServidor.className = tarjetaServidor.className.replace(/status-down/g, '');
+    } else {
+        // Servidor DOWN - rojo
+        indicadorEstado.textContent = 'DOWN';
+        indicadorEstado.className = 'server-status status-down';
+        if (!tarjetaServidor.className.includes('status-down')) {
+            tarjetaServidor.className += ' status-down';
+        }
+    }
+    
+    console.log(`Servidor ${numeroServidor} actualizado: ${estaActivo ? 'UP' : 'DOWN'}`);
+}
+
+// FUNCIÓN: Actualiza el medidor de velocidad según disponibilidad
+function actualizarMedidorVelocidad(disponibilidad) {
+    if (!speedFill || !speedValue || !speedArrow) return;
+    
+    // Actualizar el texto
+    speedValue.textContent = `${disponibilidad}`;
+    
+    // Actualizar el ancho de la barra
+    speedFill.style.width = `${disponibilidad}%`;
+    
+    // Actualizar colores según nivel
+    speedFill.className = 'speed-fill'; // Reset classes
+    
+    if (disponibilidad <= 33) {
+        speedFill.classList.add('low');
+    } else if (disponibilidad <= 66) {
+        speedFill.classList.add('medium');
+    } else {
+        speedFill.classList.add('high');
+    }
+    
+    console.log(`Medidor de velocidad actualizado: ${disponibilidad}%`);
 }
 
 // FUNCIÓN AUXILIAR: Verifica un servidor individualmente
@@ -99,60 +335,20 @@ async function verificarServidorIndividual(url) {
     }
 }
 
-// FUNCIÓN: Obtiene el total de usuarios activos (simulado para demostración)
-async function actualizarTotalUsuarios(estadoServidores) {
-    if (!estadoServidores.up1 && !estadoServidores.up2) {
-        if (contadorUsuariosTotales) {
-            contadorUsuariosTotales.textContent = '0';
-        }
-        return;
-    }
-
-    // Simular usuarios activos basado en los servidores activos
-    // En un sistema real, esto vendría de una API real
-    try {
-        let totalUsuarios = 0;
-        
-        if (estadoServidores.up1) {
-            // Simular entre 50-150 usuarios por servidor activo
-            totalUsuarios += Math.floor(Math.random() * 100) + 50;
-        }
-        
-        if (estadoServidores.up2) {
-            // Simular entre 50-150 usuarios por servidor activo
-            totalUsuarios += Math.floor(Math.random() * 100) + 50;
-        }
-        
-        if (contadorUsuariosTotales) {
-            contadorUsuariosTotales.textContent = String(totalUsuarios);
-        }
-        
-        console.log(`Usuarios actualizados: ${totalUsuarios}`);
-    } catch (error) {
-        console.error('Error simulando usuarios:', error);
-        if (contadorUsuariosTotales) {
-            contadorUsuariosTotales.textContent = '0';
-        }
-    }
-}
-
 // FUNCIÓN PRINCIPAL: Bucle infinito que actualiza el dashboard
 async function bucleActualizacion() {
     console.log('Iniciando ciclo de actualización...');
     
     try {
-        // 1) Verificar qué servidores están activos
+        // 1) Verificar qué servidores están activos (esto actualiza la batería automáticamente)
         const estadoServidores = await verificarEstadoServidores();
-
-        // 2) Actualizar contador de usuarios totales
-        await actualizarTotalUsuarios(estadoServidores);
 
         console.log('Ciclo de actualización completado');
     } catch (error) {
         console.error('Error en ciclo de actualización:', error);
     }
 
-    // 3) Programar la próxima actualización
+    // 2) Programar la próxima actualización
     console.log(`Próxima actualización en ${TIEMPO_ACTUALIZACION_MS}ms...`);
     setTimeout(bucleActualizacion, TIEMPO_ACTUALIZACION_MS);
 }

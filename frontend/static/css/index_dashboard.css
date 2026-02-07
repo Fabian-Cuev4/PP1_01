@@ -626,3 +626,277 @@ body {
         grid-column: 1;
     }
 }
+
+/* =============================================================================
+   ESTILOS DE BATERÍA ANIMADA - Disponibilidad del Sistema
+   ============================================================================= */
+
+.speed-meter {
+    grid-column: span 3; /* Ocupa todo el ancho */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 0;
+}
+
+.speed-meter-container {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.speed-bar-bg {
+    width: 100%;
+    height: 40px;
+    background: #f0f0f0;
+    border: 3px solid #333;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.speed-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #ff4444, #ffaa00, #44ff44);
+    transition: width 0.8s ease-in-out, background 0.3s ease;
+    border-radius: 17px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 10px;
+}
+
+.speed-arrow {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+    animation: pulse-arrow 2s infinite;
+    transition: transform 0.3s ease;
+}
+
+.speed-fill.low .speed-arrow {
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.speed-value {
+    font-size: 36px;
+    font-weight: bold;
+    color: #333;
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+}
+
+.speed-label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+@keyframes pulse-arrow {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(5px); }
+}
+
+/* Colores del medidor según nivel */
+.speed-fill.low {
+    background: linear-gradient(90deg, #ff4444, #cc0000);
+}
+
+.speed-fill.medium {
+    background: linear-gradient(90deg, #ffaa00, #ff8800);
+}
+
+.speed-fill.high {
+    background: linear-gradient(90deg, #44ff44, #00cc00);
+}
+
+.speed-fill.low {
+    animation: pulse-bar 2s infinite;
+}
+
+@keyframes pulse-bar {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.battery-and-percentage {
+    display: flex;
+    align-items: center;
+    gap: 30px; /* Aumentado de 20px a 30px */
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap; /* Permite que se adapte a diferentes tamaños */
+}
+
+.battery-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.battery-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.percentage-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.bar-chart-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+}
+
+.bar-chart {
+    display: flex;
+    gap: 3px;
+    width: 120px;
+    height: 8px;
+    background: #f0f0f0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.bar {
+    height: 100%;
+    background: linear-gradient(90deg, #44ff44, #00cc00);
+    transition: width 0.5s ease-in-out, background 0.3s ease;
+    border-radius: 2px;
+}
+
+.bar.down {
+    background: linear-gradient(90deg, #ff4444, #cc0000);
+}
+
+.bar-labels {
+    display: flex;
+    gap: 35px;
+    font-size: 10px;
+    font-weight: bold;
+    color: #666;
+}
+
+.battery {
+    width: 350px; /* Más grande como medidor de internet */
+    height: 180px; /* Más alto para ocupar más espacio */
+    border: 4px solid #333; /* Borde más grueso */
+    border-radius: 180px 180px 0 0; /* Semicírculo más grande */
+    position: relative;
+    background: #f0f0f0;
+    overflow: hidden;
+    box-shadow: inset 0 4px 12px rgba(0,0,0,0.2); /* Sombra más profunda */
+    transition: all 0.3s ease;
+    border-bottom: none;
+}
+
+.battery::before {
+    display: none; /* Ocultar el pequeño terminal de la batería */
+}
+
+.battery-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #ff4444, #ffaa00, #44ff44);
+    transition: width 0.8s ease-in-out, background 0.3s ease;
+    border-radius: 180px 180px 0 0; /* Semicírculo más grande */
+    position: relative;
+    transform-origin: left center;
+}
+
+.battery-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 50%);
+    border-radius: 7px;
+}
+
+.battery-text {
+    position: absolute;
+    top: 25%; /* Ajustado para semicírculo más grande */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: bold;
+    font-size: 32px; /* Más grande como medidor de internet */
+    color: #333;
+    text-shadow: 2px 2px 4px rgba(255,255,255,0.8); /* Sombra más fuerte */
+    z-index: 2;
+}
+
+/* Colores de batería según nivel */
+.battery-fill.low {
+    background: linear-gradient(90deg, #ff4444, #cc0000);
+}
+
+.battery-fill.medium {
+    background: linear-gradient(90deg, #ffaa00, #ff8800);
+}
+
+.battery-fill.high {
+    background: linear-gradient(90deg, #44ff44, #00cc00);
+}
+
+/* Animación de pulso para baja batería */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.battery.low .battery-fill {
+    animation: pulse 2s infinite;
+}
+
+/* Tercer servidor adicional */
+.lb-servers {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+@media (max-width: 768px) {
+    .lb-servers {
+        grid-template-columns: 1fr;
+    }
+    
+    .battery-only {
+        padding: 25px 0; /* Más padding en móviles */
+    }
+    
+    .battery {
+        width: 280px; /* Grande pero adaptable en móviles */
+        height: 140px; /* Mitad del ancho */
+        border-radius: 140px 140px 0 0;
+        border-width: 3px; /* Borde un poco más pequeño en móviles */
+    }
+    
+    .battery-fill {
+        border-radius: 140px 140px 0 0;
+    }
+    
+    .battery-text {
+        font-size: 28px; /* Grande pero adaptable en móviles */
+        top: 28%;
+    }
+}

@@ -116,13 +116,13 @@ class MySQLConnection:
             try:
                 cls._pool = mysql.connector.pooling.MySQLConnectionPool(
                     pool_name="mypool",
-                    pool_size=5, # Mantenemos 5 conexiones listas siempre
+                    pool_size=10, # Aumentado a 10 conexiones para evitar pool exhausted
                     pool_reset_session=True,
                     host=cls.HOST,
                     user=cls.USER,
                     password=cls.PASSWORD,
                     database=cls.DATABASE,
-                    connection_timeout=5,
+                    connection_timeout=10, # Aumentado timeout
                     autocommit=False
                 )
             except Error as e:

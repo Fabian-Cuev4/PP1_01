@@ -77,7 +77,7 @@ services:
       REDIS_PORT: 6379
       REDIS_DB: 0
       # EXPLICACIÓN: Identificador único para logs
-      API_SERVER_ID: "API Servidor 1"
+      API_SERVER_ID: "Servidor API 1"
     ports:
       - "18001:8000"
     volumes:
@@ -112,7 +112,7 @@ services:
       REDIS_PORT: 6379
       REDIS_DB: 0
       # EXPLICACIÓN: Identificador único para logs
-      API_SERVER_ID: "API Servidor 2"
+      API_SERVER_ID: "Servidor API 2"
     ports:
       - "18002:8000"
     volumes:
@@ -127,7 +127,42 @@ services:
     networks:
       - siglab_network
 
-  # SERVICIO 6: Nginx Load Balancer - Punto Único de Entrada
+  # SERVICIO 6: API Backend 3 - Tercera instancia del servidor de API
+  api_back_3:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: api_back_3
+    restart: always
+    environment:
+      # EXPLICACIÓN: Conexión a las MISMAS bases de datos que api_back_1 y api_back_2
+      MYSQL_HOST: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: Clubpengui1
+      MYSQL_DATABASE: proyecto_maquinas
+      MONGO_HOST: mongodb
+      MONGO_PORT: 27017
+      # EXPLICACIÓN: Configuración de Redis para caché y polling
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      # EXPLICACIÓN: Identificador único para logs
+      API_SERVER_ID: "Servidor API 3"
+    ports:
+      - "18003:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - siglab_network
+
+  # SERVICIO 7: Nginx Load Balancer - Punto Único de Entrada
   nginx_balancer:
     build:
       context: ./frontend
@@ -144,6 +179,7 @@ services:
     depends_on:
       - api_back_1
       - api_back_2
+      - api_back_3
       - redis
     networks:
       - siglab_network

@@ -84,33 +84,180 @@ def shutdown_db_client():
 # Endpoint simple para monitoreo (usado por el dashboard)
 @app.get("/api/health")
 def health_check():
-    server_id = os.getenv("API_SERVER_ID", "API Desconocido")
+    server_id = os.getenv("API_SERVER_ID", "Servidor API Desconocido")
     return {"status": "ok", "server_id": server_id}
 
-_traffic_active_users: Dict[str, float] = {}
-_traffic_user_ttl_seconds = 30
+# Sistema de sesiones persistentes en base de datos (sin TTL)
+# Los usuarios permanecen activos hasta que cierran sesión explícitamente
 
-@app.post("/api/traffic/ping")
-def traffic_ping(username: str = "", is_admin: int = 0):
+@app.post("/api/traffic/login")
+def traffic_login(username: str = "", is_admin: int = 0):
+    """Endpoint para registrar cuando un usuario inicia sesión automáticamente"""
+    print(f"DEBUG: Login recibido - username='{username}', is_admin={is_admin}")
+    
+    if is_admin:
+        print("DEBUG: Ignorado por ser admin")
+        return {"status": "ignored"}
+    if not username or username == "admin":
+        print(f"DEBUG: Ignorado por username vacío o admin. username='{username}'")
+        return {"status": "ignored"}
+    
+    print(f"DEBUG: Procesando login para usuario '{username}'")
+    
+    # Registrar en base de datos para persistencia (sin TTL)
+    conn = None
+    cursor = None
+    try:
+        from app.database.mysql import MySQLConnection
+        conn = MySQLConnection.conectar()
+        if not conn:
+            return {"status": "error", "message": "No se pudo conectar a la base de datos"}
+        
+        cursor = conn.cursor()
+        server_id = os.getenv("API_SERVER_ID", "Servidor API Desconocido")
+        
+        # Insertar o actualizar sesión activa
+        cursor.execute("""
+            INSERT INTO sesiones_activas (username, server_id, is_active) 
+            VALUES (%s, %s, TRUE)
+            ON DUPLICATE KEY UPDATE 
+            is_active = TRUE, 
+            last_activity = CURRENT_TIMESTAMP
+        """, (username, server_id))
+        
+        conn.commit()
+        
+        print(f"DEBUG: Login de '{username}' registrado exitosamente")
+        
+        return {"status": "ok", "message": f"Usuario {username} ha iniciado sesión (persistente)"}
+    except Exception as e:
+        print(f"Error registrando login en BD: {e}")
+        return {"status": "error", "message": f"Error al registrar login: {str(e)}"}
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+@app.post("/api/traffic/logout")
+def traffic_logout(username: str = "", is_admin: int = 0):
+    """Endpoint para registrar cuando un usuario cierra sesión automáticamente"""
     if is_admin:
         return {"status": "ignored"}
     if not username or username == "admin":
         return {"status": "ignored"}
-    _traffic_active_users[username] = time.time()
-    return {"status": "ok"}
+    
+    # Desactivar en base de datos (sin TTL - persistencia total)
+    conn = None
+    cursor = None
+    try:
+        from app.database.mysql import MySQLConnection
+        conn = MySQLConnection.conectar()
+        if not conn:
+            return {"status": "error", "message": "No se pudo conectar a la base de datos"}
+        
+        cursor = conn.cursor()
+        
+        # Marcar sesión como inactiva
+        cursor.execute("""
+            UPDATE sesiones_activas 
+            SET is_active = FALSE 
+            WHERE username = %s
+        """, (username,))
+        
+        conn.commit()
+        
+        return {"status": "ok", "message": f"Usuario {username} ha cerrado sesión (persistente)"}
+    except Exception as e:
+        print(f"Error registrando logout en BD: {e}")
+        return {"status": "error", "message": f"Error al registrar logout: {str(e)}"}
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
-@app.get("/api/traffic/stats")
-def traffic_stats():
-    server_id = os.getenv("API_SERVER_ID", "API Desconocido")
-    now = time.time()
-    expired = [uname for uname, last_seen in _traffic_active_users.items() if (now - last_seen) > _traffic_user_ttl_seconds]
-    for uname in expired:
-        _traffic_active_users.pop(uname, None)
-    return {
-        "status": "ok",
-        "server_id": server_id,
-        "active_users": len(_traffic_active_users),
-    }
+# Sistema de sesiones persistentes - SIN TTL
+# Los usuarios permanecen activos hasta cierre explícito
+
+@app.get("/api/usuarios/loadbalancer")
+def usuarios_loadbalancer():
+    """Endpoint para obtener usuarios activos usando el load balancer (sesiones persistentes)"""
+    conn = None
+    cursor = None
+    try:
+        # El load balancer distribuye automáticamente entre los servidores disponibles
+        # Contamos sesiones activas reales que no han cerrado sesión explícitamente
+        from app.database.mysql import MySQLConnection
+        conn = MySQLConnection.conectar()
+        if not conn:
+            return {
+                "status": "error",
+                "message": "No se pudo conectar a la base de datos",
+                "active_users": 0
+            }
+        
+        cursor = conn.cursor(dictionary=True)
+        
+        # Contar usuarios con sesiones activas (no admin)
+        cursor.execute("""
+            SELECT COUNT(DISTINCT username) as total 
+            FROM sesiones_activas 
+            WHERE is_active = TRUE 
+            AND username != 'admin'
+        """)
+        resultado = cursor.fetchone()
+        total_usuarios = resultado['total'] if resultado else 0
+        
+        server_id = os.getenv("API_SERVER_ID", "Servidor API Desconocido")
+        return {
+            "status": "ok",
+            "server_id": server_id,
+            "active_users": total_usuarios,
+            "source": "sesiones_activas",
+            "message": f"Usuarios activos desde {server_id} via load balancer"
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Error al contar usuarios activos: {str(e)}",
+            "active_users": 0
+        }
+    finally:
+        # Asegurarse de cerrar siempre cursor y conexión
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+@app.get("/api/usuarios/activos")
+def usuarios_activos():
+    """Endpoint para contar usuarios reales almacenados en la base de datos"""
+    try:
+        from app.database.mysql import MySQLConnection
+        conn = MySQLConnection.conectar()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Contar todos los usuarios excepto admin
+        cursor.execute("SELECT COUNT(*) as total FROM usuarios WHERE username != 'admin'")
+        resultado = cursor.fetchone()
+        total_usuarios = resultado['total'] if resultado else 0
+        
+        cursor.close()
+        
+        server_id = os.getenv("API_SERVER_ID", "Servidor API Desconocido")
+        return {
+            "status": "ok",
+            "server_id": server_id,
+            "active_users": total_usuarios,
+            "source": "database"
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Error al contar usuarios: {str(e)}",
+            "active_users": 0
+        }
 
 app.include_router(maquina.router)        # Rutas para máquinas (/api/maquinas/*)
 app.include_router(mantenimiento.router)  # Rutas para mantenimientos (/api/mantenimiento/*)
