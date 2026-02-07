@@ -1,16 +1,18 @@
 # Este archivo se encarga de guardar y buscar máquinas en la base de datos MySQL
 # DAO significa "Data Access Object" (Objeto de Acceso a Datos)
 # Su única función es ejecutar SQL puro, sin lógica de negocio
+# CAPA DAO: Solo usa el Gerente para pedir conexiones SQL. No sabe que existe Redis.
 
-# Importamos la clase que maneja la conexión a MySQL
-from app.database.mysql import MySQLConnection
+# Importamos el GERENTE DE DATOS para obtener conexiones MySQL
+from app.database.database_manager import DatabaseManager
 
 class MaquinaDAO:
     # Esta función guarda una máquina nueva en la base de datos
     # Recibe un objeto máquina con todos los datos listos para guardar
     def guardar(self, maquina):
-        # Obtenemos una conexión a la base de datos
-        conn = MySQLConnection.conectar()
+        # Obtenemos una conexión a MySQL usando el GERENTE DE DATOS
+        # Los DAOs SOLO usan este método, no saben que existe Redis
+        conn = DatabaseManager.get_mysql_connection()
         # Si no hay conexión, salimos de la función
         if not conn:
             return False
@@ -46,8 +48,8 @@ class MaquinaDAO:
     # Esta función actualiza los datos de una máquina existente
     # Recibe un objeto máquina con los datos actualizados
     def actualizar(self, maquina):
-        # Obtenemos una conexión a la base de datos
-        conn = MySQLConnection.conectar()
+        # Obtenemos una conexión a MySQL usando el GERENTE DE DATOS
+        conn = DatabaseManager.get_mysql_connection()
         if not conn:
             return False
         
@@ -83,8 +85,8 @@ class MaquinaDAO:
     # Esta función elimina una máquina de la base de datos
     # Recibe el código de la máquina a eliminar
     def eliminar(self, codigo):
-        # Obtenemos una conexión a la base de datos
-        conn = MySQLConnection.conectar()
+        # Obtenemos una conexión a MySQL usando el GERENTE DE DATOS
+        conn = DatabaseManager.get_mysql_connection()
         if not conn:
             return False
         
@@ -109,8 +111,8 @@ class MaquinaDAO:
     # Esta función busca una máquina por su código
     # Recibe el código a buscar y retorna los datos de la máquina
     def buscar_por_codigo(self, codigo):
-        # Obtenemos una conexión a la base de datos
-        conn = MySQLConnection.conectar()
+        # Obtenemos una conexión a MySQL usando el GERENTE DE DATOS
+        conn = DatabaseManager.get_mysql_connection()
         if not conn:
             return None
         
@@ -136,8 +138,8 @@ class MaquinaDAO:
     # Esta función obtiene todas las máquinas de la base de datos
     # Retorna una lista con todas las máquinas
     def listar_todas(self):
-        # Obtenemos una conexión a la base de datos
-        conn = MySQLConnection.conectar()
+        # Obtenemos una conexión a MySQL usando el GERENTE DE DATOS
+        conn = DatabaseManager.get_mysql_connection()
         if not conn:
             return []
         

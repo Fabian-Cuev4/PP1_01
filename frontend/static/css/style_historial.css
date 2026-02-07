@@ -45,21 +45,27 @@ body {
 /* Contenedor que permite bajar (scroll) si la tabla es muy larga */
 .table-wrapper {
     margin: 25px 0;
-    max-height: 400px;
-    /* Altura máxima antes de que aparezca la barra de bajada */
+    max-height: 300px;
+    /* Altura reducida para que el scroll aparezca con menos registros */
     overflow-y: auto;
-    /* Activa la barra de bajada solo si es necesario */
+    /* Scroll dentro del contenedor */
     border: 1px solid #eee;
     border-radius: 8px;
+    /* Borde visible para delimitar el área de scroll */
+    padding: 10px;
+    /* Padding interno para mejor espaciado */
+    background-color: white;
+    /* Fondo del contenedor */
+    position: relative;
+    /* Posición relativa para mejor manejo del scroll */
 }
 
 /* Estructura básica de la tabla de historial */
 .history-table {
     width: 100%;
     border-collapse: collapse;
-    /* Une las líneas de las celdas */
     text-align: left;
-    /* Alineado de texto a la izquierda */
+    /* Alineado a la izquierda para mejor legibilidad */
 }
 
 /* Estilo de los nombres de columna (Encabezados) */

@@ -38,7 +38,26 @@ services:
       retries: 3
       start_period: 15s
 
-  # SERVICIO 3: API Backend 1 - Primera instancia del servidor de API
+  # SERVICIO 3: Redis Cache - Sistema de Caché para Polling en Tiempo Real
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis_siglab
+    restart: always
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "16379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - siglab_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # SERVICIO 4: API Backend 1 - Primera instancia del servidor de API
   api_back_1:
     build:
       context: ./backend
@@ -53,6 +72,10 @@ services:
       MYSQL_DATABASE: proyecto_maquinas
       MONGO_HOST: mongodb
       MONGO_PORT: 27017
+      # EXPLICACIÓN: Configuración de Redis para caché y polling
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
       # EXPLICACIÓN: Identificador único para logs
       API_SERVER_ID: "API Servidor 1"
     ports:
@@ -64,10 +87,12 @@ services:
         condition: service_healthy
       mongodb:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - siglab_network
 
-  # SERVICIO 4: API Backend 2 - Segunda instancia del servidor de API
+  # SERVICIO 5: API Backend 2 - Segunda instancia del servidor de API
   api_back_2:
     build:
       context: ./backend
@@ -82,6 +107,10 @@ services:
       MYSQL_DATABASE: proyecto_maquinas
       MONGO_HOST: mongodb
       MONGO_PORT: 27017
+      # EXPLICACIÓN: Configuración de Redis para caché y polling
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
       # EXPLICACIÓN: Identificador único para logs
       API_SERVER_ID: "API Servidor 2"
     ports:
@@ -93,10 +122,12 @@ services:
         condition: service_healthy
       mongodb:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - siglab_network
 
-  # SERVICIO 5: Nginx Load Balancer - Punto Único de Entrada
+  # SERVICIO 6: Nginx Load Balancer - Punto Único de Entrada
   nginx_balancer:
     build:
       context: ./frontend
@@ -113,6 +144,7 @@ services:
     depends_on:
       - api_back_1
       - api_back_2
+      - redis
     networks:
       - siglab_network
 
@@ -123,6 +155,9 @@ volumes:
     driver: local # Almacena en el disco local de tu PC
   mongo_data:
     # Volumen para guardar datos de MongoDB
+    driver: local # Almacena en el disco local de tu PC
+  redis_data:
+    # Volumen para guardar datos de Redis (caché persistente)
     driver: local # Almacena en el disco local de tu PC
 
 # REDES (Comunicación entre Contenedores)

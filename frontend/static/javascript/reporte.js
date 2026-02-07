@@ -1,8 +1,13 @@
-// maneja la generación de reportes de mantenimiento con búsqueda por código
+// maneja la generación de reportes de mantenimiento con búsqueda por código y polling en tiempo real
 document.addEventListener("DOMContentLoaded", () => {
     const btnBuscar = document.getElementById("btn-buscar");
     const inputCodigo = document.getElementById("input-codigo");
     const tablaBody = document.getElementById("tabla-reporte");
+
+    // CONFIGURACIÓN DE POLLING PARA REPORTES
+    const TIEMPO_POLLING_MS = 2000; // Cada 2 segundos para mayor estabilidad
+    let pollingInterval = null;
+    let ultimoCodigoBuscado = "";
 
     // decide el color del badge según el tipo de mantenimiento
     const obtenerClaseBadgeTipo = (tipo) => {
@@ -25,10 +30,40 @@ document.addEventListener("DOMContentLoaded", () => {
         return "badge badge-maint";
     };
 
+    // FUNCIÓN: Iniciar polling para reportes
+    function iniciarPollingReportes(codigo = "") {
+        // Detener polling anterior si existe
+        if (pollingInterval) {
+            clearInterval(pollingInterval);
+        }
+        
+        // Guardar el código actual para comparar
+        ultimoCodigoBuscado = codigo;
+        
+        // Iniciar nuevo polling
+        pollingInterval = setInterval(() => {
+            cargarDatos(codigo, true); // true = es polling
+        }, TIEMPO_POLLING_MS);
+        
+        console.log(`Polling de reportes iniciado para código: "${codigo || 'todos'}"`);
+    }
+
+    // FUNCIÓN: Detener polling
+    function detenerPolling() {
+        if (pollingInterval) {
+            clearInterval(pollingInterval);
+            pollingInterval = null;
+            console.log("Polling de reportes detenido");
+        }
+    }
+
     // pide los datos de reportes al backend (con o sin filtro de código)
-    const cargarDatos = async (codigo = "") => {
+    const cargarDatos = async (codigo = "", esPolling = false) => {
         try {
-            tablaBody.innerHTML = `<tr><td colspan="8" style="text-align:center;">Cargando...</td></tr>`;
+            // Solo mostrar "Cargando..." si no es polling
+            if (!esPolling) {
+                tablaBody.innerHTML = `<tr><td colspan="8" style="text-align:center;">Cargando...</td></tr>`;
+            }
 
             const timestamp = new Date().getTime();
             // si hay código, lo envía como parámetro
@@ -107,11 +142,14 @@ document.addEventListener("DOMContentLoaded", () => {
         inputCodigo.addEventListener("keydown", (e) => {
             if (e.key === "Enter") {
                 e.preventDefault();
-                cargarDatos(inputCodigo.value.trim());
+                const codigo = inputCodigo.value.trim();
+                cargarDatos(codigo);
+                iniciarPollingReportes(codigo); // Iniciar polling después de buscar
             } else if (e.key === "Escape") {
                 e.preventDefault();
                 inputCodigo.value = "";
                 cargarDatos("");
+                iniciarPollingReportes(""); // Iniciar polling para todos
             }
         });
 
@@ -119,6 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
         inputCodigo.addEventListener("input", () => {
             if (inputCodigo.value.trim() === "") {
                 cargarDatos("");
+                iniciarPollingReportes(""); // Iniciar polling para todos
             }
         });
     }
@@ -129,6 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
             const codigo = inputCodigo ? inputCodigo.value.trim() : "";
             cargarDatos(codigo);
+            iniciarPollingReportes(codigo); // Iniciar polling después de buscar
         });
     }
 
@@ -136,10 +176,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnReturn = document.getElementById("btn-return");
     if (btnReturn) {
         btnReturn.addEventListener("click", () => {
+            detenerPolling(); // Detener polling al salir
             window.location.href = "/pagina/maquinas";
         });
     }
 
-    // carga todos los datos al iniciar la página
-    cargarDatos();
+    // carga todos los datos al iniciar la página y empieza polling
+    cargarDatos("").then(() => {
+        iniciarPollingReportes(""); // Iniciar polling para todos los reportes
+    });
 });

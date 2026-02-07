@@ -104,8 +104,6 @@ body {
     background-color: #f8f9fa;
     border: 2px solid #d6dbdf;
     border-radius: 10px;
-    transition: all 0.3s ease;
-    /* Hace que el cambio de tamaño sea suave */
 }
 
 /* Cuando clicas el buscador, se hace un poco más ancho */
@@ -178,6 +176,7 @@ body {
 .card-info {
     padding: 30px;
     flex: 1;
+    min-height: 80px; /* Altura mínima para mantener consistencia */
 }
 
 /* Etiquetas de colores para el ESTADO (Operativa, etc) */
@@ -197,15 +196,20 @@ body {
 
 /* Verde */
 .status-mantenimiento {
-    background-color: #f1c40f;
+    background-color: #3498db;
 }
 
-/* Amarillo */
+/* Azul - Mantenimiento */
 .status-baja {
+    background-color: #3498db;
+}
+
+/* Azul */
+.status-fuera-servicio {
     background-color: #e74c3c;
 }
 
-/* Rojo */
+/* Rojo - Fuera de Servicio */
 
 /* La columna de acciones a la derecha de cada máquina */
 .side-buttons {
@@ -236,38 +240,17 @@ body {
     background-color: #e74c3c;
 }
 
-.btn-red:hover {
-    background-color: #c0392b;
-}
-
-/* Borrar */
 .btn-green {
     background-color: #2ecc71;
 }
 
-.btn-green:hover {
-    background-color: #27ae60;
-}
-
-/* Actualizar */
 .btn-blue-act {
     background-color: #3498db;
 }
 
-.btn-blue-act:hover {
-    background-color: #2980b9;
-}
-
-/* Mantenimiento */
 .btn-yellow-history {
     background-color: #e4bc0b;
 }
-
-.btn-yellow-history:hover {
-    background-color: #d4ac0a;
-}
-
-/* Historial */
 
 /* La barra azul de abajo que siempre se queda en su sitio */
 .main-footer {
@@ -282,4 +265,100 @@ body {
     z-index: 1000;
     height: 125px;
     padding: 0 40px;
+}
+
+/* =============================================================================
+   ESTILOS PARA POLLING EN TIEMPO REAL - SIGLAB
+   ============================================================================= */
+
+/* Contenedor para mensaje de "no hay máquinas" */
+.no-maquinas-container {
+    text-align: center;
+    padding: 60px 20px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    border: 2px dashed #dee2e6;
+    margin: 20px auto;
+    max-width: 500px;
+}
+
+.no-maquinas-icon {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+.no-maquinas-container h3 {
+    color: #495057;
+    margin-bottom: 15px;
+    font-size: 24px;
+}
+
+.no-maquinas-container p {
+    color: #6c757d;
+    margin-bottom: 25px;
+    font-size: 16px;
+}
+
+.no-maquinas-container .btn-create {
+    background: linear-gradient(45deg, #28a745, #20c997);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.no-maquinas-container .btn-create:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+/* Contenedor para mensajes de error */
+.error-container {
+    text-align: center;
+    padding: 60px 20px;
+    background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
+    border-radius: 15px;
+    border: 2px dashed #f8d7da;
+    margin: 20px auto;
+    max-width: 500px;
+}
+
+.error-icon {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+.error-container h3 {
+    color: #721c24;
+    margin-bottom: 15px;
+    font-size: 24px;
+}
+
+.error-container p {
+    color: #856404;
+    margin-bottom: 25px;
+    font-size: 16px;
+}
+
+.error-container .btn-create {
+    background: linear-gradient(45deg, #dc3545, #c82333);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.error-container .btn-create:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
 }

@@ -148,8 +148,58 @@ document.addEventListener("DOMContentLoaded", () => {
     // DETECTAR PÁGINA: Verificamos si estamos en el formulario de mantenimiento
     const esPaginaMantenimiento = document.getElementById("mant-empresa") !== null;
 
-    // FORMULARIO DE MANTENIMIENTO: Maneja el registro de mantenimientos
+    // FORMULARIO DE MANTENIMIENTO: Maneja el registro de mantenimientos con polling en tiempo real
     if (botonGuardarMantenimiento && esPaginaMantenimiento) {
+        // CONFIGURACIÓN DE POLLING PARA MANTENIMIENTO
+        const TIEMPO_POLLING_MS = 2000; // Cada 2 segundos para mayor estabilidad
+        let pollingInterval = null;
+        
+        // FUNCIÓN: Iniciar polling para mantenimientos
+        function iniciarPollingMantenimiento() {
+            // Detener polling anterior si existe
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+            }
+            
+            // Obtener el código de la máquina desde los parámetros de la URL
+            const parametrosURL = new URLSearchParams(window.location.search);
+            const codigoMaquina = parametrosURL.get("codigo");
+            
+            if (!codigoMaquina) return;
+            
+            // Iniciar nuevo polling
+            pollingInterval = setInterval(async () => {
+                try {
+                    const timestamp = new Date().getTime();
+                    const response = await fetch(`/api/mantenimiento/listar/${encodeURIComponent(codigoMaquina)}?_t=${timestamp}`, {
+                        headers: { 'Cache-Control': 'no-cache' }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        // Aquí podríamos actualizar una lista de mantenimientos recientes si quisiéramos
+                        console.log("Polling de mantenimientos actualizado");
+                    }
+                } catch (error) {
+                    console.error("Error en polling de mantenimientos:", error);
+                }
+            }, TIEMPO_POLLING_MS);
+            
+            console.log(`Polling de mantenimientos iniciado para máquina: ${codigoMaquina}`);
+        }
+
+        // FUNCIÓN: Detener polling
+        function detenerPolling() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+                console.log("Polling de mantenimientos detenido");
+            }
+        }
+
+        // Iniciar polling automáticamente al cargar la página
+        iniciarPollingMantenimiento();
+
         botonGuardarMantenimiento.addEventListener("click", async (evento) => {
             evento.preventDefault();
 

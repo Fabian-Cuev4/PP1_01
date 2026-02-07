@@ -1,15 +1,17 @@
 # Este archivo se encarga de guardar y buscar mantenimientos en la base de datos MongoDB
 # DAO significa "Data Access Object" (Objeto de Acceso a Datos)
 # Su única función es ejecutar operaciones de base de datos, sin lógica de negocio
+# CAPA DAO: Solo usa el Gerente para pedir conexiones. No sabe que existe Redis.
 
-# Importamos la clase que maneja la conexión a MongoDB
-from app.database.mongodb import MongoDB
+# Importamos el GERENTE DE DATOS para obtener conexiones
+from app.database.database_manager import DatabaseManager
 
 class MantenimientoDAO:
     # El constructor se ejecuta cuando creamos un objeto de esta clase
     def __init__(self):
-        # Obtenemos la conexión a MongoDB
-        self.db = MongoDB.conectar()
+        # Obtenemos la conexión a MongoDB usando el GERENTE DE DATOS
+        # Los DAOs SOLO usan el Gerente, no saben que existe Redis
+        self.db = DatabaseManager.obtener_mongodb()
         # Seleccionamos la colección (tabla) de mantenimientos
         self.collection = self.db["mantenimientos"]
 
