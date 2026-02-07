@@ -58,8 +58,8 @@
                 body: `username=${encodeURIComponent(username)}&is_admin=0`,
                 credentials: 'include' // Para sticky sessions
             }).then(() => {
-                document.getElementById('stats').innerHTML = `<span class="success">✅ Usuario ${username} ha iniciado sesión (persistente)</span>`;
-                console.log(`✅ Login registrado: ${username}`);
+                document.getElementById('stats').innerHTML = `<span class="success">Usuario ${username} ha iniciado sesión (persistente)</span>`;
+                console.log(`Login registrado: ${username}`);
                 verStats(); // Actualizar stats después del login
             });
         }
@@ -74,8 +74,8 @@
                 body: `username=${encodeURIComponent(usuarioActual)}&is_admin=0`,
                 credentials: 'include' // Para sticky sessions
             }).then(() => {
-                document.getElementById('stats').innerHTML = `<span class="success">❌ Usuario ${usuarioActual} ha cerrado sesión (persistente)</span>`;
-                console.log(`❌ Logout registrado: ${usuarioActual}`);
+                document.getElementById('stats').innerHTML = `<span class="success">Usuario ${usuarioActual} ha cerrado sesión (persistente)</span>`;
+                console.log(`Logout registrado: ${usuarioActual}`);
                 usuarioActual = null;
                 verStats(); // Actualizar stats después del logout
             });

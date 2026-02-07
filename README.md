@@ -1,212 +1,746 @@
-# SIGLAB - Sistema de Gestión de Laboratorios
+# SIGLAB - Sistema de Gestión de Laboratorios con Arquitectura de Alta Disponibilidad
 
-Sistema web para gestionar máquinas (computadoras e impresoras) y sus mantenimientos en laboratorios de la Universidad Central del Ecuador.
+Sistema web completo para gestionar máquinas (computadoras e impresoras) y sus mantenimientos en laboratorios, implementado con **alta disponibilidad**, **caché Redis** y **actualizaciones en tiempo real** mediante polling.
 
-## ¿Qué hace este sistema?
+## 📋 Resumen del Sistema
 
-Este sistema permite:
-- **Registrar máquinas**: Agregar computadoras e impresoras al inventario
-- **Ver historial**: Consultar todos los mantenimientos realizados a cada máquina
-- **Agregar mantenimientos**: Registrar cuando se hace mantenimiento a una máquina
-- **Actualizar estado**: Cambiar el estado de una máquina (operativa, fuera de servicio, etc.)
-- **Eliminar máquinas**: Borrar máquinas y todos sus mantenimientos
-- **Generar reportes**: Ver reportes completos de todas las máquinas y sus mantenimientos
+Este sistema SIGLAB proporciona:
+- **Gestión completa de máquinas**: Registro, actualización, eliminación de equipos
+- **Historial de mantenimientos**: Consulta detallada de todos los mantenimientos
+- **Alta disponibilidad**: Load balancer con múltiples servidores API
+- **Caché inteligente**: Redis para optimizar rendimiento
+- **Actualizaciones en tiempo real**: Polling automático cada 2 segundos
+- **Monitoreo visual**: Dashboard de métricas en vivo
 
-## Tecnologías usadas
+---
 
-### Backend (Servidor)
-- **Python 3.11**: Lenguaje de programación
-- **FastAPI**: Framework para crear la API (interfaz de comunicación)
-- **MySQL**: Base de datos para guardar máquinas y usuarios
-- **MongoDB**: Base de datos para guardar los mantenimientos
+## 🏗️ Arquitectura Implementada
 
-### Frontend (Interfaz de usuario)
-- **HTML**: Estructura de las páginas
-- **CSS**: Estilos y diseño visual
-- **JavaScript**: Lógica y comunicación con el servidor
-- **Nginx**: Servidor web que muestra las páginas
+### Componentes de la Infraestructura
 
-## Cómo instalar y usar
+- **1 Nginx Load Balancer** (Puerto 8080) - Punto único de entrada
+- **2 Servidores API Backend** (FastAPI + Python) - Balanceo de carga
+- **1 Base de Datos MySQL** (Máquinas y Usuarios) - Archivador central
+- **1 Base de Datos MongoDB** (Mantenimientos) - Archivador central
+- **1 Redis Cache** (Caché y Polling en tiempo real)
+- **1 Frontend** (HTML + CSS + JavaScript)
+- **Dashboard VTS** (Puerto 8084) - Monitoreo visual en tiempo real
 
-### Requisitos
-- Tener instalado **Docker Desktop** (Windows/Mac) o Docker (Linux)
+### Arquitectura de Cache y Polling
 
-### Pasos para iniciar
+#### Gerente de Datos (DatabaseManager)
+- `get_mysql_connection()` para los DAOs
+- `get_redis()` para los Services
+- `limpiar_cache_sistema()` que borra `cache:dashboard` y `cache:lista_maquinas`
 
-1. **Abrir la terminal** en la carpeta del proyecto
+#### Capa DAO (Datos)
+- Solo usa el Gerente para pedir conexiones SQL
+- No sabe que existe Redis
 
-2. **Ejecutar este comando** para iniciar todos los servicios:
+#### Capa Service (Cerebro)
+- **Lectura**: Antes de ir al DAO, pide el cliente Redis al Gerente
+- **Cache Hit**: Si hay datos en caché, devuelve los datos al Front
+- **Cache Miss**: Si no hay, va al DAO y guarda en Redis
+- **Escritura**: Invalida caché con `DatabaseManager.limpiar_cache_sistema()`
+- **Failover**: Si Redis no está disponible, va directamente al DAO
+
+#### Capa Router (Entrada)
+- Recibe peticiones de Polling del Front-end
+- Endpoints específicos para actualizaciones en tiempo real
+
+---
+
+## 🌐 Puertos de Acceso
+
+### APLICACIÓN PRINCIPAL (Frontend + Load Balancer)
+```
+http://localhost:8080
+```
+- Punto de entrada único para todos los usuarios
+- Load Balancer automático entre APIs
+- Sticky Sessions activadas
+
+### DASHBOARD DE MONITOREO VTS
+```
+http://localhost:8084/dashboard
+```
+- Métricas en tiempo real
+- Tráfico en PORCENTAJES (%)
+- Estados UP/DOWN con colores
+
+### SERVIDORES API (Acceso Directo)
+```
+API Servidor 1: http://localhost:18001
+API Servidor 2: http://localhost:18002
+```
+- Para pruebas individuales
+- Logs de identificación
+- Conexión a bases de datos compartidas
+
+### BASES DE DATOS (Acceso Directo)
+```
+MySQL: localhost:13306
+MongoDB: localhost:27018
+Redis: localhost:6379
+```
+- Archivador central compartido
+- Persistencia de datos
+- Acceso para administración
+
+---
+
+## 🚀 Instalación y Ejecución
+
+### Requisitos Previos
+- Docker Desktop instalado
+- Docker Compose disponible
+
+### Paso 1: Iniciar el Sistema Completo
 ```bash
+# Clonar o navegar al proyecto
+cd PP1_01
+
+# Iniciar todos los servicios con Redis
 docker-compose up -d --build
+
+# Verificar que todos los servicios estén saludables
+docker-compose ps
 ```
 
-3. **Esperar unos minutos** mientras se descargan e instalan todas las dependencias
+**ESPERADO VER:**
+- `mysql_siglab` (Base de datos central)
+- `mongo_siglab` (Base de datos central)  
+- `redis_siglab` (Cache y polling)
+- `api_back_1` (Servidor API 1)
+- `api_back_2` (Servidor API 2)
+- `nginx_balancer_siglab` (Load Balancer + Frontend)
 
-4. **Abrir el navegador** y ir a: **http://localhost:18080**
+### Paso 2: Verificar Conexiones
+```bash
+# Verificar Redis
+docker exec redis_siglab redis-cli ping
+# Debe responder: PONG
 
-5. **Iniciar sesión** con:
-   - Usuario: `admin`
-   - Contraseña: `admin123`
+# Verificar MySQL
+docker exec mysql_siglab mysqladmin ping -h localhost -u root -pClubpengui1
 
-## Estructura del proyecto
+# Verificar MongoDB
+docker exec mongo_siglab mongosh --eval "db.adminCommand('ping')"
+```
+
+### Paso 3: Acceder al Sistema
+- **Frontend Principal**: http://localhost:8080
+- **Dashboard de Monitoreo**: http://localhost:8084/dashboard
+- **API Servidor 1**: http://localhost:18001
+- **API Servidor 2**: http://localhost:18002
+
+### Paso 4: Iniciar Sesión
+```bash
+Usuario: admin
+Contraseña: admin123
+```
+
+---
+
+## 🔄 Flujo de Datos en Tiempo Real
+
+### Escenario 1: Lectura con Polling
+```
+Frontend → Router → Service → Redis → DAO → MySQL
+```
+
+1. **Frontend** hace polling cada 2 segundos a `/api/maquinas/polling/dashboard`
+2. **Service** pide cliente Redis al `DatabaseManager`
+3. **Cache Hit**: Si los datos están en caché, los devuelve inmediatamente
+4. **Cache Miss**: Va al DAO → MySQL → guarda en Redis → devuelve datos
+
+### Escenario 2: Escritura con Invalidación
+```
+Frontend → Router → Service → DAO → MySQL → [Invalidación de Caché]
+```
+
+1. **Frontend** registra/actualiza una máquina
+2. **Service** guarda en MySQL a través del DAO
+3. **Service** llama a `DatabaseManager.limpiar_cache_sistema()`
+4. **Redis** borra las claves `cache:dashboard` y `cache:lista_maquinas`
+5. **Próximo polling** será Cache Miss → datos frescos desde MySQL
+
+---
+
+## 📊 Endpoints Disponibles
+
+### Endpoints Principales (CRUD)
+```bash
+# Autenticación
+POST /api/login
+POST /api/register
+
+# Máquinas
+GET /api/maquinas/listar
+POST /api/maquinas/agregar
+PUT /api/maquinas/actualizar/{codigo}
+DELETE /api/maquinas/eliminar/{codigo}
+
+# Mantenimientos
+GET /api/mantenimiento/listar/{codigo_maquina}
+POST /api/mantenimiento/agregar
+GET /api/mantenimiento/informe/{codigo_maquina}
+```
+
+### Endpoints de Polling (Tiempo Real)
+```bash
+# Máquinas
+GET /api/maquinas/polling/dashboard     # Dashboard principal con estadísticas
+GET /api/maquinas/polling/lista        # Lista actualizada de máquinas
+GET /api/maquinas/polling/buscar/{termino}  # Búsqueda en tiempo real
+GET /api/maquinas/cache/status         # Estado del sistema de caché
+
+# Mantenimientos
+GET /api/mantenimiento/polling/historial/{codigo_maquina}  # Historial específico
+GET /api/mantenimiento/polling/informe                  # Informe completo
+GET /api/mantenimiento/polling/todos                     # Todos los mantenimientos
+```
+
+---
+
+## ⏱️ Tiempo de Vida del Cache (TTL)
+
+| Cache Key | Tiempo de Vida | Propósito |
+|-----------|----------------|-----------|
+| `cache:dashboard` | 5 minutos | Dashboard principal |
+| `cache:lista_maquinas` | 5 minutos | Lista de máquinas |
+| `maquina:{codigo}` | 5 minutos | Máquina individual |
+| `historial:{codigo}` | 4 minutos | Historial de mantenimientos |
+| `busqueda:codigo:{termino}` | 3 minutos | Resultados de búsqueda |
+| `informe:{codigo}` | 3 minutos | Informes completos |
+
+---
+
+## 🔧 Configuración de Redis
+
+### Variables de Entorno
+```bash
+REDIS_HOST=redis          # Nombre del servicio Docker
+REDIS_PORT=6379           # Puerto estándar de Redis
+REDIS_DB=0                # Base de datos Redis
+```
+
+### Configuración en Docker
+- **Memoria Máxima**: 256MB
+- **Política de Evicción**: `allkeys-lru` (elimina las claves menos usadas)
+- **Persistencia**: `appendonly yes` (guarda datos en disco)
+
+---
+
+## 🚨 Failover y Tolerancia a Fallos
+
+### Si Redis no está disponible:
+- **Services** detectan `redis_cliente is None`
+- **Van directamente al DAO** sin detener la aplicación
+- **Log informativo**: "Redis no disponible, yendo directamente a DAO"
+- **La aplicación sigue funcionando** sin caché
+
+### Si MySQL no está disponible:
+- **DAOs** retornan `None` o listas vacías
+- **Services** manejan errores gracefully
+- **Routers** devuelven respuestas de error apropiadas
+
+### Escenario de Caída de Servidor API
+
+#### Simular Caída
+```bash
+# Matar el servidor API 1 para simular una caída
+docker stop api_back_1
+
+# Verificar que el servidor está caído
+docker ps
+```
+
+#### Comportamiento Esperado
+1. **En el Dashboard VTS** (http://localhost:8084/dashboard):
+   - `api_back_1` cambia a estado **DOWN** (color rojo)
+   - `api_back_2` muestra **100%** del tráfico
+   - Los porcentajes se actualizan en tiempo real
+
+2. **En la Aplicación** (http://localhost:8080):
+   - La aplicación sigue funcionando normalmente
+   - Todas las peticiones van automáticamente a `api_back_2`
+   - Los usuarios no notan la caída
+
+#### Recuperación Automática
+```bash
+# Levantar nuevamente el servidor caído
+docker start api_back_1
+
+# Observar el dashboard VTS
+# El servidor volverá a estado UP y comenzará a recibir tráfico
+```
+
+---
+
+## 📱 Frontend con Polling Automático
+
+### Implementación JavaScript
+El frontend incluye polling automático cada 2 segundos:
+
+```javascript
+// Polling automático implementado en mantenimiento.js
+setInterval(async () => {
+    await cargarMaquinasPolling();
+}, 2000); // Cada 2 segundos
+```
+
+### Indicadores Visuales
+- **Indicador verde**: "Actualizando automáticamente"
+- **Indicador azul**: "Actualizado: HH:MM:SS"
+- **Mensaje de error**: Si hay problemas de conexión
+
+---
+
+## 🎮 Ejemplos de Uso
+
+### 1. Registrar una Máquina
+```bash
+curl -X POST http://localhost:8080/api/maquinas/agregar \
+  -H "Content-Type: application/json" \
+  -d '{
+    "codigo_equipo": "PC-001",
+    "tipo_equipo": "PC",
+    "estado_actual": "Operativa",
+    "area": "Sistemas",
+    "fecha": "2026-02-06",
+    "usuario": "admin"
+  }'
+```
+
+### 2. Ver Dashboard en Tiempo Real
+```bash
+curl http://localhost:8080/api/maquinas/polling/dashboard
+```
+
+### 3. Buscar Máquinas
+```bash
+curl http://localhost:8080/api/maquinas/polling/buscar/PC
+```
+
+### 4. Agregar Mantenimiento
+```bash
+curl -X POST http://localhost:8080/api/mantenimiento/agregar \
+  -H "Content-Type: application/json" \
+  -d '{
+    "codigo_maquina": "PC-001",
+    "tipo": "Correctivo",
+    "tecnico": "Juan Pérez",
+    "empresa": "Tech Solutions",
+    "observaciones": "Reparación de fuente de poder",
+    "fecha": "2026-02-06",
+    "usuario": "admin"
+  }'
+```
+
+---
+
+## 🔍 Monitoreo y Debugging
+
+### Ver Logs de Redis
+```bash
+docker logs redis_siglab -f
+```
+
+### Ver Estado del Cache
+```bash
+# Conectarse a Redis
+docker exec -it redis_siglab redis-cli
+
+# Ver todas las claves
+KEYS *
+
+# Ver una clave específica
+GET cache:dashboard
+
+# Ver información de memoria
+INFO memory
+```
+
+### Ver Logs de las APIs
+```bash
+# API Servidor 1
+docker logs api_back_1 -f
+
+# API Servidor 2
+docker logs api_back_2 -f
+
+# Todos los servicios
+docker-compose logs -f
+```
+
+### Ver Estado General del Sistema
+```bash
+docker-compose ps
+
+# Ver métricas del Load Balancer
+curl http://localhost:8084/status | jq
+
+# Probar balanceo de carga
+for i in {1..10}; do curl -s http://localhost:8080/api/maquinas | head -c 50; echo ""; done
+
+# Simular estrés
+ab -n 100 -c 10 http://localhost:8080/api/maquinas
+```
+
+---
+
+## 🏆 Beneficios de la Arquitectura
+
+### Performance
+- **Cache Redis**: Reduce carga en MySQL hasta 90%
+- **Polling eficiente**: Datos frescos sin recargar página
+- **Respuesta rápida**: Cache Hit en milisegundos
+
+### Disponibilidad
+- **Load Balancer**: Distribuye carga entre 2 APIs
+- **Failover automático**: Si Redis falla, sigue funcionando
+- **Health checks**: Monitoreo constante de servicios
+
+### Escalabilidad
+- **Sticky Sessions**: Mantiene consistencia de usuario
+- **Modular**: Fácil agregar más instancias API
+- **Docker**: Despliegue simplificado
+
+---
+
+## 🛠️ Estructura del Proyecto
 
 ```
 PP1_01/
-├── backend/              # Código del servidor (Python)
+├── backend/                    # Código del servidor (Python)
 │   ├── app/
-│   │   ├── daos/        # Acceso a las bases de datos
-│   │   ├── database/    # Configuración de MySQL y MongoDB
-│   │   ├── models/      # Modelos de datos (Máquina, Mantenimiento)
-│   │   ├── routes/      # Rutas de la API (endpoints)
-│   │   └── services.py  # Lógica de negocio
-│   └── main.py         # Archivo principal que inicia el servidor
+│   │   ├── daos/            # Acceso a las bases de datos
+│   │   │   ├── maquina_dao.py
+│   │   │   ├── mantenimiento_dao.py
+│   │   │   └── usuario_dao.py
+│   │   ├── database/        # Configuración de MySQL, MongoDB y Redis
+│   │   │   ├── mysql.py
+│   │   │   ├── mongodb.py
+│   │   │   ├── redis.py
+│   │   │   └── database_manager.py
+│   │   ├── models/          # Modelos de datos (Pydantic)
+│   │   │   ├── maquina.py
+│   │   │   ├── mantenimiento.py
+│   │   │   └── usuario.py
+│   │   ├── routes/          # Rutas de la API (endpoints)
+│   │   │   ├── auth.py
+│   │   │   ├── maquina.py
+│   │   │   ├── mantenimiento.py
+│   │   │   └── usuarios.py
+│   │   ├── services/        # Lógica de negocio
+│   │   │   ├── maquina_service.py
+│   │   │   ├── mantenimiento_service.py
+│   │   │   └── usuario_service.py
+│   │   └── utils/           # Utilidades varias
+│   │       └── encryption.py
+│   ├── main.py              # Archivo principal que inicia el servidor
+│   ├── requirements.txt     # Dependencias Python
+│   └── Dockerfile          # Configuración Docker
 │
-├── frontend/            # Código de la interfaz (HTML, CSS, JS)
-│   ├── static/         # Archivos estáticos (CSS, JavaScript, imágenes)
-│   ├── templates/      # Páginas HTML
-│   └── nginx.conf      # Configuración del servidor web
+├── frontend/                # Código de la interfaz (HTML, CSS, JS)
+│   ├── static/
+│   │   ├── css/            # Estilos CSS
+│   │   ├── javascript/     # Lógica JavaScript
+│   │   └── img/           # Imágenes e iconos
+│   ├── templates/          # Páginas HTML
+│   │   ├── index_session.html
+│   │   ├── index_dashboard.html
+│   │   ├── index_formulario1.html
+│   │   ├── index_actualizar.html
+│   │   ├── index_ventana1.html
+│   │   ├── index_ventana2.html
+│   │   ├── index_historial.html
+│   │   └── index_register.html
+│   ├── nginx.conf         # Configuración del servidor web
+│   └── Dockerfile         # Configuración Docker
 │
-└── docker-compose.yml  # Configuración de todos los servicios
+├── docker-compose.yml      # Configuración de todos los servicios
+├── README.md              # Este archivo
+└── test_usuarios.html      # Página de pruebas
 ```
 
-## Cómo funciona
+---
 
-1. **El usuario** abre el navegador y va a `http://localhost:18080`
-2. **Nginx** (servidor web) muestra la página de login
-3. **El usuario** ingresa sus credenciales
-4. **JavaScript** envía los datos al backend mediante una petición HTTP
-5. **FastAPI** (backend) verifica las credenciales en MySQL
-6. **Si es correcto**, el usuario puede ver y gestionar máquinas
-7. **Al agregar una máquina**, se guarda en MySQL
-8. **Al agregar un mantenimiento**, se guarda en MongoDB
-9. **Los reportes** combinan datos de ambas bases de datos
+## 🔧 Patrones de Diseño Implementados
 
-## Guía rápida (preguntas comunes)
+### 1. Factory Pattern
+- **Ubicación**: `backend/app/models/factory.py`
+- **Propósito**: Crear objetos de tipo máquina (Computadora o Impresora)
+- **Uso**: `MaquinaFactory.crear_maquina(tipo_equipo, datos)`
 
-### 1) Flujo completo (de punta a punta)
+### 2. DAO Pattern (Data Access Object)
+- **Ubicación**: `backend/app/daos/`
+- **Propósito**: Separar la lógica de acceso a datos
+- **Componentes**: `MaquinaDAO`, `MantenimientoDAO`, `UsuarioDAO`
 
-Cuando el usuario hace una acción en la web, normalmente pasa esto:
+### 3. Service Layer Pattern
+- **Ubicación**: `backend/app/services/`
+- **Propósito**: Encapsular la lógica de negocio
+- **Componentes**: `MaquinaService`, `MantenimientoService`, `UsuarioService`
 
-1. **Frontend (JavaScript)** hace un `fetch("/api/..." )`
-2. **Nginx (frontend)** recibe `/api/...` y lo reenvía al backend (reverse proxy)
-3. **Routes (FastAPI)** recibe la petición y valida datos (Pydantic)
-4. **Service (`services.py`)** aplica reglas y orquesta la operación
-5. **DAO (`daos/*.py`)** guarda/lee datos en MySQL o MongoDB
-6. **Database (`database/*.py`)** maneja la conexión/pool (encapsulado)
+### 4. Singleton Pattern (DatabaseManager)
+- **Ubicación**: `backend/app/database/database_manager.py`
+- **Propósito**: Gestionar conexiones centralizadas
+- **Uso**: `DatabaseManager.get_mysql_connection()`, `DatabaseManager.get_redis()`
 
-### 2) ¿Qué diferencia hay entre `factory.py` y `Maquina.py`?
+### 5. Repository Pattern (implícito)
+- **Propósito**: Abstracción sobre el almacenamiento de datos
+- **Implementación**: Los DAOs actúan como repositorios
 
-- **`Maquina.py`** (clase base): define qué es una máquina (campos/estructura). Se hereda en `Computadora` e `Impresora`.
-- **`factory.py`** (fábrica): decide qué clase crear (Computadora o Impresora) según el `tipo_equipo`.
+---
 
-Idea simple:
-- `Maquina` = el “molde”
-- `MaquinaFactory` = el “selector/constructor” que crea el objeto correcto
+## 🌐 Flujo Completo de una Petición
 
-### 3) ¿Se encapsulan las bases de datos?
+### Escenario: Registro de Nueva Máquina
 
-Sí, porque el proyecto NO abre conexiones en las rutas.
+1. **Frontend (JavaScript)**
+   ```javascript
+   fetch('/api/maquinas/agregar', {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify(datosMaquina)
+   })
+   ```
 
-- **MySQL**:
-  - `app/database/mysql.py` encapsula conexión + pool + creación de tablas
-  - Los DAOs usan `MySQLConnection.conectar()`
-- **MongoDB**:
-  - `app/database/mongodb.py` encapsula cliente + reintentos + `conectar()`/`cerrar()`
-  - `MantenimientoDAO` usa `MongoDB.conectar()`
-- **Orquestación**:
-  - `app/database/database_manager.py` centraliza `inicializar()` y `cerrar()`
-  - `main.py` lo llama en `startup`/`shutdown`
+2. **Nginx (Load Balancer)**
+   - Recibe la petición en el puerto 8080
+   - Reenvía a uno de los servidores API (balanceo de carga)
+   - Mantiene sticky session si el usuario ya existe
 
-### 4) ¿Qué es “reverse proxy” en este proyecto?
+3. **FastAPI (Router)**
+   ```python
+   @router.post("/agregar")
+   async def agregar_maquina(maquina: MaquinaCreate):
+       return maquina_service.crear_maquina(maquina)
+   ```
 
-En `frontend/nginx.conf` existe:
+4. **Service Layer**
+   ```python
+   def crear_maquina(self, maquina_data):
+       # Validaciones de negocio
+       if self.existe_codigo(maquina_data.codigo_equipo):
+           raise ValueError("Código ya existe")
+       
+       # Usar Factory para crear objeto
+       maquina = MaquinaFactory.crear_maquina(...)
+       
+       # Guardar mediante DAO
+       resultado = maquina_dao.crear(maquina)
+       
+       # Invalidar caché
+       DatabaseManager.limpiar_cache_sistema()
+       
+       return resultado
+   ```
 
-- `location /api/ { proxy_pass http://backend:8000; }`
+5. **DAO Layer**
+   ```python
+   def crear(self, maquina):
+       connection = DatabaseManager.get_mysql_connection()
+       cursor = connection.cursor()
+       # Ejecutar INSERT SQL
+       connection.commit()
+       return maquina
+   ```
 
-Esto significa:
+6. **DatabaseManager**
+   - Proporciona conexión MySQL desde el pool
+   - Maneja reintentos y errores de conexión
+   - Centraliza la configuración
 
-- El navegador entra a **Frontend**: `http://localhost:18080`
-- Cuando el frontend llama `/api/...`, **Nginx** reenvía esa petición al contenedor **backend**
-- El navegador no necesita saber el puerto del backend
+7. **Respuesta**
+   - DAO → Service → Router → Nginx → Frontend
+   - Frontend actualiza la interfaz
+   - Próximo polling refrescará los datos automáticamente
 
-### 5) ¿Para qué sirven los headers `X-Forwarded-*` y el `ProxyHeadersMiddleware`?
+---
 
-Nginx agrega headers como:
+## 🚨 Solución de Problemas Comunes
 
-- `X-Forwarded-Proto` (http/https)
-- `X-Forwarded-Host` y `X-Forwarded-Port` (host/puerto real)
-- `X-Forwarded-For` (IP del cliente)
-
-El `ProxyHeadersMiddleware` en `backend/main.py` sirve para que FastAPI use esa información “real” cuando el backend está detrás de Nginx.
-
-Nota: para el CRUD básico normalmente no es obligatorio, pero es correcto tenerlo en este proyecto porque sí hay reverse proxy.
-
-### 6) ¿Para qué sirve `Cache-Control: no-cache` en `/api/mantenimiento/listar/{codigo}`?
-
-En algunos endpoints se envía:
-
-- `Cache-Control: no-cache, no-store, must-revalidate`
-
-Sirve para que el navegador NO muestre una respuesta vieja (cacheada) y siempre pida el historial actualizado.
-
-## Apuntes (para ir agregando)
-
-En esta sección puedes ir anotando dudas/respuestas del proyecto.
-
-- Tema:
-  - Explicación:
-
-## Comandos útiles
-
-**Ver los logs del servidor:**
+### Problema: "No hay equipos registrados"
 ```bash
-docker-compose logs -f backend
+# Verificar que Redis esté funcionando
+docker exec redis_siglab redis-cli ping
+
+# Verificar que las APIs estén saludables
+curl http://localhost:18001/api/health
+curl http://localhost:18002/api/health
+
+# Limpiar cache si es necesario
+docker exec redis_siglab redis-cli FLUSHALL
 ```
 
-**Detener todos los servicios:**
+### Problema: Los datos no se actualizan
 ```bash
+# Verificar logs de las APIs
+docker logs api_back_1 | grep "Cache"
+docker logs api_back_2 | grep "Cache"
+
+# Forzar invalidación de cache
+curl http://localhost:8080/api/maquinas/cache/status
+```
+
+### Problema: Redis consume mucha memoria
+```bash
+# Ver uso de memoria
+docker exec redis_siglab redis-cli INFO memory
+
+# Limpiar cache si es necesario
+docker exec redis_siglab redis-cli FLUSHALL
+```
+
+### Problema: Load Balancer no distribuye correctamente
+```bash
+# Ver configuración de Nginx
+docker exec nginx_balancer_siglab nginx -t
+
+# Reiniciar Nginx
+docker restart nginx_balancer_siglab
+
+# Ver logs del balanceador
+docker logs nginx_balancer_siglab -f
+```
+
+---
+
+## 📋 Comandos Útiles
+
+### Gestión de Servicios
+```bash
+# Iniciar todos los servicios
+docker-compose up -d --build
+
+# Ver estado de los servicios
+docker-compose ps
+
+# Ver logs de todos los servicios
+docker-compose logs -f
+
+# Detener todos los servicios
 docker-compose stop
+
+# Eliminar todos los servicios y volúmenes
+docker-compose down -v
+
+# Reconstruir imágenes
+docker-compose build --no-cache
 ```
 
-**Iniciar los servicios de nuevo:**
+### Gestión Individual de Contenedores
 ```bash
-docker-compose start
+# Ver logs específicos
+docker logs api_back_1 -f
+docker logs api_back_2 -f
+docker logs redis_siglab -f
+docker logs mysql_siglab -f
+docker logs mongo_siglab -f
+docker logs nginx_balancer_siglab -f
+
+# Acceder a contenedor
+docker exec -it api_back_1 bash
+docker exec -it redis_siglab redis-cli
+docker exec -it mysql_siglab mysql -u root -pClubpengui1
 ```
 
-**Eliminar todo y empezar de cero:**
+### Monitoreo y Pruebas
 ```bash
-docker-compose down
+# Probar endpoints directamente
+curl http://localhost:8080/api/maquinas/listar
+curl -X POST http://localhost:8080/api/login -H "Content-Type: application/json" -d '{"username":"admin","password":"admin123"}'
+
+# Pruebas de carga
+ab -n 100 -c 10 http://localhost:8080/api/maquinas
+
+# Ver estado del sistema
+curl http://localhost:8084/status | jq
 ```
 
-## Usuarios por defecto
+---
 
-Al iniciar el sistema por primera vez, se crea automáticamente un usuario administrador:
-- **Usuario**: `admin`
-- **Contraseña**: `admin123`
+## 🔐 Seguridad Considerada
 
-## Puertos utilizados
+### Autenticación
+- **Encriptación de contraseñas**: bcrypt
+- **Sesiones persistentes**: Sticky sessions
+- **Tokens de sesión**: Gestión centralizada
 
-- **18080**: Frontend (página web)
-- **18000**: Backend (API)
-- **13306**: MySQL (base de datos)
-- **27018**: MongoDB (base de datos)
+### Base de Datos
+- **MySQL**: Contraseña segura en variables de entorno
+- **MongoDB**: Autenticación habilitada
+- **Redis**: Sin exposición externa en producción
 
-## Características principales
+### Red
+- **Nginx**: Reverse proxy oculta servidores backend
+- **Docker**: Aislamiento de contenedores
+- **Ports**: Solo exposición necesaria
 
-- ✅ **Encriptación de contraseñas**: Las contraseñas se guardan de forma segura usando bcrypt
-- ✅ **Asociación de usuarios**: Cada máquina y mantenimiento está asociado al usuario que lo creó
-- ✅ **Validaciones**: El sistema valida que los datos sean correctos antes de guardarlos
-- ✅ **Manejo de errores**: Muestra mensajes claros cuando algo sale mal
+---
 
-## Notas importantes
+## 📈 Métricas y Monitoreo
 
-- Si cambias código JavaScript, limpia la caché del navegador (Ctrl+Shift+Suprimir)
-- Los datos se guardan en contenedores Docker, si los eliminas se pierden los datos
-- Para desarrollo, puedes modificar los archivos y recargar la página
+### Dashboard VTS (http://localhost:8084/dashboard)
+- **Tráfico en porcentajes**: Distribución entre APIs
+- **Estados UP/DOWN**: Salud de servidores
+- **Tiempo real**: Actualizaciones automáticas
 
-## Soporte
+### Logs Estructurados
+- **Identificación de servidor**: Cada petición logged
+- **Eventos de sistema**: Inicio, caída, recuperación
+- **Errores y warnings**: Trazabilidad completa
+
+### Métricas de Rendimiento
+- **Cache Hit Rate**: Eficiencia de Redis
+- **Response Time**: Tiempos de respuesta
+- **Throughput**: Peticiones por segundo
+
+---
+
+## 🎯 Conclusión
+
+Este sistema SIGLAB demuestra una implementación completa de:
+
+1. **Arquitectura de Alta Disponibilidad**
+   - Un solo punto de entrada (Nginx en puerto 8080)
+   - Múltiples servidores backend para distribución de carga
+   - Bases de datos compartidas como "archivador central"
+   - Monitoreo visual en tiempo real
+
+2. **Resiliencia Automática**
+   - Detección automática de caídas de servidores
+   - Redirección transparente del tráfico
+   - Recuperación automática sin intervención manual
+   - Experiencia de usuario ininterrumpida
+
+3. **Performance Optimizado**
+   - Caché Redis para reducir carga en base de datos
+   - Polling eficiente para actualizaciones en tiempo real
+   - Load balancing para distribución de carga
+
+4. **Arquitectura Limpia**
+   - Patrones de diseño bien definidos
+   - Separación de responsabilidades
+   - Código mantenible y escalable
+
+**Resultado:** Un sistema robusto, escalable y resiliente listo para producción.
+
+---
+
+## 🆘 Soporte
 
 Si tienes problemas:
-1. Revisa los logs con `docker-compose logs -f backend`
-2. Verifica que todos los servicios estén corriendo con `docker-compose ps`
-3. Reinicia los servicios con `docker-compose restart`
+
+1. **Revisa los logs**: `docker-compose logs -f`
+2. **Verifica servicios**: `docker-compose ps`
+3. **Reinicia servicios**: `docker-compose restart`
+4. **Limpia caché**: `docker exec redis_siglab redis-cli FLUSHALL`
+5. **Reconstruye**: `docker-compose down && docker-compose up -d --build`
+
+**Acceso principal**: http://localhost:8080
+**Usuario**: admin
+**Contraseña**: admin123

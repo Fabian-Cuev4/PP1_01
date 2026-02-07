@@ -26,7 +26,7 @@ class MySQLConnection:
         for attempt in range(max_retries):
             try:
                 # EXPLICACIÓN: Log de intento de conexión al archivador central MySQL
-                print(f"🔌 Intentando conectar al archivador central MySQL (intento {attempt + 1}/{max_retries})...")
+                print(f"Intentando conectar al archivador central MySQL (intento {attempt + 1}/{max_retries})...")
                 
                 # Intentamos entrar al servidor de MySQL (sin especificar base de datos todavía)
                 conn = mysql.connector.connect(
@@ -89,7 +89,7 @@ class MySQLConnection:
 
                 # Guardamos los cambios
                 conn.commit()
-                print("✅ ¡Conectado exitosamente al archivador central (MySQL)!")
+                print("Conectado exitosamente al archivador central (MySQL)!")
                 
                 # Cerramos la conexión temporal
                 cursor.close()
@@ -99,10 +99,10 @@ class MySQLConnection:
             except (Error, Exception) as e:
                 # Si falla, esperamos un poco y volvemos a intentar
                 if attempt < max_retries - 1:
-                    print(f"❌ Intento {attempt + 1}/{max_retries} fallido. Reintentando... Error: {e}")
+                    print(f"Intento {attempt + 1}/{max_retries} fallido. Reintentando... Error: {e}")
                     time.sleep(retry_delay)
                 else:
-                    print(f"🚫 ERROR: No se pudo conectar al archivador central MySQL tras muchos intentos.")
+                    print(f"ERROR: No se pudo conectar al archivador central MySQL tras muchos intentos.")
 
     # El 'Pool' es como una reserva de conexiones abiertas para no tener que abrir una nueva cada vez.
     _pool = None

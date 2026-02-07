@@ -38,10 +38,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         
         pollingInterval = setInterval(() => {
             cargarHistorial(true);
-            console.log(`🔄 Polling de historial activado para máquina: ${codigo} - ${new Date().toLocaleTimeString()}`);
+            console.log(`Polling de historial activado para máquina: ${codigo} - ${new Date().toLocaleTimeString()}`);
         }, TIEMPO_POLLING_MS);
         
-        console.log(`✅ Polling de historial iniciado para máquina: ${codigo}`);
+        console.log(`Polling de historial iniciado para máquina: ${codigo}`);
     }
 
     // Detener polling
@@ -63,10 +63,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         
         // Si el contenido es más alto que el contenedor, activar scroll
         if (scrollHeight > clientHeight) {
-            console.log("📜 Activando scroll del historial - Contenido requiere scroll");
+            console.log("Activando scroll del historial - Contenido requiere scroll");
             tablaBody.style.overflowY = "auto";
         } else {
-            console.log("📜 Desactivando scroll del historial - Contenido cabe en el contenedor");
+            console.log("Desactivando scroll del historial - Contenido cabe en el contenedor");
             tablaBody.style.overflowY = "hidden";
         }
     }

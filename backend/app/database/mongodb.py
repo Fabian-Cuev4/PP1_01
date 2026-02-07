@@ -20,7 +20,7 @@ class MongoDB:
             for attempt in range(max_retries):
                 try:
                     # EXPLICACIÓN: Log de intento de conexión al archivador central MongoDB
-                    print(f"🔌 Intentando conectar al archivador central MongoDB (intento {attempt + 1}/{max_retries})...")
+                    print(f"Intentando conectar al archivador central MongoDB (intento {attempt + 1}/{max_retries})...")
                     
                     # Configurar pool de conexiones para reutilizar conexiones
                     cls._client = MongoClient(
@@ -33,14 +33,14 @@ class MongoDB:
                     # Verificar conexión
                     cls._client.admin.command('ping')
                     cls._db = cls._client["siglab_db"]
-                    print("✅ ¡Conectado exitosamente al archivador central (MongoDB)!")
+                    print("Conectado exitosamente al archivador central (MongoDB)!")
                     return cls._db
                 except Exception as e:
                     if attempt < max_retries - 1:
-                        print(f"❌ Intento {attempt + 1}/{max_retries} de conexión a MongoDB fallido. Reintentando en {retry_delay} segundos... Error: {e}")
+                        print(f"Intento {attempt + 1}/{max_retries} de conexión a MongoDB fallido. Reintentando en {retry_delay} segundos... Error: {e}")
                         time.sleep(retry_delay)
                     else:
-                        print(f"🚫 ERROR: No se pudo conectar al archivador central MongoDB después de {max_retries} intentos: {e}")
+                        print(f"ERROR: No se pudo conectar al archivador central MongoDB después de {max_retries} intentos: {e}")
                         raise
         return cls._db
 

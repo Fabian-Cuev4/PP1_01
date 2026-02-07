@@ -74,7 +74,7 @@ function detectarLogoutUsuario() {
         clearTimeout(inactivityTimer);
         inactivityTimer = setTimeout(() => {
             if (sesionIniciada) {
-                console.log('🕐 Usuario inactivo por 30 segundos, cerrando sesión automáticamente');
+                console.log('Usuario inactivo por 30 segundos, cerrando sesión automáticamente');
                 registrarUsuarioInactivo();
             }
         }, 30000);

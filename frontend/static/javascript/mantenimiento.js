@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 // FUNCIÓN: Inicia el polling automático de máquinas
 async function iniciarPolling() {
-    console.log("🚀 Iniciando polling automático de máquinas...");
+    console.log("Iniciando polling automático de máquinas...");
     
     // Carga inicial
     await cargarMaquinasPolling();
@@ -96,10 +96,10 @@ async function cargarMaquinasPolling() {
         // Actualizar timestamp
         actualizarTimestamp(data.timestamp);
         
-        console.log(`✅ Polling exitoso: ${maquinasCache.length} máquinas cargadas`);
+        console.log(`Polling exitoso: ${maquinasCache.length} máquinas cargadas`);
         
     } catch (error) {
-        console.error("❌ Error en polling de máquinas:", error);
+        console.error("Error en polling de máquinas:", error);
         
         // Si falla el polling, intentar con el endpoint legacy
         await cargarMaquinasLegacy();
@@ -131,10 +131,10 @@ async function cargarMaquinasLegacy() {
         maquinasCache = maquinas;
         renderizarMaquinas(maquinasCache);
         
-        console.log("🔄 Usando endpoint legacy como fallback");
+        console.log("Usando endpoint legacy como fallback");
         
     } catch (error) {
-        console.error("❌ Error crítico cargando máquinas:", error);
+        console.error("Error crítico cargando máquinas:", error);
         mostrarError("No se pudieron cargar las máquinas. Intente recargar la página.");
     }
 }
@@ -154,7 +154,7 @@ function renderizarMaquinas(maquinas) {
         if (!contenedorMaquinas.querySelector('.no-maquinas-container')) {
             contenedorMaquinas.innerHTML = `
                 <div class="no-maquinas-container">
-                    <div class="no-maquinas-icon">🖥️</div>
+                    <div class="no-maquinas-icon">PC</div>
                     <h3>No hay equipos registrados</h3>
                     <p>Parece que aún no tienes máquinas en el sistema.</p>
                     <button class="btn-create" onclick="irAAgregarMaquina()">
@@ -256,13 +256,13 @@ function crearTarjetaMaquina(maquina) {
         
         <div class="side-buttons">
             <button class="btn-action btn-yellow-history" onclick="verHistorial('${maquina.codigo_equipo || maquina.codigo}')">
-                📋 Historial
+                Historial
             </button>
             <button class="btn-action btn-blue-act" onclick="irAMantenimiento('${maquina.codigo_equipo || maquina.codigo}')">
-                🔧 Mantenimiento
+                Mantenimiento
             </button>
             <button class="btn-action btn-green" onclick="actualizarMaquina('${maquina.codigo_equipo || maquina.codigo}')">
-                ✏️ Actualizar
+                Actualizar
             </button>
         </div>
     `;
@@ -309,7 +309,7 @@ function mostrarError(mensaje) {
     
     contenedorMaquinas.innerHTML = `
         <div class="error-container">
-            <div class="error-icon">❌</div>
+            <div class="error-icon">X</div>
             <h3>Error de conexión</h3>
             <p>${mensaje}</p>
             <button class="btn-create" onclick="location.reload()">
