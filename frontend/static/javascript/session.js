@@ -1,23 +1,20 @@
-// =============================================================================
-// SESIÓN SIGLAB - Manejo de Autenticación de Usuarios
-// Autor: Estudiante de Programación Avanzada
-// Propósito: Controlar el inicio de sesión, registro y cierre de sesión
-// =============================================================================
+// Sesión SIGLAB - Manejo de Autenticación de Usuarios
+// Controla inicio de sesión, registro y cierre de sesión
 
 document.addEventListener("DOMContentLoaded", () => {
     mostrarNombreUsuario();
-    // Aseguramos que el modal esté oculto al cargar la página
+    // Asegurar que modal esté oculto al cargar página
     const modalNotificacion = document.getElementById("modal-notificacion");
     if (modalNotificacion) {
         modalNotificacion.classList.add("hidden");
         modalNotificacion.classList.remove("show");
     }
     
-    // Referencias a los botones principales de la página de login
+    // Referencias a botones principales de página de login
     const botonIniciarSesion = document.getElementById("btn-signin-on");
     const botonIrRegistro = document.getElementById("btn-register-redirect");
 
-    // BOTÓN INICIAR SESIÓN: Valida credenciales y redirige según el tipo de usuario
+    // Botón iniciar sesión: valida credenciales y redirige según tipo de usuario
     if (botonIniciarSesion) {
         botonIniciarSesion.addEventListener("click", async (evento) => {
             evento.preventDefault();
@@ -26,13 +23,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const nombreUsuario = document.getElementById("usuario").value;
             const contrasena = document.getElementById("password").value;
 
-            // VALIDACIÓN: Verificar que los campos no estén vacíos
+            // Validación: verificar que campos no estén vacíos
             if (!nombreUsuario || !contrasena) {
                 mostrarModal("Campos incompletos", "Por favor, completa todos los campos.");
                 return;
             }
 
             try {
+                // Autenticación: enviar credenciales al backend para validación
                 // AUTENTICACIÓN: Enviar credenciales al backend para validación
                 const respuesta = await fetch("/api/login", {
                     method: "POST",

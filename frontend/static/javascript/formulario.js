@@ -1,13 +1,10 @@
-// =============================================================================
-// FORMULARIOS SIGLAB - Gestión de Máquinas y Mantenimiento
-// Autor: Estudiante de Programación Avanzada
-// Propósito: Manejar el registro de máquinas y mantenimientos del sistema
-// =============================================================================
+// Formularios SIGLAB - Gestión de Máquinas y Mantenimiento
+// Maneja registro de máquinas y mantenimientos del sistema
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    // Creamos el modal de notificaciones dinámicamente
-    // Esto nos permite reutilizarlo en toda la aplicación
+    // Creamos modal de notificaciones dinámicamente
+    // Permite reutilización en toda la aplicación
     const codigoModalHTML = `
     <div id="validationModal" class="validation-modal-overlay">
         <div class="validation-card">
@@ -19,31 +16,30 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>`;
     document.body.insertAdjacentHTML('beforeend', codigoModalHTML);
 
-    // Referencias a los elementos del modal para poder manipularlos
+    // Referencias a elementos del modal
     const modalNotificacion = document.getElementById("validationModal");
     const iconoModal = document.getElementById("modalIcon");
     const tituloModal = document.getElementById("modalTitle");
     const mensajeModal = document.getElementById("modalMessage");
     const botonAceptarModal = document.getElementById("btnModalOk");
 
-    // FUNCIÓN GLOBAL: Muestra el modal con diferentes tipos de notificación
+    // Función global: muestra modal con diferentes tipos de notificación
     // Parámetros: tipo (success/error/warning), título, mensaje, callback (opcional)
-    // La hacemos global para que otros archivos puedan usarla
     window.mostrarModal = (tipo, titulo, mensaje, callback = null) => {
         let codigoIcono = '';
         
-        // Seleccionar el ícono según el tipo de mensaje
+        // Seleccionar ícono según tipo de mensaje
         if (tipo === 'success') codigoIcono = '<i class="fa-solid fa-circle-check icon-success"></i>';
         else if (tipo === 'error') codigoIcono = '<i class="fa-solid fa-circle-xmark icon-error"></i>';
         else if (tipo === 'warning') codigoIcono = '<i class="fa-solid fa-triangle-exclamation icon-warning"></i>';
 
-        // Configurar el modal con los datos recibidos
+        // Configurar modal con datos recibidos
         iconoModal.innerHTML = codigoIcono;
         tituloModal.textContent = titulo;
         mensajeModal.textContent = mensaje;
         modalNotificacion.classList.add("active");
         
-        // Configurar el botón de aceptar
+        // Configurar botón aceptar
         botonAceptarModal.onclick = () => {
             console.log("Botón 'Entendido' presionado");
             modalNotificacion.classList.remove("active");
@@ -55,27 +51,27 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     };
 
-    // Referencias a los elementos principales de los formularios
+    // Referencias a elementos principales de formularios
     const botonCancelar = document.getElementById("btn-cancel-action");
     const formularioMaquina = document.querySelector(".form");
     const botonGuardarMantenimiento = document.querySelector(".btn-save");
 
-    // BOTÓN CANCELAR: Regresa a la lista de máquinas
+    // Botón cancelar: regresa a lista de máquinas
     if (botonCancelar) {
         botonCancelar.addEventListener("click", () => {
             window.location.href = "/pagina/maquinas";
         });
     }
 
-    // FORMULARIO DE MÁQUINA: Maneja el registro de nuevas máquinas
+    // Formulario de máquina: maneja registro de nuevas máquinas
     if (formularioMaquina) {
         formularioMaquina.addEventListener("submit", async (evento) => {
-            evento.preventDefault(); // Evitar que la página se recargue
+            evento.preventDefault();
 
-            // Obtener el nombre de usuario desde la sesión
+            // Obtener nombre de usuario desde sesión
             const nombreUsuario = sessionStorage.getItem('username') || null;
             
-            // Recopilar todos los datos del formulario
+            // Recopilar datos del formulario
             const datosMaquina = {
                 tipo_equipo: document.getElementById("tipo_equipo").value,
                 codigo_equipo: document.getElementById("codigo").value,

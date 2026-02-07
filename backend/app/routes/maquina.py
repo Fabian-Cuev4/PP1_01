@@ -1,105 +1,97 @@
-# Este archivo define las rutas (URLs) relacionadas con las máquinas
-# Las rutas son las direcciones que el frontend usa para comunicarse con el backend
-# CAPA ROUTER: Recibe las peticiones de Polling del Front-end y llama a los Services.
+# Rutas relacionadas con máquinas para comunicación frontend-backend
+# CAPA ROUTER: Recibe peticiones de Polling y llama a Services
 
-# Importamos las librerías necesarias
+# Importamos librerías necesarias
 from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel
 from datetime import date
 from app.services.maquina_service import MaquinaService
 from app.repositories.proyecto_repository import get_repository
 
-# Creamos un router para agrupar todas las rutas de máquinas
-# El prefix significa que todas las rutas empezarán con /api/maquinas
+# Router para agrupar rutas de máquinas con prefijo /api/maquinas
 router = APIRouter(prefix="/api/maquinas")
 
-# Obtenemos la instancia del repository y creamos el service
+# Obtenemos repository y creamos servicio
 repository = get_repository()
 maquina_service = MaquinaService(repository.get_maquina_dao())
 
-# Definimos cómo deben ser los datos que recibimos del frontend
+# Schema para datos de máquinas recibidos del frontend
 class MaquinaSchema(BaseModel):
     codigo_equipo: str      # Código único de la máquina
     tipo_equipo: str         # Tipo: PC o IMP
     estado_actual: str       # Estado: operativa, fuera de servicio, etc.
     area: str                # Área donde está ubicada
-    fecha: str = None       # Fecha de adquisición (opcional, string para evitar validación)
+    fecha: str = None       # Fecha de adquisición (opcional)
     usuario: str = None      # Usuario que registró la máquina (opcional)
 
-# Esta ruta se ejecuta cuando el frontend hace POST a /api/maquinas/agregar
+# Endpoint para agregar nueva máquina
 @router.post("/agregar")
 async def agregar_maquina(datos: MaquinaSchema):
-    # Convertimos los datos a un diccionario y los enviamos al servicio
+    # Convertimos datos a diccionario y enviamos al servicio
     nueva, error = maquina_service.registrar_maquina(datos.model_dump())
     
-    # Si hubo un error (nueva es None), retornamos un error HTTP 400
+    # Si hay error, retornamos HTTP 400
     if error and nueva is None:
         raise HTTPException(status_code=400, detail=error)
     
-    # Si todo salió bien, retornamos un mensaje de éxito
+    # Retornamos mensaje de éxito
     return {"mensaje": "Máquina guardada", "codigo": nueva.codigo_equipo}
 
-# Esta ruta se ejecuta cuando el frontend hace PUT a /api/maquinas/actualizar
+# Endpoint para actualizar máquina existente
 @router.put("/actualizar")
 async def actualizar_maquina(datos: MaquinaSchema):
-    # Enviamos los datos al servicio para actualizar
+    # Enviamos datos al servicio para actualizar
     actualizada, error = maquina_service.actualizar_maquina(datos.model_dump())
     
-    # Si hubo un error (actualizada es None), retornamos un error HTTP 400
+    # Si hay error, retornamos HTTP 400
     if error and actualizada is None:
         raise HTTPException(status_code=400, detail=error)
     
-    # Si todo salió bien, retornamos un mensaje de éxito
+    # Retornamos mensaje de éxito
     return {"mensaje": "Máquina actualizada", "codigo": actualizada.codigo_equipo}
 
-# Esta ruta se ejecuta cuando el frontend hace DELETE a /api/maquinas/eliminar/{codigo}
-# El {codigo} es un parámetro que viene en la URL
+# Endpoint para eliminar máquina por código
 @router.delete("/eliminar/{codigo}")
 async def eliminar_maquina(codigo: str):
     # Llamamos al servicio para eliminar la máquina
     exito, error = maquina_service.eliminar_maquina(codigo)
     
-    # Si hubo un error, retornamos un error HTTP 400
+    # Si hay error, retornamos HTTP 400
     if error:
         raise HTTPException(status_code=400, detail=error)
     
-    # Si todo salió bien, retornamos un mensaje de éxito
+    # Retornamos mensaje de éxito
     return {"mensaje": "Máquina y mantenimientos eliminados"}
 
-# Esta ruta se ejecuta cuando el frontend hace GET a /api/maquinas/listar
+# Endpoint para listar todas las máquinas
 @router.get("/listar")
 async def listar_maquinas(response: Response):
-    # Configuramos los headers para que el navegador no guarde una copia en caché
-    # Esto asegura que siempre obtengamos los datos más recientes
+    # Configuramos headers para evitar caché
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     
-    # Pedimos al service que nos traiga todas las máquinas
+    # Obtenemos todas las máquinas desde el servicio
     maquinas, error = maquina_service.listar_todas_las_maquinas()
     
-    # Si hubo un error, lo imprimimos y retornamos una lista vacía
+    # Si hay error, imprimimos y retornamos lista vacía
     if error:
         print(f"Error al listar máquinas: {error}")
         return []
     
-    # Retornamos la lista de máquinas
+    # Retornamos lista de máquinas
     return maquinas
 
-# === RUTAS DE POLLING PARA ACTUALIZACIONES EN TIEMPO REAL ===
+# Rutas de polling para actualizaciones en tiempo real
 
-# Esta ruta es específica para polling del dashboard
-# El frontend la llamará periódicamente para obtener datos actualizados
+# Endpoint de polling para dashboard principal
 @router.get("/polling/dashboard")
 async def polling_dashboard(response: Response):
-    """
-    Endpoint de polling para el dashboard principal
-    Retorna datos actualizados de máquinas con caché optimizado para polling
-    """
+    """Endpoint de polling para dashboard con datos actualizados de máquinas"""
     # Configuramos headers para polling
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Access-Control-Allow-Origin"] = "*"
     
     try:
-        # Obtenemos todas las máquinas (usará caché si está disponible)
+        # Obtenemos todas las máquinas (usará caché si disponible)
         maquinas, error = maquina_service.listar_todas_las_maquinas()
         
         if error:
@@ -117,7 +109,7 @@ async def polling_dashboard(response: Response):
             "datos_completos": maquinas
         }
         
-        # Agrupamos por estado
+        # Agrupamos máquinas por estado, tipo y área
         for maquina in maquinas:
             estado = maquina.get("estado", "Sin estado")
             dashboard_data["maquinas_por_estado"][estado] = dashboard_data["maquinas_por_estado"].get(estado, 0) + 1
@@ -134,20 +126,16 @@ async def polling_dashboard(response: Response):
         print(f"Error general en polling dashboard: {e}")
         return {"status": "error", "mensaje": str(e), "datos": []}
 
-# Esta ruta es específica para polling de lista de máquinas
-# Útil para tablas que necesitan actualizarse en tiempo real
+# Endpoint de polling para lista actualizada de máquinas
 @router.get("/polling/lista")
 async def polling_lista_maquinas(response: Response):
-    """
-    Endpoint de polling para lista actualizada de máquinas
-    Optimizado para actualizaciones frecuentes con caché de corta duración
-    """
+    """Endpoint de polling para lista de máquinas con actualizaciones frecuentes"""
     # Configuramos headers para polling
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Access-Control-Allow-Origin"] = "*"
     
     try:
-        # Obtenemos todas las máquinas (usará caché si está disponible)
+        # Obtenemos todas las máquinas (usará caché si disponible)
         maquinas, error = maquina_service.listar_todas_las_maquinas()
         
         if error:
@@ -165,18 +153,16 @@ async def polling_lista_maquinas(response: Response):
         print(f"Error general en polling lista: {e}")
         return {"status": "error", "mensaje": str(e), "datos": []}
 
-# Esta ruta es para polling de búsqueda de máquinas
+# Endpoint de polling para búsqueda de máquinas en tiempo real
 @router.get("/polling/buscar/{termino}")
 async def polling_buscar_maquinas(termino: str, response: Response):
-    """
-    Endpoint de polling para búsqueda de máquinas en tiempo real
-    """
+    """Endpoint de polling para búsqueda de máquinas por código parcial"""
     # Configuramos headers para polling
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Access-Control-Allow-Origin"] = "*"
     
     try:
-        # Buscamos máquinas por código parcial (usará caché si está disponible)
+        # Buscamos máquinas por código parcial (usará caché si disponible)
         maquinas, error = maquina_service.buscar_maquinas_por_codigo(termino)
         
         if error:
@@ -195,13 +181,10 @@ async def polling_buscar_maquinas(termino: str, response: Response):
         print(f"Error general en polling búsqueda: {e}")
         return {"status": "error", "mensaje": str(e), "datos": []}
 
-# Esta ruta verifica el estado del sistema de caché
+# Endpoint para verificar estado del sistema de caché
 @router.get("/cache/status")
 async def cache_status(response: Response):
-    """
-    Endpoint para verificar el estado del sistema de caché
-    Útil para monitoreo y debugging
-    """
+    """Endpoint para verificar estado del sistema de caché (monitoreo)"""
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     
     try:

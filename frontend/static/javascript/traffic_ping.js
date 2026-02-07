@@ -1,53 +1,37 @@
+// Sistema de pings para tracking de usuarios activos
+// Sistema desactivado - ya no se usa traffic/login
+
 (function () {
     try {
         const isAdmin = sessionStorage.getItem('is_admin');
-        if (isAdmin === '1') {
-            return;
-        }
+        if (isAdmin === '1') return;
 
         const username = sessionStorage.getItem('username') || '';
-        if (!username || username === 'admin') {
-            return;
-        }
+        if (!username || username === 'admin') return;
 
-        // Evitar múltiples pestañas del mismo usuario enviando pings
+        // Sistema desactivado - ya no se hace ping al servidor
+        console.log(`Sistema de pings desactivado para usuario: ${username}`);
+        
+        // Opcional: mantener pings locales si se necesita
         const pingKey = `ping_${username}`;
         const now = Date.now();
         const lastPing = parseInt(sessionStorage.getItem(pingKey) || '0');
-        // Solo permitir un ping cada 15 segundos por pestaña para evitar duplicados
-        if (now - lastPing < 15000) {
-            return;
-        }
+        if (now - lastPing < 15000) return;
         sessionStorage.setItem(pingKey, now.toString());
-
+        
         function jitter(minMs, maxMs) {
             return Math.floor(minMs + Math.random() * (maxMs - minMs));
         }
 
         async function pingOnce() {
-            try {
-                await fetch(`/api/traffic/ping?username=${encodeURIComponent(username)}&is_admin=0`, {
-                    method: 'POST',
-                    cache: 'no-store'
-                });
-            } catch (e) {
-            }
+            // Ping desactivado - ya no se llama al servidor
+            console.log('Ping desactivado - no se contacta al servidor');
         }
 
-        pingOnce();
-
-        const base = jitter(1200, 2600);
-        setInterval(pingOnce, base);
-
-        document.addEventListener('click', () => {
-            pingOnce();
-        });
-
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) {
-                pingOnce();
-            }
-        });
+        // Sistema desactivado - no se inicia polling
+        console.log('Sistema de pings completamente desactivado');
+        
     } catch (e) {
+        console.log('Error en sistema de pings:', e);
     }
 })();

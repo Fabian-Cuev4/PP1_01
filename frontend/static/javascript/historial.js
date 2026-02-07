@@ -1,9 +1,9 @@
-// Maneja la visualización del historial de mantenimientos con polling en tiempo real
+// Maneja visualización de historial de mantenimientos con polling en tiempo real
 document.addEventListener("DOMContentLoaded", async () => {
     const btnVolver = document.getElementById("btn-volver-historial");
     if (btnVolver) {
         btnVolver.addEventListener("click", () => {
-            detenerPolling(); // Detener polling al salir
+            detenerPolling();
             window.location.href = "/pagina/maquinas";
         });
     }
@@ -26,27 +26,25 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
-    // CONFIGURACIÓN DE POLLING PARA HISTORIAL
-    const TIEMPO_POLLING_MS = 2000; // Cada 2 segundos para mayor estabilidad
+    // Configuración de polling para historial
+    const TIEMPO_POLLING_MS = 2000;
     let pollingInterval = null;
 
-    // FUNCIÓN: Iniciar polling para historial
+    // Iniciar polling para historial
     function iniciarPollingHistorial() {
-        // Detener polling anterior si existe
         if (pollingInterval) {
             clearInterval(pollingInterval);
         }
         
-        // Iniciar nuevo polling
         pollingInterval = setInterval(() => {
-            cargarHistorial(true); // true = es polling
+            cargarHistorial(true);
             console.log(`🔄 Polling de historial activado para máquina: ${codigo} - ${new Date().toLocaleTimeString()}`);
         }, TIEMPO_POLLING_MS);
         
         console.log(`✅ Polling de historial iniciado para máquina: ${codigo}`);
     }
 
-    // FUNCIÓN: Detener polling
+    // Detener polling
     function detenerPolling() {
         if (pollingInterval) {
             clearInterval(pollingInterval);

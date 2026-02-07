@@ -1,56 +1,30 @@
-// =============================================================================
-// DASHBOARD SIGLAB - Monitoreo de Alta Disponibilidad
-// Autor: Sistema SIGLAB
-// Propósito: Verificar estado de servidores API y mostrar estadísticas básicas
-// =============================================================================
+// Dashboard SIGLAB - Monitoreo de Alta Disponibilidad
+// Verifica estado de servidores API y muestra estadísticas básicas
 
-// CONFIGURACIÓN: Tiempos de actualización y conexión
-const TIEMPO_ACTUALIZACION_MS = 1000;  // Reducido de 200ms a 1000ms (1 segundo)
-const TIEMPO_ESPERA_API_MS = 1500;     // Aumentado a 1500ms timeout por petición
+// Configuración: tiempos de actualización y conexión
+const TIEMPO_ACTUALIZACION_MS = 1000;
+const TIEMPO_ESPERA_API_MS = 1500;
 
-// SISTEMA DE USUARIOS AUTOMÁTICO
+// Sistema de usuarios automático - desactivado
 let usuarioActual = null;
 let sesionIniciada = false;
 
-// FUNCIÓN: Registrar login automático cuando un usuario entra al sistema
+// Funciones de tracking desactivadas - ya no se usan
 function registrarUsuarioActivo(username) {
-    if (!username || username === 'admin') return;
-    
-    usuarioActual = username;
-    sesionIniciada = true;
-    
-    // Notificar al load balancer que el usuario ha iniciado sesión (sesiones persistentes)
-    fetch('/api/traffic/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `username=${encodeURIComponent(username)}&is_admin=0`,
-        credentials: 'include' // Para sticky sessions
-    }).catch(() => {}); // Ignorar errores
-    
-    console.log(`✅ Usuario ${username} ha iniciado sesión (persistente)`);
+    // Tracking desactivado - ya no se usa traffic/login
+    console.log(`Usuario ${username} ha iniciado sesión`);
 }
 
-// FUNCIÓN: Registrar logout automático cuando un usuario sale del sistema
 function registrarUsuarioInactivo() {
-    if (!usuarioActual || !sesionIniciada) return;
-    
-    // Notificar al load balancer que el usuario ha cerrado sesión (sesiones persistentes)
-    fetch('/api/traffic/logout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `username=${encodeURIComponent(usuarioActual)}&is_admin=0`,
-        credentials: 'include' // Para sticky sessions
-    }).catch(() => {}); // Ignorar errores
-    
-    console.log(`❌ Usuario ${usuarioActual} ha cerrado sesión (persistente)`);
-    
+    // Tracking desactivado - ya no se usa traffic/logout
+    console.log(`Usuario ${usuarioActual} ha cerrado sesión`);
     usuarioActual = null;
     sesionIniciada = false;
 }
 
-// FUNCIÓN: Detectar cuando un usuario entra al sistema (login)
+// Detecta cuando usuario entra al sistema (login)
 function detectarLoginUsuario() {
-    // Buscar formularios de login en la página
+    // Buscar formularios de login en página
     const loginForms = document.querySelectorAll('form');
     const usernameInputs = document.querySelectorAll('input[type="text"], input[name*="user"], input[name*="username"]');
     
@@ -65,7 +39,7 @@ function detectarLoginUsuario() {
         });
     });
     
-    // También detectar inputs de username para login automático
+    // Detectar inputs de username para login automático
     usernameInputs.forEach(input => {
         input.addEventListener('change', (e) => {
             const username = e.target.value;
@@ -76,7 +50,7 @@ function detectarLoginUsuario() {
     });
 }
 
-// FUNCIÓN: Detectar cuando un usuario sale del sistema (logout)
+// Detecta cuando usuario sale del sistema (logout)
 function detectarLogoutUsuario() {
     // Detectar botones de logout
     const logoutButtons = document.querySelectorAll('button[onclick*="logout"], a[href*="logout"], button[onclick*="salir"], a[href*="salir"]');
@@ -87,14 +61,14 @@ function detectarLogoutUsuario() {
         });
     });
     
-    // Detectar cuando el usuario cierra la pestaña o ventana
+    // Detectar cuando usuario cierra pestaña o ventana
     window.addEventListener('beforeunload', () => {
         if (sesionIniciada) {
             registrarUsuarioInactivo();
         }
     });
     
-    // Detectar inactividad (no movimiento del mouse/teclado por 30 segundos)
+    // Detectar inactividad (sin movimiento mouse/teclado por 30 segundos)
     let inactivityTimer;
     function resetInactivityTimer() {
         clearTimeout(inactivityTimer);
@@ -103,19 +77,19 @@ function detectarLogoutUsuario() {
                 console.log('🕐 Usuario inactivo por 30 segundos, cerrando sesión automáticamente');
                 registrarUsuarioInactivo();
             }
-        }, 30000); // 30 segundos de inactividad
+        }, 30000);
     }
     
-    // Reiniciar timer con cualquier actividad del usuario
+    // Reiniciar timer con actividad del usuario
     document.addEventListener('mousemove', resetInactivityTimer);
     document.addEventListener('keypress', resetInactivityTimer);
     document.addEventListener('click', resetInactivityTimer);
     document.addEventListener('scroll', resetInactivityTimer);
     
-    resetInactivityTimer(); // Iniciar el timer
+    resetInactivityTimer();
 }
 
-// ELEMENTOS DEL DOM: Servidores y medidor de velocidad
+// Elementos del DOM: servidores y medidor de velocidad
 const tarjetaServidor1 = document.getElementById('server1');
 const tarjetaServidor2 = document.getElementById('server2');
 const tarjetaServidor3 = document.getElementById('server3');
@@ -129,7 +103,7 @@ const speedFill = document.getElementById('speed-fill');
 const speedValue = document.getElementById('speed-value');
 const speedArrow = document.getElementById('speed-arrow');
 
-// INICIALIZACIÓN: Iniciar el dashboard
+// Inicialización del dashboard
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Dashboard cargado, iniciando monitoreo...');
     console.log('Elementos encontrados:', {
@@ -151,11 +125,11 @@ document.addEventListener('DOMContentLoaded', () => {
     detectarLoginUsuario();
     detectarLogoutUsuario();
     
-    // Iniciar el bucle de actualización
+    // Iniciar bucle de actualización
     bucleActualizacion();
 });
 
-// FUNCIÓN: Realiza peticiones a la API con timeout
+// Realiza peticiones a API con timeout
 async function obtenerDatosAPI(url) {
     const controlador = new AbortController();
     const temporizador = setTimeout(() => controlador.abort(), TIEMPO_ESPERA_API_MS);
@@ -182,7 +156,7 @@ async function obtenerDatosAPI(url) {
     }
 }
 
-// FUNCIÓN: Verifica si los servidores API están activos o caídos (3 servidores)
+// Verifica si servidores API están activos o caídos (3 servidores)
 async function verificarEstadoServidores() {
     console.log('Verificando estado de servidores...');
     

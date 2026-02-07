@@ -1,16 +1,13 @@
-// =============================================================================
-// MANTENIMIENTO SIGLAB - Lista de Máquinas con Polling Estable
-// Autor: Sistema SIGLAB con Redis Cache y Polling
-// Propósito: Cargar, mostrar y actualizar máquinas automáticamente cada 2 segundos
-// =============================================================================
+// Mantenimiento SIGLAB - Lista de Máquinas con Polling Estable
+// Carga, muestra y actualiza máquinas automáticamente cada 2 segundos
 
-// CONFIGURACIÓN: Tiempos de polling y conexión
-const TIEMPO_POLLING_MS = 2000;        // Cada 2 segundos (Estable y Rápido)
-const TIEMPO_ESPERA_API_MS = 1500;       // 1.5 segundos timeout por petición
-let pollingInterval = null;            // Guardamos el ID del intervalo
-let maquinasCache = [];                 // Cache local de máquinas
+// Configuración: tiempos de polling y conexión
+const TIEMPO_POLLING_MS = 2000;
+const TIEMPO_ESPERA_API_MS = 1500;
+let pollingInterval = null;
+let maquinasCache = [];
 
-// ELEMENTOS DEL DOM
+// Elementos del DOM
 let contenedorMaquinas = null;
 let inputBusqueda = null;
 
@@ -19,7 +16,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     contenedorMaquinas = document.getElementById("contenedor-principal-maquinas");
     inputBusqueda = document.getElementById("input-busqueda");
     
-    // Configurar el buscador
+    // Configurar buscador
     if (inputBusqueda) {
         inputBusqueda.addEventListener("input", filtrarMaquinas);
         

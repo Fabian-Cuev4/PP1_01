@@ -1,8 +1,8 @@
-// Este archivo maneja la actualización de máquinas
-// Solo permite cambiar el estado, el resto de campos están bloqueados
+// Maneja actualización de máquinas
+// Solo permite cambiar estado, otros campos están bloqueados
 
 document.addEventListener("DOMContentLoaded", async () => {
-    // Manejador del botón cancelar
+    // Manejador botón cancelar
     const btnCancelar = document.getElementById("btn-cancel-action");
     if (btnCancelar) {
         btnCancelar.addEventListener("click", () => {
@@ -10,42 +10,40 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
-    // Obtener el código de la máquina desde la URL
+    // Obtener código de máquina desde URL
     const urlParams = new URLSearchParams(window.location.search);
     const codigo = urlParams.get("codigo");
 
     if (!codigo) {
-        // Si no hay código, volver a la lista
         window.location.href = "http://localhost:8080/pagina/maquinas";
         return;
     }
 
-    // Buscar la máquina en el servidor
+    // Buscar máquina en servidor
     try {
         const response = await fetch("/api/maquinas/listar");
         const maquinas = await response.json();
         const maquina = maquinas.find(m => m.codigo.toLowerCase() === codigo.toLowerCase());
 
         if (!maquina) {
-            // Si no se encuentra, mostrar error y volver
             alert("No se encontró la máquina.");
             window.location.href = "http://localhost:8080/pagina/maquinas";
             return;
         }
 
-        // Llenar el formulario con los datos de la máquina
+        // Llenar formulario con datos de máquina
         document.getElementById("tipo_equipo").value = maquina.tipo === "Computadora" ? "PC" : "IMP";
         document.getElementById("codigo").value = maquina.codigo;
         document.getElementById("estado_actual").value = maquina.estado;
         document.getElementById("area").value = maquina.area;
         document.getElementById("fecha").value = maquina.fecha;
 
-        // Configurar el formulario para enviar la actualización
+        // Configurar formulario para enviar actualización
         const form = document.getElementById("form-actualizar");
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
 
-            // Crear el modal si no existe (por si formulario.js no se cargó)
+            // Crear modal si no existe
             if (!document.getElementById("validationModal")) {
                 const modalHTML = `
                 <div id="validationModal" class="validation-modal-overlay">
@@ -65,7 +63,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const modalMessage = document.getElementById("modalMessage");
             const btnModalOk = document.getElementById("btnModalOk");
 
-            // Función para mostrar el modal
+            // Función para mostrar modal
             const mostrarModal = (tipo, titulo, mensaje, callback = null) => {
                 let iconHtml = '';
                 if (tipo === 'success') iconHtml = '<i class="fa-solid fa-circle-check icon-success"></i>';
@@ -83,7 +81,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 };
             };
 
-            // Preparar los datos para actualizar
+            // Preparar datos para actualizar
             const username = sessionStorage.getItem('username') || null;
             const datos = {
                 codigo_equipo: maquina.codigo,
@@ -94,14 +92,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                 usuario: username
             };
 
-            // Validar que se haya seleccionado un estado
+            // Validar selección de estado
             if (!datos.estado_actual) {
                 mostrarModal('warning', 'Campo Requerido', 'Por favor, selecciona un estado.');
                 return;
             }
 
             try {
-                // Enviar la actualización al servidor
+                // Enviar actualización al servidor
                 const response = await fetch("/api/maquinas/actualizar", {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },

@@ -1,30 +1,27 @@
-// =============================================================================
-// REGISTRO SIGLAB - Creación de Nuevas Cuentas de Usuario
-// Autor: Estudiante de Programación Avanzada
-// Propósito: Manejar el formulario de registro de nuevos usuarios
-// =============================================================================
+// Registro SIGLAB - Creación de Nuevas Cuentas de Usuario
+// Maneja formulario de registro de nuevos usuarios
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Aseguramos que el modal esté oculto al cargar la página
+    // Asegurar que modal esté oculto al cargar página
     const modalNotificacion = document.getElementById("modal-notificacion");
     if (modalNotificacion) {
         modalNotificacion.classList.add("hidden");
         modalNotificacion.classList.remove("show");
     }
 
-    // Referencias a los elementos del formulario de registro
+    // Referencias a elementos del formulario de registro
     const botonRegistrarse = document.getElementById("btn-register");
     const elementoMensajeModal = document.getElementById("modal-mensaje");
     const botonCerrarModal = document.getElementById("btn-modal-cerrar");
     const iconoModal = document.querySelector(".modal-icon i");
 
-    // FUNCIÓN: Muestra el modal de notificación con mensaje y tipo
+    // Muestra modal de notificación con mensaje y tipo
     // Parámetros: mensaje - Texto a mostrar, tipo - 'success' o 'error'
     function mostrarModalRegistro(mensaje, tipo = "error") {
         console.log("mostrarModal registro llamado con:", mensaje, tipo);
         elementoMensajeModal.textContent = mensaje;
 
-        // Configurar ícono y color según el tipo de mensaje
+        // Configurar ícono y color según tipo de mensaje
         if (tipo === "success") {
             iconoModal.className = "fas fa-check-circle";
             iconoModal.parentElement.style.color = "#2ecc71";

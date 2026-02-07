@@ -1,4 +1,4 @@
-# Representa un mantenimiento realizado a una máquina
+# Modelo que representa un mantenimiento realizado a una máquina
 class Mantenimiento:
     def __init__(self, maquina_objeto, empresa, tecnico, tipo, fecha, observaciones, usuario=None):
         self.maquina = maquina_objeto

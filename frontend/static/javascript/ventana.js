@@ -1,11 +1,7 @@
-// =============================================================================
-// NAVEGACIÓN SIGLAB - Control de Navegación Entre Páginas
-// Autor: Estudiante de Programación Avanzada
-// Propósito: Manejar los botones de navegación de la aplicación
-// =============================================================================
+// Control de navegación entre páginas de la aplicación
 
 document.addEventListener("DOMContentLoaded", () => {
-    // BOTÓN AGREGAR MÁQUINA: Navega al formulario de registro
+    // Botón agregar máquina: navega al formulario de registro
     const botonAgregarMaquina = document.getElementById("btn-agregar-maquina");
     if (botonAgregarMaquina) {
         botonAgregarMaquina.addEventListener("click", () => {
@@ -13,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // BOTÓN REPORTES: Navega a la página de reportes
+    // Botón reportes: navega a página de reportes
     const botonVerReportes = document.getElementById("btn-reportes");
     if (botonVerReportes) {
         botonVerReportes.addEventListener("click", () => {
@@ -21,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // BOTÓN REGRESAR: Vuelve a la página principal
+    // Botón regresar: vuelve a página principal
     const botonRegresarInicio = document.getElementById("btn-regresar");
     if (botonRegresarInicio) {
         botonRegresarInicio.addEventListener("click", () => {

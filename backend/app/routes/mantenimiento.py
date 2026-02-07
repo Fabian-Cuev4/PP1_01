@@ -1,26 +1,24 @@
-# Este archivo define las rutas (URLs) relacionadas con los mantenimientos
-# Las rutas son las direcciones que el frontend usa para comunicarse con el backend
-# CAPA ROUTER: Recibe las peticiones de Polling del Front-end y llama a los Services.
+# Rutas relacionadas con mantenimientos para comunicación frontend-backend
+# CAPA ROUTER: Recibe peticiones de Polling y llama a Services
 
-# Importamos las librerías necesarias
+# Importamos librerías necesarias
 from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel
 from datetime import date
 from app.services.mantenimiento_service import MantenimientoService
 from app.repositories.proyecto_repository import get_repository
 
-# Creamos un router para agrupar todas las rutas de mantenimientos
-# El prefix significa que todas las rutas empezarán con /api/mantenimiento
+# Router para agrupar rutas de mantenimientos con prefijo /api/mantenimiento
 router = APIRouter(prefix="/api/mantenimiento")
 
-# Obtenemos la instancia del repository y creamos el service
+# Obtenemos repository y creamos servicio
 repository = get_repository()
 mantenimiento_service = MantenimientoService(
     repository.get_mantenimiento_dao(), 
     repository.get_maquina_dao()
 )
 
-# Definimos cómo deben ser los datos que recibimos del frontend
+# Schema para datos de mantenimientos recibidos del frontend
 class MantenimientoSchema(BaseModel):
     codigo_maquina: str      # Código de la máquina a la que se le hace mantenimiento
     empresa: str              # Nombre de la empresa que hizo el mantenimiento
@@ -30,82 +28,76 @@ class MantenimientoSchema(BaseModel):
     observaciones: str        # Comentarios sobre el mantenimiento
     usuario: str = None       # Usuario que registró el mantenimiento (opcional)
 
-# Esta ruta se ejecuta cuando el frontend hace POST a /api/mantenimiento/agregar
+# Endpoint para agregar nuevo mantenimiento
 @router.post("/agregar")
 async def agregar(datos: MantenimientoSchema):
-    # Convertimos los datos a un diccionario y los enviamos al servicio
+    # Convertimos datos a diccionario y enviamos al servicio
     resultado, error = mantenimiento_service.registrar_mantenimiento(datos.model_dump())
     
-    # Si hubo un error (resultado es None), retornamos un error HTTP 400
+    # Si hay error, retornamos HTTP 400
     if error and resultado is None:
         raise HTTPException(status_code=400, detail=error)
     
-    # Si todo salió bien, retornamos un mensaje de éxito
+    # Retornamos mensaje de éxito
     return {"mensaje": "Mantenimiento guardado exitosamente"}
 
-# Esta ruta se ejecuta cuando el frontend hace GET a /api/mantenimiento/listar/{codigo}
-# El {codigo} es un parámetro que viene en la URL
+# Endpoint para listar mantenimientos de una máquina específica
 @router.get("/listar/{codigo}")
 async def listar_mantenimientos_equipo(codigo: str, response: Response):
-    # Configuramos los headers para que el navegador no guarde una copia en caché
+    # Configuramos headers para evitar caché
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     
-    # Pedimos al servicio que nos traiga todos los mantenimientos de esa máquina
+    # Obtenemos mantenimientos desde el servicio
     registros, error = mantenimiento_service.obtener_historial_por_maquina(codigo)
     
-    # Si hubo un error, retornamos un error HTTP 400
+    # Si hay error, retornamos HTTP 400
     if error:
         raise HTTPException(status_code=400, detail=error)
     
-    # MongoDB guarda los IDs de forma especial, los convertimos a string
-    # para que se puedan enviar como JSON
+    # Convertimos IDs de MongoDB a string para JSON
     for r in registros:
         if "_id" in r:
             r["_id"] = str(r["_id"])
     
-    # Retornamos la lista de mantenimientos
+    # Retornamos lista de mantenimientos
     return registros
 
-# Esta ruta se ejecuta cuando el frontend hace GET a /api/mantenimiento/informe-general
-# Puede recibir un código opcional como parámetro para filtrar
+# Endpoint para informe general de mantenimientos
 @router.get("/informe-general")
 async def informe_general(codigo: str = None):
-    # Pedimos al servicio que genere el reporte completo
+    # Generamos reporte completo desde el servicio
     resultado, error = mantenimiento_service.obtener_informe_completo(codigo)
     
-    # Si hubo un error, retornamos un error HTTP 404
+    # Si hay error, retornamos HTTP 404
     if error:
         raise HTTPException(status_code=404, detail=error)
     
-    # Si no hay resultados, retornamos un error
+    # Si no hay resultados, retornamos HTTP 404
     if resultado is None:
         raise HTTPException(status_code=404, detail="No se encontraron datos")
     
-    # Retornamos el reporte
+    # Retornamos reporte
     return resultado
 
-# === RUTAS DE POLLING PARA ACTUALIZACIONES EN TIEMPO REAL ===
+# Rutas de polling para actualizaciones en tiempo real
 
-# Esta ruta es específica para polling del historial de mantenimientos
+# Endpoint de polling para historial de mantenimientos de máquina específica
 @router.get("/polling/historial/{codigo_maquina}")
 async def polling_historial_mantenimientos(codigo_maquina: str, response: Response):
-    """
-    Endpoint de polling para historial de mantenimientos de una máquina específica
-    Útil para actualizar en tiempo real el historial cuando se agregan nuevos mantenimientos
-    """
+    """Endpoint de polling para historial de mantenimientos en tiempo real"""
     # Configuramos headers para polling
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Access-Control-Allow-Origin"] = "*"
     
     try:
-        # Obtenemos el historial (usará caché si está disponible)
+        # Obtenemos historial (usará caché si disponible)
         registros, error = mantenimiento_service.obtener_historial_por_maquina(codigo_maquina)
         
         if error:
             print(f"Error en polling historial: {error}")
             return {"status": "error", "mensaje": error, "datos": []}
         
-        # Convertimos los IDs de MongoDB a string para JSON
+        # Convertimos IDs de MongoDB a string para JSON
         for r in registros:
             if "_id" in r:
                 r["_id"] = str(r["_id"])
@@ -122,26 +114,23 @@ async def polling_historial_mantenimientos(codigo_maquina: str, response: Respon
         print(f"Error general en polling historial: {e}")
         return {"status": "error", "mensaje": str(e), "datos": []}
 
-# Esta ruta es para polling del informe completo de mantenimientos
+# Endpoint de polling para informe completo de mantenimientos
 @router.get("/polling/informe")
 async def polling_informe_mantenimientos(response: Response, codigo: str = None):
-    """
-    Endpoint de polling para informe completo de mantenimientos
-    Proporciona datos actualizados para dashboard de mantenimientos
-    """
+    """Endpoint de polling para informe completo de mantenimientos"""
     # Configuramos headers para polling
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Access-Control-Allow-Origin"] = "*"
     
     try:
-        # Obtenemos el informe completo (usará caché si está disponible)
+        # Obtenemos informe completo (usará caché si disponible)
         resultado, error = mantenimiento_service.obtener_informe_completo(codigo)
         
         if error:
             print(f"Error en polling informe: {error}")
             return {"status": "error", "mensaje": error, "datos": []}
         
-        # Preparamos estadísticas adicionales para el dashboard
+        # Preparamos estadísticas adicionales para dashboard
         total_maquinas = len(resultado)
         total_mantenimientos = sum(len(maquina.get("mantenimientos", [])) for maquina in resultado)
         
@@ -168,26 +157,23 @@ async def polling_informe_mantenimientos(response: Response, codigo: str = None)
         print(f"Error general en polling informe: {e}")
         return {"status": "error", "mensaje": str(e), "datos": []}
 
-# Esta ruta es para polling de todos los mantenimientos del sistema
+# Endpoint de polling para todos los mantenimientos del sistema
 @router.get("/polling/todos")
 async def polling_todos_mantenimientos(response: Response):
-    """
-    Endpoint de polling para todos los mantenimientos del sistema
-    Útil para vistas administrativas que necesitan ver todos los mantenimientos
-    """
+    """Endpoint de polling para todos los mantenimientos del sistema"""
     # Configuramos headers para polling
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Access-Control-Allow-Origin"] = "*"
     
     try:
-        # Obtenemos todos los mantenimientos (usará caché si está disponible)
+        # Obtenemos todos los mantenimientos (usará caché si disponible)
         mantenimientos, error = mantenimiento_service.obtener_todos_los_mantenimientos()
         
         if error:
             print(f"Error en polling todos mantenimientos: {error}")
             return {"status": "error", "mensaje": error, "datos": []}
         
-        # Convertimos los IDs de MongoDB a string para JSON
+        # Convertimos IDs de MongoDB a string para JSON
         for m in mantenimientos:
             if "_id" in m:
                 m["_id"] = str(m["_id"])

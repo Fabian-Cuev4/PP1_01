@@ -1,15 +1,15 @@
-// maneja la generación de reportes de mantenimiento con búsqueda por código y polling en tiempo real
+// Maneja generación de reportes de mantenimiento con búsqueda por código y polling en tiempo real
 document.addEventListener("DOMContentLoaded", () => {
     const btnBuscar = document.getElementById("btn-buscar");
     const inputCodigo = document.getElementById("input-codigo");
     const tablaBody = document.getElementById("tabla-reporte");
 
-    // CONFIGURACIÓN DE POLLING PARA REPORTES
-    const TIEMPO_POLLING_MS = 2000; // Cada 2 segundos para mayor estabilidad
+    // Configuración de polling para reportes
+    const TIEMPO_POLLING_MS = 2000;
     let pollingInterval = null;
     let ultimoCodigoBuscado = "";
 
-    // decide el color del badge según el tipo de mantenimiento
+    // Decide color del badge según tipo de mantenimiento
     const obtenerClaseBadgeTipo = (tipo) => {
         if (!tipo) return "badge";
         const t = tipo.toLowerCase();
@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return "badge";
     };
 
-    // decide el color del badge según el estado de la máquina
+    // Decide color del badge según estado de máquina
     const obtenerClaseBadgeEstado = (estado) => {
         if (!estado) return "badge";
         const e = estado.toLowerCase();

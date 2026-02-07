@@ -1,10 +1,10 @@
-# Este archivo se encarga de la lógica de negocio de mantenimientos
-# Service es el cerebro: aquí validamos y coordinamos las operaciones
-# CAPA SERVICE: Antes de ir al DAO, pide el cliente Redis al Gerente.
-# Si hay "Cache Hit", devuelve los datos al Front.
+# Lógica de negocio de mantenimientos
+# Service es el cerebro: valida y coordina operaciones
+# CAPA SERVICE: Antes de ir al DAO, pide cliente Redis al DatabaseManager
+# Si hay "Cache Hit", devuelve datos al Front
 # Escritura e Invalidación: Llama a DatabaseManager.limpiar_cache_sistema()
 
-# Importamos las clases necesarias
+# Importamos clases necesarias
 from app.models.Mantenimiento import Mantenimiento
 from app.models.Computadora import Computadora
 from app.models.Impresora import Impresora
@@ -12,19 +12,19 @@ from app.database.database_manager import DatabaseManager
 from app.database.redis import RedisConnection
 
 class MantenimientoService:
-    # Esta clase coordina todas las operaciones de mantenimientos
+    # Coordina todas las operaciones de mantenimientos
     # Es el CEREBRO que maneja caché y coordina con los DAOs
     
     def __init__(self, mantenimiento_dao, maquina_dao):
-        # Guardamos las referencias a los DAOs para usarlos después
+        # Guardamos referencias a los DAOs para uso posterior
         self._mantenimiento_dao = mantenimiento_dao
         self._maquina_dao = maquina_dao
     
     def registrar_mantenimiento(self, datos_dict):
-        # Esta función registra un nuevo mantenimiento con todas las validaciones
+        # Registra nuevo mantenimiento con todas las validaciones
         # ESCRITURA: Invalidamos caché después de guardar
         
-        # Validación: el código de máquina es obligatorio
+        # Validación: código de máquina es obligatorio
         codigo_maquina = datos_dict.get("codigo_maquina")
         if not codigo_maquina or codigo_maquina.strip() == "":
             return None, "El código de la máquina es obligatorio"
@@ -50,7 +50,7 @@ class MantenimientoService:
         if not datos_dict.get("usuario"):
             return None, "El usuario que registra es obligatorio"
         
-        # Creamos el objeto máquina según su tipo
+        # Creamos objeto máquina según su tipo
         tipo_maquina = maquina_db.get('tipo', '').upper()
         if tipo_maquina in ['COMPUTADORA', 'PC']:
             maquina_obj = Computadora(
@@ -71,10 +71,10 @@ class MantenimientoService:
         else:
             return None, "Tipo de máquina no reconocido"
         
-        # Usamos el usuario del mantenimiento o el de la máquina
+        # Usamos usuario del mantenimiento o de la máquina
         usuario = datos_dict.get("usuario") or maquina_db.get('usuario')
         
-        # Creamos el objeto mantenimiento
+        # Creamos objeto mantenimiento
         try:
             nuevo_mantenimiento = Mantenimiento(
                 maquina_objeto=maquina_obj,
@@ -86,15 +86,12 @@ class MantenimientoService:
                 usuario=usuario
             )
             
-            # Guardamos el mantenimiento
+            # Guardamos mantenimiento
             resultado = self._mantenimiento_dao.guardar(nuevo_mantenimiento)
-            print(f"DEBUG: Resultado de guardar mantenimiento: {resultado}")
             
             if resultado:
-                # ESCRITURA: Invalidamos el caché del sistema
-                print("DEBUG: Invalidando caché después de registrar mantenimiento")
+                # ESCRITURA: Invalidamos caché del sistema
                 DatabaseManager.limpiar_cache_sistema()
-                
                 return nuevo_mantenimiento, "Mantenimiento registrado correctamente"
             else:
                 return None, "Error al guardar el mantenimiento"
@@ -103,10 +100,10 @@ class MantenimientoService:
             return None, f"Error al guardar el mantenimiento: {str(e)}"
     
     def obtener_historial_por_maquina(self, codigo_maquina):
-        # Esta función obtiene todos los mantenimientos de una máquina
+        # Obtiene todos los mantenimientos de una máquina
         # LECTURA: Primero busca en caché, si no hay va al DAO
         
-        # Validación: el código es obligatorio
+        # Validación: código es obligatorio
         if not codigo_maquina or codigo_maquina.strip() == "":
             return None, "El código de la máquina es obligatorio"
         
@@ -114,7 +111,7 @@ class MantenimientoService:
         if not self._maquina_dao.buscar_por_codigo(codigo_maquina):
             return None, f"La máquina '{codigo_maquina}' no existe"
         
-        # LECTURA: Antes de ir al DAO, pedimos el cliente Redis al Gerente
+        # LECTURA: Antes de ir al DAO, pedimos cliente Redis al DatabaseManager
         redis_cliente = DatabaseManager.get_redis()
         
         if redis_cliente is not None:
@@ -123,12 +120,7 @@ class MantenimientoService:
             historial_cache = RedisConnection.obtener_cache(cache_key)
             
             if historial_cache is not None:
-                print(f"DEBUG: Cache HIT para historial de máquina {codigo_maquina}")
                 return historial_cache, None
-            else:
-                print(f"DEBUG: Cache MISS para historial de máquina {codigo_maquina}")
-        else:
-            print(f"DEBUG: Redis no disponible, yendo directamente a DAO para historial de máquina {codigo_maquina}")
         
         # Cache MISS o Redis no disponible: vamos al DAO
         try:
@@ -137,18 +129,17 @@ class MantenimientoService:
             if historial and redis_cliente is not None:
                 # Guardamos en caché para próximas consultas
                 cache_key = f"historial:{codigo_maquina.strip().lower()}"
-                RedisConnection.guardar_cache(cache_key, historial, tiempo_vida=2)  # 2 segundos para sincronización ultra rápida
-                print(f"DEBUG: Guardado en caché historial de máquina {codigo_maquina}")
+                RedisConnection.guardar_cache(cache_key, historial, tiempo_vida=2)
             
             return historial, None
         except Exception as e:
             return None, f"Error al obtener el historial: {str(e)}"
     
     def obtener_todos_los_mantenimientos(self):
-        # Esta función obtiene todos los mantenimientos del sistema
+        # Obtiene todos los mantenimientos del sistema
         # LECTURA: Primero busca en caché, si no hay va al DAO
         
-        # LECTURA: Antes de ir al DAO, pedimos el cliente Redis al Gerente
+        # LECTURA: Antes de ir al DAO, pedimos cliente Redis al DatabaseManager
         redis_cliente = DatabaseManager.get_redis()
         
         if redis_cliente is not None:
@@ -156,12 +147,7 @@ class MantenimientoService:
             mantenimientos_cache = RedisConnection.obtener_cache("cache:lista_mantenimientos")
             
             if mantenimientos_cache is not None:
-                print("DEBUG: Cache HIT para lista de mantenimientos")
                 return mantenimientos_cache, None
-            else:
-                print("DEBUG: Cache MISS para lista de mantenimientos")
-        else:
-            print("DEBUG: Redis no disponible, yendo directamente a DAO para lista de mantenimientos")
         
         # Cache MISS o Redis no disponible: vamos al DAO
         try:
@@ -169,18 +155,17 @@ class MantenimientoService:
             
             if mantenimientos and redis_cliente is not None:
                 # Guardamos en caché para próximas consultas
-                RedisConnection.guardar_cache("cache:lista_mantenimientos", mantenimientos, tiempo_vida=300)  # 5 minutos
-                print("DEBUG: Guardado en caché lista de mantenimientos")
+                RedisConnection.guardar_cache("cache:lista_mantenimientos", mantenimientos, tiempo_vida=300)
             
             return mantenimientos, None
         except Exception as e:
             return [], f"Error al listar mantenimientos: {str(e)}"
     
     def eliminar_mantenimientos_por_maquina(self, codigo_maquina):
-        # Esta función elimina todos los mantenimientos de una máquina
+        # Elimina todos los mantenimientos de una máquina
         # ESCRITURA: Invalidamos caché después de eliminar
         
-        # Validación: el código es obligatorio
+        # Validación: código es obligatorio
         if not codigo_maquina or codigo_maquina.strip() == "":
             return False, "El código de la máquina es obligatorio"
         
@@ -193,10 +178,8 @@ class MantenimientoService:
             cantidad_eliminada = self._mantenimiento_dao.eliminar_por_maquina(codigo_maquina)
             
             if cantidad_eliminada > 0:
-                # ESCRITURA: Invalidamos el caché del sistema
-                print("DEBUG: Invalidando caché después de eliminar mantenimientos")
+                # ESCRITURA: Invalidamos caché del sistema
                 DatabaseManager.limpiar_cache_sistema()
-                
                 return True, f"Se eliminaron {cantidad_eliminada} mantenimientos"
             else:
                 return True, "No había mantenimientos que eliminar"
@@ -205,11 +188,11 @@ class MantenimientoService:
             return False, f"Error al eliminar mantenimientos: {str(e)}"
     
     def obtener_informe_completo(self, codigo_maquina=None):
-        # Esta función genera un reporte completo de máquinas y mantenimientos
+        # Genera reporte completo de máquinas y mantenimientos
         # LECTURA: Primero busca en caché, si no hay va al DAO
         
         try:
-            # LECTURA: Antes de ir al DAO, pedimos el cliente Redis al Gerente
+            # LECTURA: Antes de ir al DAO, pedimos cliente Redis al DatabaseManager
             redis_cliente = DatabaseManager.get_redis()
             
             if redis_cliente is not None:
@@ -218,12 +201,7 @@ class MantenimientoService:
                 informe_cache = RedisConnection.obtener_cache(cache_key)
                 
                 if informe_cache is not None:
-                    print(f"DEBUG: Cache HIT para informe {'de máquina ' + codigo_maquina if codigo_maquina else 'completo'}")
                     return informe_cache, None
-                else:
-                    print(f"DEBUG: Cache MISS para informe {'de máquina ' + codigo_maquina if codigo_maquina else 'completo'}")
-            else:
-                print(f"DEBUG: Redis no disponible, yendo directamente a DAO para informe")
             
             # Cache MISS o Redis no disponible: vamos al DAO
             # Obtenemos todas las máquinas
@@ -247,7 +225,7 @@ class MantenimientoService:
                 # Guardamos en caché si Redis está disponible
                 if redis_cliente is not None:
                     cache_key = f"informe:{codigo_maquina or 'completo'}"
-                    RedisConnection.guardar_cache(cache_key, resultado, tiempo_vida=30)  # 30 segundos para sincronización rápida
+                    RedisConnection.guardar_cache(cache_key, resultado, tiempo_vida=30)
                 return resultado, None
             
             # Obtenemos todos los mantenimientos
@@ -262,7 +240,7 @@ class MantenimientoService:
                     if codigo_key not in mantenimientos_por_maquina:
                         mantenimientos_por_maquina[codigo_key] = []
                     
-                    # Convertimos el ID de MongoDB a string
+                    # Convertimos ID de MongoDB a string
                     if "_id" in mantenimiento:
                         mantenimiento["_id"] = str(mantenimiento["_id"])
                     
@@ -272,7 +250,7 @@ class MantenimientoService:
                     
                     mantenimientos_por_maquina[codigo_key].append(mantenimiento)
             
-            # Construimos el reporte final
+            # Construimos reporte final
             resultado = []
             for maquina in maquinas_db:
                 codigo_maq = str(maquina.get("codigo", "")).strip().lower()
@@ -289,8 +267,7 @@ class MantenimientoService:
             # Guardamos en caché si Redis está disponible
             if resultado and redis_cliente is not None:
                 cache_key = f"informe:{codigo_maquina or 'completo'}"
-                RedisConnection.guardar_cache(cache_key, resultado, tiempo_vida=180)  # 3 minutos
-                print(f"DEBUG: Guardado en caché informe {'de máquina ' + codigo_maquina if codigo_maquina else 'completo'}")
+                RedisConnection.guardar_cache(cache_key, resultado, tiempo_vida=180)
             
             return resultado, None
             

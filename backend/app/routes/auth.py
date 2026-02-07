@@ -1,35 +1,34 @@
-# Este archivo maneja la autenticación: login y registro de usuarios
-# Las rutas son las direcciones que el frontend usa para comunicarse con el backend
-# Router solo llama al Service, no conoce la base de datos ni cómo se encripta
+# Manejo de autenticación: login y registro de usuarios
+# Router llama al Service, no conoce la base de datos ni encriptación
 
-# Importamos las librerías necesarias
+# Importamos librerías necesarias
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from app.services.usuario_service import UsuarioService
 from app.repositories.proyecto_repository import get_repository
 
-# Creamos un router para agrupar todas las rutas de autenticación
+# Router para agrupar rutas de autenticación
 router = APIRouter()
 
-# Obtenemos la instancia del repository y creamos el service
+# Obtenemos repository y creamos servicio
 repository = get_repository()
 usuario_service = UsuarioService(repository.get_usuario_dao())
 
-# Definimos cómo deben ser los datos que recibimos del frontend para login
+# Schema para datos de login desde frontend
 class LoginRequest(BaseModel):
     username: str  # Nombre de usuario
     password: str  # Contraseña
 
-# Definimos cómo deben ser los datos que recibimos del frontend para registro
+# Schema para datos de registro desde frontend
 class RegisterRequest(BaseModel):
     nombre_completo: str  # Nombre completo de la persona
     username: str         # Nombre de usuario único
     password: str         # Contraseña
 
-# Esta ruta se ejecuta cuando el frontend hace POST a /api/login
+# Endpoint para login de usuarios
 @router.post("/api/login")
 async def login(datos: LoginRequest):
-    # Llamamos al Service para verificar las credenciales
+    # Llamamos al Service para verificar credenciales
     usuario, mensaje = usuario_service.login_usuario(datos.username, datos.password)
     
     # Si encontramos el usuario, retornamos sus datos
@@ -41,18 +40,18 @@ async def login(datos: LoginRequest):
             "rol": usuario.get('rol', 'usuario')
         }
     else:
-        # Si no encontramos el usuario, retornamos un error HTTP 401 (No autorizado)
+        # Si no encontramos el usuario, retornamos HTTP 401
         raise HTTPException(status_code=401, detail=mensaje)
 
-# Esta ruta se ejecuta cuando el frontend hace POST a /api/register
+# Endpoint para registro de nuevos usuarios
 @router.post("/api/register")
 async def register(datos: RegisterRequest):
-    # Llamamos al Service para crear el nuevo usuario con validaciones
+    # Llamamos al Service para crear nuevo usuario con validaciones
     exito, mensaje = usuario_service.registrar_usuario(datos.nombre_completo, datos.username, datos.password)
     
-    # Si se creó correctamente, retornamos un mensaje de éxito
+    # Si se creó correctamente, retornamos mensaje de éxito
     if exito:
         return {"mensaje": mensaje}
     else:
-        # Si falló (por ejemplo, el usuario ya existe), retornamos un error HTTP 400
+        # Si falló (usuario ya existe), retornamos HTTP 400
         raise HTTPException(status_code=400, detail=mensaje)
