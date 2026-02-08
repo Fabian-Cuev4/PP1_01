@@ -703,7 +703,13 @@ curl http://localhost:8084/status | jq
 
 ## 🎯 CONCLUSIÓN FINAL
 
-Sistema SIGLAB implementado con arquitectura distribuida, load balancer y cache Redis. Dashboard optimizado mostrando estadísticas de máquinas con tipo pero sin área, polling en tiempo real (1s dashboard, 2s otros), y gestión completa de mantenimientos.
+Sistema SIGLAB implementado con arquitectura distribuida, load balancer y cache Redis. Dashboard optimizado mostrando estadísticas de máquinas con tipo pero sin área, polling en tiempo real y gestión completa de mantenimientos.
+
+**Tiempos de Polling:**
+- **Dashboard**: 1 segundo (actualización de estado de servidores y estadísticas)
+- **Reportes**: 2 segundos (actualización de informes de mantenimiento)
+- **Mantenimientos**: 2 segundos (actualización de lista de máquinas)
+- **Historial**: 2 segundos (actualización de historial por máquina)
 
 **Estado actual:**
 - ✅ Load balancer funcional con 3 servidores
