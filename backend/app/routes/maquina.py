@@ -95,7 +95,7 @@ async def listar_maquinas(response: Response, polling: bool = False):
 # Endpoint de polling para dashboard principal
 @router.get("/polling/dashboard")
 async def polling_dashboard(response: Response):
-    """Endpoint de polling para dashboard con datos actualizados de máquinas"""
+    # Endpoint de polling para dashboard con datos actualizados de máquinas
     # Configuramos headers para polling
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Access-Control-Allow-Origin"] = "*"
@@ -119,7 +119,7 @@ async def polling_dashboard(response: Response):
             "datos_completos": maquinas
         }
         
-        # Agrupamos máquinas por estado, tipo y área
+        # Agrupamos máquinas por estado, tipo
         for maquina in maquinas:
             estado = maquina.get("estado", "Sin estado")
             dashboard_data["maquinas_por_estado"][estado] = dashboard_data["maquinas_por_estado"].get(estado, 0) + 1
@@ -127,9 +127,6 @@ async def polling_dashboard(response: Response):
             tipo = maquina.get("tipo", "Sin tipo")
             dashboard_data["maquinas_por_tipo"][tipo] = dashboard_data["maquinas_por_tipo"].get(tipo, 0) + 1
             
-            area = maquina.get("area", "Sin área")
-            dashboard_data["maquinas_por_area"][area] = dashboard_data["maquinas_por_area"].get(area, 0) + 1
-        
         return dashboard_data
         
     except Exception as e:
@@ -139,7 +136,7 @@ async def polling_dashboard(response: Response):
 # Endpoint de polling para búsqueda de máquinas en tiempo real
 @router.get("/polling/buscar/{termino}")
 async def polling_buscar_maquinas(termino: str, response: Response):
-    """Endpoint de polling para búsqueda de máquinas por código parcial"""
+    # Endpoint de polling para búsqueda de máquinas por código parcial
     # Configuramos headers para polling
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Access-Control-Allow-Origin"] = "*"
@@ -167,7 +164,7 @@ async def polling_buscar_maquinas(termino: str, response: Response):
 # Endpoint para verificar estado del sistema de caché
 @router.get("/cache/status")
 async def cache_status(response: Response):
-    """Endpoint para verificar estado del sistema de caché (monitoreo)"""
+    # Endpoint para verificar estado del sistema de caché (monitoreo)
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     
     try:

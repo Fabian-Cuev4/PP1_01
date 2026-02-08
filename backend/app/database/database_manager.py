@@ -13,7 +13,7 @@ class DatabaseManager:
     
     @staticmethod
     def inicializar():
-        """Inicializa todas las bases de datos cuando arranca el servidor"""
+        # Inicializa todas las bases de datos cuando arranca el servidor
         # Intentamos inicializar MySQL
         try:
             MySQLConnection.inicializar_base_datos()
@@ -38,7 +38,7 @@ class DatabaseManager:
     
     @staticmethod
     def cerrar():
-        """Cierra todas las conexiones cuando se apaga el servidor"""
+        # Cierra todas las conexiones cuando se apaga el servidor
         # Cerramos conexión a MongoDB
         MongoDB.cerrar()
         
@@ -47,17 +47,17 @@ class DatabaseManager:
     
     @staticmethod
     def get_mysql_connection():
-        """Obtiene conexión a MySQL para los DAOs"""
+        # Obtiene conexión a MySQL para los DAOs
         return MySQLConnection.conectar()
     
     @staticmethod
     def get_redis():
-        """Obtiene cliente Redis para los Services"""
+        # Obtiene cliente Redis para los Services
         return RedisConnection.conectar()
     
     @staticmethod
     def limpiar_cache_sistema():
-        """Borra claves de caché principales del sistema"""
+        # Borra claves de caché principales del sistema
         try:
             redis_cliente = RedisConnection.conectar()
             if redis_cliente is None:
@@ -106,10 +106,10 @@ class DatabaseManager:
     # Métodos legacy para compatibilidad
     @staticmethod
     def obtener_mysql():
-        """Método legacy - usar get_mysql_connection()"""
+        # Método legacy - usar get_mysql_connection()
         return DatabaseManager.get_mysql_connection()
     
     @staticmethod
     def obtener_mongodb():
-        """Método legacy - retorna MongoDB para compatibilidad"""
+        # Método legacy - retorna MongoDB para compatibilidad
         return MongoDB.conectar()

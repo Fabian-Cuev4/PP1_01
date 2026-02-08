@@ -236,6 +236,73 @@ async function actualizarNombreServidorIndividual(numeroServidor, url, elementoN
     }
 }
 
+// FUNCIÓN: Obtiene y muestra datos de máquinas desde el backend
+async function obtenerDatosMaquinas() {
+    try {
+        console.log('Obteniendo datos de máquinas desde polling dashboard...');
+        const datos = await obtenerDatosAPI('/api/maquinas/polling/dashboard');
+        
+        if (datos && datos.status === 'ok') {
+            console.log('Datos de máquinas recibidos:', datos);
+            
+            // Actualizar tarjetas de estadísticas de máquinas
+            actualizarEstadisticasMaquinas(datos);
+        } else {
+            console.log('Error al obtener datos de máquinas:', datos);
+        }
+    } catch (error) {
+        console.error('Error obteniendo datos de máquinas:', error);
+    }
+}
+
+// FUNCIÓN: Actualiza las estadísticas de máquinas en el dashboard
+function actualizarEstadisticasMaquinas(datos) {
+    // Actualizar contador total de máquinas
+    const totalMaquinasElement = document.getElementById('total-maquinas');
+    if (totalMaquinasElement) {
+        totalMaquinasElement.textContent = datos.total_maquinas || 0;
+    }
+    
+    // Actualizar máquinas por estado
+    const maquinasPorEstadoElement = document.getElementById('maquinas-por-estado');
+    if (maquinasPorEstadoElement && datos.maquinas_por_estado) {
+        let html = '';
+        for (const [estado, cantidad] of Object.entries(datos.maquinas_por_estado)) {
+            html += `<div class="stat-item">
+                        <span class="stat-label">${estado}:</span>
+                        <span class="stat-value">${cantidad}</span>
+                    </div>`;
+        }
+        maquinasPorEstadoElement.innerHTML = html;
+    }
+    
+    // Actualizar máquinas por tipo
+    const maquinasPorTipoElement = document.getElementById('maquinas-por-tipo');
+    if (maquinasPorTipoElement && datos.maquinas_por_tipo) {
+        let html = '';
+        for (const [tipo, cantidad] of Object.entries(datos.maquinas_por_tipo)) {
+            html += `<div class="stat-item">
+                        <span class="stat-label">${tipo}:</span>
+                        <span class="stat-value">${cantidad}</span>
+                    </div>`;
+        }
+        maquinasPorTipoElement.innerHTML = html;
+    }
+    
+    // Actualizar máquinas por área
+    const maquinasPorAreaElement = document.getElementById('maquinas-por-area');
+    if (maquinasPorAreaElement && datos.maquinas_por_area) {
+        let html = '';
+        for (const [area, cantidad] of Object.entries(datos.maquinas_por_area)) {
+            html += `<div class="stat-item">
+                        <span class="stat-label">${area}:</span>
+                        <span class="stat-value">${cantidad}</span>
+                    </div>`;
+        }
+        maquinasPorAreaElement.innerHTML = html;
+    }
+}
+
 // FUNCIÓN AUXILIAR: Obtiene el nombre de un servidor individual
 async function obtenerNombreServidor(url) {
     try {
@@ -321,8 +388,11 @@ async function bucleActualizacion() {
     } catch (error) {
         console.error('Error en ciclo de actualización:', error);
     }
-
-    // 2) Programar la próxima actualización
+    
+    // 2) Obtener y mostrar datos de máquinas
+    await obtenerDatosMaquinas();
+    
+    // 3) Programar la próxima actualización
     console.log(`Próxima actualización en ${TIEMPO_ACTUALIZACION_MS}ms...`);
     setTimeout(bucleActualizacion, TIEMPO_ACTUALIZACION_MS);
 }

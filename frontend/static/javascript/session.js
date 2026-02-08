@@ -145,12 +145,6 @@ if (botonCerrarSesion) {
 
         try {
             // Limpiar datos de sesión del frontend
-            const nombreUsuario = sessionStorage.getItem('username');
-            if (nombreUsuario) {
-                // Eliminar flag de ping si existe
-                sessionStorage.removeItem(`ping_${nombreUsuario}`);
-            }
-            // Eliminar datos de usuario y tipo de usuario
             sessionStorage.removeItem('is_admin');
             sessionStorage.removeItem('username');
             sessionStorage.removeItem('nombre_completo');

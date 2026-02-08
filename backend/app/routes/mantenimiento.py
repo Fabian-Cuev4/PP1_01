@@ -113,7 +113,7 @@ async def informe_general(response: Response, codigo: str = None, polling: bool 
 # Endpoint de polling para informe completo con estadísticas
 @router.get("/polling/informe")
 async def polling_informe_mantenimientos(response: Response, codigo: str = None):
-    """Endpoint de polling para informe completo con estadísticas"""
+    # Endpoint de polling para informe completo con estadísticas
     # Configuramos headers para polling
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Access-Control-Allow-Origin"] = "*"
@@ -156,7 +156,7 @@ async def polling_informe_mantenimientos(response: Response, codigo: str = None)
 # Endpoint de polling para todos los mantenimientos del sistema
 @router.get("/polling/todos")
 async def polling_todos_mantenimientos(response: Response):
-    """Endpoint de polling para todos los mantenimientos del sistema"""
+    # Endpoint de polling para todos los mantenimientos del sistema
     # Configuramos headers para polling
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Access-Control-Allow-Origin"] = "*"

@@ -70,24 +70,4 @@ class UsuarioService:
         else:
             return None, "Usuario o contraseña incorrectos"
     
-    def obtener_usuario(self, username):
-        # Obtiene datos de usuario por su username
-        
-        # Validación básica
-        if not username:
-            return None, "El nombre de usuario es obligatorio"
-        
-        # Obtenemos usuario de base de datos
-        usuario = self._usuario_dao.obtener_usuario_por_username(username)
-        
-        if usuario:
-            # Quitamos contraseña por seguridad
-            usuario_seguro = {
-                'id': usuario.get('id'),
-                'nombre_completo': usuario.get('nombre_completo'),
-                'username': usuario.get('username'),
-                'rol': usuario.get('rol', 'usuario')
-            }
-            return usuario_seguro, None
-        else:
-            return None, "Usuario no encontrado"
+    
