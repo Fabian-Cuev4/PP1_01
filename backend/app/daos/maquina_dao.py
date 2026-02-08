@@ -82,32 +82,6 @@ class MaquinaDAO:
             print(f"Error al actualizar máquina: {e}")
             return False
 
-    # Esta función elimina una máquina de la base de datos
-    # Recibe el código de la máquina a eliminar
-    def eliminar(self, codigo):
-        # Obtenemos una conexión a MySQL usando el GERENTE DE DATOS
-        conn = DatabaseManager.get_mysql_connection()
-        if not conn:
-            return False
-        
-        try:
-            # Creamos un cursor para ejecutar comandos SQL
-            cursor = conn.cursor()
-            # Definimos la consulta SQL para eliminar una máquina
-            query = "DELETE FROM maquinas WHERE codigo = %s"
-            # Ejecutamos la consulta pasándole el código
-            cursor.execute(query, (codigo,))
-            # Confirmamos los cambios
-            conn.commit()
-            # Cerramos el cursor y la conexión
-            cursor.close()
-            conn.close()
-            return True
-        except Exception as e:
-            # Si hay un error, lo imprimimos y retornamos False
-            print(f"Error al eliminar máquina: {e}")
-            return False
-
     # Esta función busca una máquina por su código
     # Recibe el código a buscar y retorna los datos de la máquina
     def buscar_por_codigo(self, codigo):
