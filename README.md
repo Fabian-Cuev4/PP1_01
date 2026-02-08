@@ -461,9 +461,7 @@ PP1_01/
 │   └── Dockerfile         # Configuración Docker
 │
 ├── docker-compose.yml      # Configuración de todos los servicios
-├── README.md              # Este archivo
-└── test_usuarios.html      # Página de pruebas
-```
+└── README.md              # Este archivo
 
 ---
 
