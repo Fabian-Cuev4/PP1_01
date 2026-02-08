@@ -9,7 +9,7 @@ const POLLING_CONFIG = {
         LENTO: 10000      // 10 segundos para datos secundarios
     },
     
-    // Endpoints para polling (ahora unificados)
+    // Endpoints para polling
     ENDPOINTS: {
         MAQUINAS: {
             LISTAR: "/api/maquinas/listar?polling=true",

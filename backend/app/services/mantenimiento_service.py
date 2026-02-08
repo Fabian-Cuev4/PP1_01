@@ -8,6 +8,7 @@
 from app.models.Mantenimiento import Mantenimiento
 from app.models.Computadora import Computadora
 from app.models.Impresora import Impresora
+from app.dtos.informe_dto import InformeMaquinaDTO
 from app.database.database_manager import DatabaseManager
 from app.database.redis import RedisConnection
 
@@ -250,19 +251,21 @@ class MantenimientoService:
                     
                     mantenimientos_por_maquina[codigo_key].append(mantenimiento)
             
-            # Construimos reporte final
+            # Construimos reporte final usando DTO
             resultado = []
             for maquina in maquinas_db:
                 codigo_maq = str(maquina.get("codigo", "")).strip().lower()
                 mantenimientos = mantenimientos_por_maquina.get(codigo_maq, [])
                 
-                resultado.append({
-                    "codigo": maquina["codigo"],
-                    "tipo": maquina["tipo"],
-                    "area": maquina["area"],
-                    "estado": maquina["estado"],
-                    "mantenimientos": mantenimientos
-                })
+                # Usamos el DTO para empaquetar la información
+                informe_dto = InformeMaquinaDTO(
+                    codigo=maquina["codigo"],
+                    tipo=maquina["tipo"],
+                    area=maquina["area"],
+                    estado=maquina["estado"],
+                    mantenimientos=mantenimientos
+                )
+                resultado.append(informe_dto.model_dump())  # Convertimos a dict para JSON
             
             # Guardamos en caché si Redis está disponible
             if resultado and redis_cliente is not None:
