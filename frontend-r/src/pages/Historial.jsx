@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { api } from '../utils/api'
+import Modal from '../components/Modal'
 import './Historial.css'
 
 function Historial() {
@@ -9,12 +10,36 @@ function Historial() {
   const codigoMaquina = searchParams.get('codigo') || ''
   const [historial, setHistorial] = useState([])
   const [loading, setLoading] = useState(true)
+  const [modal, setModal] = useState({
+    isVisible: false,
+    title: 'Atención',
+    message: '',
+    icon: 'fa-exclamation-circle',
+    iconColor: '#e74c3c'
+  })
 
   useEffect(() => {
     if (codigoMaquina) {
       cargarHistorial()
     }
   }, [codigoMaquina])
+
+  const showModal = (title, message, icon = 'fa-exclamation-circle', iconColor = '#e74c3c') => {
+    setModal({
+      isVisible: true,
+      title,
+      message,
+      icon,
+      iconColor
+    })
+  }
+
+  const hideModal = () => {
+    setModal({
+      ...modal,
+      isVisible: false
+    })
+  }
 
   const cargarHistorial = async () => {
     try {
@@ -23,7 +48,7 @@ function Historial() {
       setHistorial(data)
     } catch (error) {
       console.error('Error al cargar historial:', error)
-      alert('Error al cargar el historial de mantenimientos')
+      showModal('Error', 'Error al cargar el historial de mantenimientos', 'fa-exclamation-circle', '#e74c3c')
     } finally {
       setLoading(false)
     }
@@ -78,6 +103,15 @@ function Historial() {
           </div>
         </div>
       </div>
+
+      <Modal
+        isVisible={modal.isVisible}
+        onClose={hideModal}
+        title={modal.title}
+        message={modal.message}
+        icon={modal.icon}
+        iconColor={modal.iconColor}
+      />
     </div>
   )
 }

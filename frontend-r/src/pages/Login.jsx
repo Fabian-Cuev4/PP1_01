@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Modal from '../components/Modal'
 import './Login.css'
 
 function Login() {
@@ -8,11 +9,35 @@ function Login() {
     username: '',
     password: ''
   })
+  const [modal, setModal] = useState({
+    isVisible: false,
+    title: 'Atención',
+    message: '',
+    icon: 'fa-exclamation-circle',
+    iconColor: '#e74c3c'
+  })
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.id]: e.target.value
+    })
+  }
+
+  const showModal = (title, message, icon = 'fa-exclamation-circle', iconColor = '#e74c3c') => {
+    setModal({
+      isVisible: true,
+      title,
+      message,
+      icon,
+      iconColor
+    })
+  }
+
+  const hideModal = () => {
+    setModal({
+      ...modal,
+      isVisible: false
     })
   }
 
@@ -35,11 +60,11 @@ function Login() {
         navigate('/pagina/inicio')
       } else {
         const errorData = await response.json()
-        alert(errorData.detail || 'Error en el login')
+        showModal('Error de Login', errorData.detail || 'Error en el login', 'fa-exclamation-circle', '#e74c3c')
       }
     } catch (error) {
       console.error('Error:', error)
-      alert('Error de conexión con el servidor')
+      showModal('Error de Conexión', 'Error de conexión con el servidor', 'fa-wifi', '#e74c3c')
     }
   }
 
@@ -87,14 +112,14 @@ function Login() {
         </p>
       </div>
 
-      <div id="modal-notificacion" className="modal-overlay hidden">
-        <div className="modal-content">
-          <span className="modal-icon"><i className="fas fa-exclamation-circle"></i></span>
-          <h3 id="modal-titulo">Atención</h3>
-          <p id="modal-mensaje"></p>
-          <button type="button" id="btn-modal-cerrar" className="btn-modal">Entendido</button>
-        </div>
-      </div>
+      <Modal
+        isVisible={modal.isVisible}
+        onClose={hideModal}
+        title={modal.title}
+        message={modal.message}
+        icon={modal.icon}
+        iconColor={modal.iconColor}
+      />
     </div>
   )
 }

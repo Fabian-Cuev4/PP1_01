@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Modal from '../components/Modal'
 import './Register.css'
 
 function Register() {
@@ -10,6 +11,13 @@ function Register() {
     password: '',
     'confirm-password': ''
   })
+  const [modal, setModal] = useState({
+    isVisible: false,
+    title: 'Atención',
+    message: '',
+    icon: 'fa-exclamation-circle',
+    iconColor: '#e74c3c'
+  })
 
   const handleChange = (e) => {
     setFormData({
@@ -18,16 +26,33 @@ function Register() {
     })
   }
 
+  const showModal = (title, message, icon = 'fa-exclamation-circle', iconColor = '#e74c3c') => {
+    setModal({
+      isVisible: true,
+      title,
+      message,
+      icon,
+      iconColor
+    })
+  }
+
+  const hideModal = () => {
+    setModal({
+      ...modal,
+      isVisible: false
+    })
+  }
+
   const handleRegister = async (e) => {
     e.preventDefault()
     
     if (formData.password !== formData['confirm-password']) {
-      alert('Las contraseñas no coinciden')
+      showModal('Error de Validación', 'Las contraseñas no coinciden', 'fa-exclamation-triangle', '#e74c3c')
       return
     }
 
     if (formData.password.length < 8) {
-      alert('La contraseña debe tener mínimo 8 caracteres')
+      showModal('Error de Validación', 'La contraseña debe tener mínimo 8 caracteres', 'fa-exclamation-triangle', '#e74c3c')
       return
     }
 
@@ -45,15 +70,17 @@ function Register() {
       })
 
       if (response.ok) {
-        alert('Usuario registrado exitosamente')
-        navigate('/pagina/login')
+        showModal('Registro Exitoso', 'Usuario registrado exitosamente', 'fa-check-circle', '#27ae60')
+        setTimeout(() => {
+          navigate('/pagina/login')
+        }, 2000)
       } else {
         const errorData = await response.json()
-        alert(errorData.detail || 'Error en el registro')
+        showModal('Error en el Registro', errorData.detail || 'Error en el registro', 'fa-exclamation-circle', '#e74c3c')
       }
     } catch (error) {
       console.error('Error:', error)
-      alert('Error de conexión con el servidor')
+      showModal('Error de Conexión', 'Error de conexión con el servidor', 'fa-wifi', '#e74c3c')
     }
   }
 
@@ -132,14 +159,14 @@ function Register() {
         </p>
       </div>
 
-      <div id="modal-notificacion" className="modal-overlay hidden">
-        <div className="modal-content">
-          <span className="modal-icon"><i className="fas fa-exclamation-circle"></i></span>
-          <h3 id="modal-titulo">Atención</h3>
-          <p id="modal-mensaje"></p>
-          <button type="button" id="btn-modal-cerrar" className="btn-modal">Entendido</button>
-        </div>
-      </div>
+      <Modal
+        isVisible={modal.isVisible}
+        onClose={hideModal}
+        title={modal.title}
+        message={modal.message}
+        icon={modal.icon}
+        iconColor={modal.iconColor}
+      />
     </div>
   )
 }

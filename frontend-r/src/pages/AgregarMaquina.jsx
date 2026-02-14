@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../utils/api'
+import Modal from '../components/Modal'
 import './AgregarMaquina.css'
 
 function AgregarMaquina() {
@@ -14,6 +15,13 @@ function AgregarMaquina() {
     usuario: ''
   })
   const [loading, setLoading] = useState(false)
+  const [modal, setModal] = useState({
+    isVisible: false,
+    title: 'Atención',
+    message: '',
+    icon: 'fa-exclamation-circle',
+    iconColor: '#e74c3c'
+  })
 
   const handleChange = (e) => {
     const { id, value } = e.target
@@ -23,22 +31,41 @@ function AgregarMaquina() {
     }))
   }
 
+  const showModal = (title, message, icon = 'fa-exclamation-circle', iconColor = '#e74c3c') => {
+    setModal({
+      isVisible: true,
+      title,
+      message,
+      icon,
+      iconColor
+    })
+  }
+
+  const hideModal = () => {
+    setModal({
+      ...modal,
+      isVisible: false
+    })
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     
     if (!formData.tipo_equipo || !formData.codigo_equipo || !formData.estado_actual || !formData.area || !formData.fecha) {
-      alert('Por favor complete todos los campos requeridos')
+      showModal('Campos Requeridos', 'Por favor complete todos los campos requeridos', 'fa-exclamation-triangle', '#e74c3c')
       return
     }
 
     try {
       setLoading(true)
       await api.agregarMaquina(formData)
-      alert('Máquina agregada exitosamente')
-      navigate('/pagina/maquinas')
+      showModal('Registro Exitoso', 'Máquina agregada exitosamente', 'fa-check-circle', '#27ae60')
+      setTimeout(() => {
+        navigate('/pagina/maquinas')
+      }, 2000)
     } catch (error) {
       console.error('Error al agregar máquina:', error)
-      alert(error.detail || 'Error al agregar la máquina')
+      showModal('Error al Agregar', error.detail || 'Error al agregar la máquina', 'fa-exclamation-circle', '#e74c3c')
     } finally {
       setLoading(false)
     }
@@ -143,6 +170,15 @@ function AgregarMaquina() {
           </form>
         </div>
       </div>
+
+      <Modal
+        isVisible={modal.isVisible}
+        onClose={hideModal}
+        title={modal.title}
+        message={modal.message}
+        icon={modal.icon}
+        iconColor={modal.iconColor}
+      />
     </div>
   )
 }

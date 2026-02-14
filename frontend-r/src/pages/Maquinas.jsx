@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../utils/api'
+import Modal from '../components/Modal'
 import './Maquinas.css'
 
 function Maquinas() {
@@ -8,10 +9,37 @@ function Maquinas() {
   const [maquinas, setMaquinas] = useState([])
   const [busqueda, setBusqueda] = useState('')
   const [loading, setLoading] = useState(true)
+  const [modal, setModal] = useState({
+    isVisible: false,
+    title: 'Atención',
+    message: '',
+    icon: 'fa-exclamation-circle',
+    iconColor: '#e74c3c',
+    showCancel: false,
+    onConfirm: null,
+    confirmText: 'Entendido'
+  })
 
   useEffect(() => {
     cargarMaquinas()
   }, [])
+
+  const showModal = (title, message, icon = 'fa-exclamation-circle', iconColor = '#e74c3c') => {
+    setModal({
+      isVisible: true,
+      title,
+      message,
+      icon,
+      iconColor
+    })
+  }
+
+  const hideModal = () => {
+    setModal({
+      ...modal,
+      isVisible: false
+    })
+  }
 
   const cargarMaquinas = async () => {
     try {
@@ -20,23 +48,37 @@ function Maquinas() {
       setMaquinas(data)
     } catch (error) {
       console.error('Error al cargar máquinas:', error)
-      alert('Error al cargar las máquinas')
+      showModal('Error', 'Error al cargar las máquinas', 'fa-exclamation-circle', '#e74c3c')
     } finally {
       setLoading(false)
     }
   }
 
   const handleEliminar = async (codigo) => {
-    if (confirm(`¿Estás seguro de eliminar la máquina ${codigo}?`)) {
+    const confirmEliminar = async () => {
       try {
         await api.eliminarMaquina(codigo)
-        alert('Máquina eliminada exitosamente')
-        cargarMaquinas()
+        showModal('Eliminación Exitosa', 'Máquina eliminada exitosamente', 'fa-check-circle', '#27ae60')
+        setTimeout(() => {
+          hideModal()
+          cargarMaquinas()
+        }, 1500)
       } catch (error) {
         console.error('Error al eliminar máquina:', error)
-        alert('Error al eliminar la máquina')
+        showModal('Error al Eliminar', 'Error al eliminar la máquina', 'fa-exclamation-circle', '#e74c3c')
       }
     }
+
+    setModal({
+      isVisible: true,
+      title: 'Confirmar Eliminación',
+      message: `¿Estás seguro de eliminar la máquina ${codigo}?`,
+      icon: 'fa-trash-alt',
+      iconColor: '#e67e22',
+      showCancel: true,
+      onConfirm: confirmEliminar,
+      confirmText: 'Eliminar'
+    })
   }
 
   const maquinasFiltradas = maquinas.filter(maquina => 
@@ -138,6 +180,18 @@ function Maquinas() {
 
       <footer className="main-footer">
       </footer>
+
+      <Modal
+        isVisible={modal.isVisible}
+        onClose={hideModal}
+        title={modal.title}
+        message={modal.message}
+        icon={modal.icon}
+        iconColor={modal.iconColor}
+        showCancel={modal.showCancel}
+        onConfirm={modal.onConfirm}
+        confirmText={modal.confirmText}
+      />
     </div>
   )
 }

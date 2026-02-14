@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { api } from '../utils/api'
+import Modal from '../components/Modal'
 import './ActualizarMaquina.css'
 
 function ActualizarMaquina() {
@@ -17,12 +18,36 @@ function ActualizarMaquina() {
   })
   const [loading, setLoading] = useState(false)
   const [loadingData, setLoadingData] = useState(true)
+  const [modal, setModal] = useState({
+    isVisible: false,
+    title: 'Atención',
+    message: '',
+    icon: 'fa-exclamation-circle',
+    iconColor: '#e74c3c'
+  })
 
   useEffect(() => {
     if (codigoMaquina) {
       cargarDatosMaquina()
     }
   }, [codigoMaquina])
+
+  const showModal = (title, message, icon = 'fa-exclamation-circle', iconColor = '#e74c3c') => {
+    setModal({
+      isVisible: true,
+      title,
+      message,
+      icon,
+      iconColor
+    })
+  }
+
+  const hideModal = () => {
+    setModal({
+      ...modal,
+      isVisible: false
+    })
+  }
 
   const cargarDatosMaquina = async () => {
     try {
@@ -40,13 +65,17 @@ function ActualizarMaquina() {
           usuario: maquina.usuario || ''
         })
       } else {
-        alert('Máquina no encontrada')
-        navigate('/pagina/maquinas')
+        showModal('Máquina No Encontrada', 'La máquina solicitada no existe', 'fa-search', '#e74c3c')
+        setTimeout(() => {
+          navigate('/pagina/maquinas')
+        }, 2000)
       }
     } catch (error) {
       console.error('Error al cargar máquina:', error)
-      alert('Error al cargar los datos de la máquina')
-      navigate('/pagina/maquinas')
+      showModal('Error', 'Error al cargar los datos de la máquina', 'fa-exclamation-circle', '#e74c3c')
+      setTimeout(() => {
+        navigate('/pagina/maquinas')
+      }, 2000)
     } finally {
       setLoadingData(false)
     }
@@ -64,18 +93,20 @@ function ActualizarMaquina() {
     e.preventDefault()
     
     if (!formData.tipo_equipo || !formData.codigo_equipo || !formData.estado_actual || !formData.area || !formData.fecha) {
-      alert('Por favor complete todos los campos requeridos')
+      showModal('Campos Requeridos', 'Por favor complete todos los campos requeridos', 'fa-exclamation-triangle', '#e74c3c')
       return
     }
 
     try {
       setLoading(true)
       await api.actualizarMaquina(formData)
-      alert('Máquina actualizada exitosamente')
-      navigate('/pagina/maquinas')
+      showModal('Actualización Exitosa', 'Máquina actualizada exitosamente', 'fa-check-circle', '#27ae60')
+      setTimeout(() => {
+        navigate('/pagina/maquinas')
+      }, 2000)
     } catch (error) {
       console.error('Error al actualizar máquina:', error)
-      alert(error.detail || 'Error al actualizar la máquina')
+      showModal('Error al Actualizar', error.detail || 'Error al actualizar la máquina', 'fa-exclamation-circle', '#e74c3c')
     } finally {
       setLoading(false)
     }
@@ -185,6 +216,15 @@ function ActualizarMaquina() {
           </form>
         </div>
       </div>
+
+      <Modal
+        isVisible={modal.isVisible}
+        onClose={hideModal}
+        title={modal.title}
+        message={modal.message}
+        icon={modal.icon}
+        iconColor={modal.iconColor}
+      />
     </div>
   )
 }

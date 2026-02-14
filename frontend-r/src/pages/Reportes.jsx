@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../utils/api'
+import Modal from '../components/Modal'
 import './Reportes.css'
 
 function Reportes() {
@@ -8,10 +9,34 @@ function Reportes() {
   const [reportes, setReportes] = useState([])
   const [busqueda, setBusqueda] = useState('')
   const [loading, setLoading] = useState(true)
+  const [modal, setModal] = useState({
+    isVisible: false,
+    title: 'Atención',
+    message: '',
+    icon: 'fa-exclamation-circle',
+    iconColor: '#e74c3c'
+  })
 
   useEffect(() => {
     cargarReportes()
   }, [])
+
+  const showModal = (title, message, icon = 'fa-exclamation-circle', iconColor = '#e74c3c') => {
+    setModal({
+      isVisible: true,
+      title,
+      message,
+      icon,
+      iconColor
+    })
+  }
+
+  const hideModal = () => {
+    setModal({
+      ...modal,
+      isVisible: false
+    })
+  }
 
   const cargarReportes = async () => {
     try {
@@ -20,7 +45,7 @@ function Reportes() {
       setReportes(data)
     } catch (error) {
       console.error('Error al cargar reportes:', error)
-      alert('Error al cargar los reportes')
+      showModal('Error', 'Error al cargar los reportes', 'fa-exclamation-circle', '#e74c3c')
     } finally {
       setLoading(false)
     }
@@ -33,7 +58,7 @@ function Reportes() {
       setReportes(data)
     } catch (error) {
       console.error('Error al buscar reportes:', error)
-      alert('Error al buscar reportes')
+      showModal('Error', 'Error al buscar reportes', 'fa-search', '#e74c3c')
     } finally {
       setLoading(false)
     }
@@ -156,6 +181,15 @@ function Reportes() {
           </div>
         </div>
       </main>
+
+      <Modal
+        isVisible={modal.isVisible}
+        onClose={hideModal}
+        title={modal.title}
+        message={modal.message}
+        icon={modal.icon}
+        iconColor={modal.iconColor}
+      />
     </div>
   )
 }

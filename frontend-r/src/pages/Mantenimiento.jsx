@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { api } from '../utils/api'
+import Modal from '../components/Modal'
 import './Mantenimiento.css'
 
 function Mantenimiento() {
@@ -17,6 +18,13 @@ function Mantenimiento() {
     usuario: ''
   })
   const [loading, setLoading] = useState(false)
+  const [modal, setModal] = useState({
+    isVisible: false,
+    title: 'Atención',
+    message: '',
+    icon: 'fa-exclamation-circle',
+    iconColor: '#e74c3c'
+  })
 
   useEffect(() => {
     setFormData(prev => ({ ...prev, codigo_maquina: codigoMaquina }))
@@ -31,22 +39,41 @@ function Mantenimiento() {
     }))
   }
 
+  const showModal = (title, message, icon = 'fa-exclamation-circle', iconColor = '#e74c3c') => {
+    setModal({
+      isVisible: true,
+      title,
+      message,
+      icon,
+      iconColor
+    })
+  }
+
+  const hideModal = () => {
+    setModal({
+      ...modal,
+      isVisible: false
+    })
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     
     if (!formData.empresa || !formData.tecnico || !formData.tipo || !formData.fecha) {
-      alert('Por favor complete todos los campos requeridos')
+      showModal('Campos Requeridos', 'Por favor complete todos los campos requeridos', 'fa-exclamation-triangle', '#e74c3c')
       return
     }
 
     try {
       setLoading(true)
       await api.agregarMantenimiento(formData)
-      alert('Mantenimiento registrado exitosamente')
-      navigate('/pagina/maquinas')
+      showModal('Registro Exitoso', 'Mantenimiento registrado exitosamente', 'fa-check-circle', '#27ae60')
+      setTimeout(() => {
+        navigate('/pagina/maquinas')
+      }, 2000)
     } catch (error) {
       console.error('Error al registrar mantenimiento:', error)
-      alert(error.detail || 'Error al registrar el mantenimiento')
+      showModal('Error al Registrar', error.detail || 'Error al registrar el mantenimiento', 'fa-exclamation-circle', '#e74c3c')
     } finally {
       setLoading(false)
     }
@@ -151,6 +178,15 @@ function Mantenimiento() {
           </form>
         </div>
       </div>
+
+      <Modal
+        isVisible={modal.isVisible}
+        onClose={hideModal}
+        title={modal.title}
+        message={modal.message}
+        icon={modal.icon}
+        iconColor={modal.iconColor}
+      />
     </div>
   )
 }
