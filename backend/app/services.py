@@ -5,6 +5,7 @@
 from app.models.Computadora import Computadora
 from app.models.Impresora import Impresora
 from app.models.Mantenimiento import Mantenimiento
+from app.models.abstrac_factory.MaquinaFactory import MaquinaFactory
 from app.dtos.informe_dto import InformeMaquinaDTO
 
 # Esta clase coordina todas las operaciones del sistema
@@ -32,28 +33,18 @@ class ProyectoService:
         # Obtenemos el usuario que está registrando la máquina
         usuario = datos_dict.get("usuario")
         
-        # Según el tipo, creamos un objeto diferente
-        if tipo == "PC":
-            # Si es una computadora, creamos un objeto Computadora
-            nueva = Computadora(
+        # Usamos el Factory Pattern para crear la máquina
+        try:
+            nueva = MaquinaFactory.crear_maquina(
+                tipo, 
                 datos_dict.get("codigo_equipo"), 
                 datos_dict.get("estado_actual"), 
                 datos_dict.get("area"), 
                 datos_dict.get("fecha"),
                 usuario
             )
-        elif tipo == "IMP":
-            # Si es una impresora, creamos un objeto Impresora
-            nueva = Impresora(
-                datos_dict.get("codigo_equipo"), 
-                datos_dict.get("estado_actual"), 
-                datos_dict.get("area"), 
-                datos_dict.get("fecha"),
-                usuario
-            )
-        else:
-            # Si el tipo no es válido, retornamos un error
-            return None, f"Tipo de equipo '{tipo}' no válido."
+        except ValueError as e:
+            return None, str(e)
         
         # Intentamos guardar la máquina en la base de datos
         try:
@@ -89,13 +80,13 @@ class ProyectoService:
         fecha = datos_dict.get("fecha") or maquina_db.get('fecha')
         usuario = datos_dict.get("usuario") or maquina_db.get('usuario')
         
-        # Creamos el objeto máquina según su tipo
-        if tipo in ['COMPUTADORA', 'PC']:
-            maquina_obj = Computadora(codigo, estado, area, fecha, usuario)
-        elif tipo in ['IMPRESORA', 'IMP']:
-            maquina_obj = Impresora(codigo, estado, area, fecha, usuario)
-        else:
-            return None, "Tipo de máquina no reconocido."
+        # Usamos el Factory Pattern para crear el objeto máquina
+        try:
+            maquina_obj = MaquinaFactory.crear_maquina(
+                tipo, codigo, estado, area, fecha, usuario
+            )
+        except ValueError as e:
+            return None, str(e)
         
         # Intentamos actualizar en la base de datos
         if self._dao_maq.actualizar(maquina_obj):
@@ -239,3 +230,15 @@ class ProyectoService:
         
         # Retornamos el resultado
         return resultado, None
+    
+    def listar_todas_maquinas(self):
+        """
+        Obtiene todas las máquinas del sistema
+        
+        Returns:
+            list: Lista de todas las máquinas
+        """
+        try:
+            return self._dao_maq.listar_todas()
+        except Exception as e:
+            raise Exception(f"Error al listar máquinas: {str(e)}")

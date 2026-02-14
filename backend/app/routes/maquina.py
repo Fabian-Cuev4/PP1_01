@@ -5,15 +5,18 @@
 from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel
 from datetime import date
-from app.services import ProyectoService
-from app.repositories import repo_instancia
+from app.daos.maquina_dao import MaquinaDAO
+from app.daos.mantenimiento_dao import MantenimientoDAO
+from app.models.Computadora import Computadora
+from app.models.Impresora import Impresora
 
 # Creamos un router para agrupar todas las rutas de máquinas
 # El prefix significa que todas las rutas empezarán con /api/maquinas
 router = APIRouter(prefix="/api/maquinas")
 
-# Creamos una instancia del servicio que maneja la lógica
-service = ProyectoService(repo_instancia.maquina_dao, repo_instancia.mantenimiento_dao)
+# Creamos instancias directas de los DAOs
+maquina_dao = MaquinaDAO()
+mantenimiento_dao = MantenimientoDAO()
 
 # Definimos cómo deben ser los datos que recibimos del frontend
 class MaquinaSchema(BaseModel):
@@ -27,56 +30,104 @@ class MaquinaSchema(BaseModel):
 # Esta ruta se ejecuta cuando el frontend hace POST a /api/maquinas/agregar
 @router.post("/agregar")
 async def agregar_maquina(datos: MaquinaSchema):
-    # Convertimos los datos a un diccionario y los enviamos al servicio
-    nueva, error = service.registrar_maquina(datos.model_dump())
+    # Convertimos los datos a diccionario
+    datos_dict = datos.model_dump()
     
-    # Si hubo un error, retornamos un error HTTP 400
-    if error:
-        raise HTTPException(status_code=400, detail=error)
+    # Verificamos que no exista otra máquina con el mismo código
+    if maquina_dao.buscar_por_codigo(datos_dict.get("codigo_equipo")):
+        raise HTTPException(status_code=400, detail=f"El código '{datos_dict.get('codigo_equipo')}' ya existe.")
     
-    # Si todo salió bien, retornamos un mensaje de éxito
-    return {"mensaje": "Máquina guardada", "codigo": nueva.codigo_equipo}
+    # Creamos el objeto máquina según el tipo usando Abstract Factory
+    tipo = datos_dict.get("tipo_equipo", "").upper()
+    try:
+        if tipo == "PC":
+            nueva = Computadora(
+                datos_dict.get("codigo_equipo"), 
+                datos_dict.get("estado_actual"), 
+                datos_dict.get("area"), 
+                datos_dict.get("fecha"),
+                datos_dict.get("usuario")
+            )
+        elif tipo == "IMP":
+            nueva = Impresora(
+                datos_dict.get("codigo_equipo"), 
+                datos_dict.get("estado_actual"), 
+                datos_dict.get("area"), 
+                datos_dict.get("fecha"),
+                datos_dict.get("usuario")
+            )
+        else:
+            raise HTTPException(status_code=400, detail=f"Tipo de equipo '{tipo}' no válido.")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+    # Guardamos la máquina
+    try:
+        maquina_dao.guardar(nueva)
+        return {"mensaje": "Máquina guardada", "codigo": nueva.codigo_equipo}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al guardar: {str(e)}")
 
 # Esta ruta se ejecuta cuando el frontend hace PUT a /api/maquinas/actualizar
 @router.put("/actualizar")
 async def actualizar_maquina(datos: MaquinaSchema):
-    # Enviamos los datos al servicio para actualizar
-    actualizada, error = service.actualizar_maquina(datos.model_dump())
+    datos_dict = datos.model_dump()
+    codigo = datos_dict.get("codigo_equipo")
     
-    # Si hubo un error, retornamos un error HTTP 400
-    if error:
-        raise HTTPException(status_code=400, detail=error)
+    if not codigo:
+        raise HTTPException(status_code=400, detail="El código de la máquina es obligatorio.")
     
-    # Si todo salió bien, retornamos un mensaje de éxito
-    return {"mensaje": "Máquina actualizada", "codigo": actualizada.codigo_equipo}
+    # Verificamos que la máquina exista
+    maquina_db = maquina_dao.buscar_por_codigo(codigo)
+    if not maquina_db:
+        raise HTTPException(status_code=404, detail=f"La máquina {codigo} no existe.")
+    
+    # Obtenemos los datos nuevos, si no vienen usamos los antiguos
+    tipo = datos_dict.get("tipo_equipo", "").upper() or maquina_db.get('tipo', '').upper()
+    estado = datos_dict.get("estado_actual") or maquina_db.get('estado')
+    area = datos_dict.get("area") or maquina_db.get('area')
+    fecha = datos_dict.get("fecha") or maquina_db.get('fecha')
+    usuario = datos_dict.get("usuario") or maquina_db.get('usuario')
+    
+    # Creamos el objeto máquina según su tipo
+    try:
+        if tipo in ['COMPUTADORA', 'PC']:
+            maquina_obj = Computadora(codigo, estado, area, fecha, usuario)
+        elif tipo in ['IMPRESORA', 'IMP']:
+            maquina_obj = Impresora(codigo, estado, area, fecha, usuario)
+        else:
+            raise HTTPException(status_code=400, detail="Tipo de máquina no reconocido.")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+    # Actualizamos en la base de datos
+    if maquina_dao.actualizar(maquina_obj):
+        return {"mensaje": "Máquina actualizada", "codigo": maquina_obj.codigo_equipo}
+    else:
+        raise HTTPException(status_code=500, detail="Error al actualizar la máquina.")
 
 # Esta ruta se ejecuta cuando el frontend hace DELETE a /api/maquinas/eliminar/{codigo}
-# El {codigo} es un parámetro que viene en la URL
 @router.delete("/eliminar/{codigo}")
 async def eliminar_maquina(codigo: str):
-    # Llamamos al servicio para eliminar la máquina
-    exito, error = service.eliminar_maquina(codigo)
+    # Verificamos que la máquina exista
+    if not maquina_dao.buscar_por_codigo(codigo):
+        raise HTTPException(status_code=404, detail="La máquina no existe.")
     
-    # Si hubo un error, retornamos un error HTTP 400
-    if error:
-        raise HTTPException(status_code=400, detail=error)
+    # Eliminamos primero todos los mantenimientos de esa máquina
+    mantenimiento_dao.eliminar_por_maquina(codigo)
     
-    # Si todo salió bien, retornamos un mensaje de éxito
-    return {"mensaje": "Máquina y mantenimientos eliminados"}
+    # Luego eliminamos la máquina
+    if maquina_dao.eliminar(codigo):
+        return {"mensaje": "Máquina y mantenimientos eliminados"}
+    else:
+        raise HTTPException(status_code=500, detail="Error al eliminar la máquina.")
 
 # Esta ruta se ejecuta cuando el frontend hace GET a /api/maquinas/listar
 @router.get("/listar")
-async def listar_maquinas(response: Response):
-    # Configuramos los headers para que el navegador no guarde una copia en caché
-    # Esto asegura que siempre obtengamos los datos más recientes
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    
+async def listar_maquinas():
     try:
         # Pedimos al DAO que nos traiga todas las máquinas
-        maquinas = repo_instancia.maquina_dao.listar_todas()
-        # Retornamos la lista de máquinas
+        maquinas = maquina_dao.listar_todas()
         return maquinas
     except Exception as e:
-        # Si hay un error, lo imprimimos y retornamos una lista vacía
-        print(f"Error al listar máquinas: {e}")
-        return []
+        raise HTTPException(status_code=500, detail=str(e))

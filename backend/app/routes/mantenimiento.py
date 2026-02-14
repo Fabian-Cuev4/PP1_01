@@ -4,15 +4,18 @@
 # Importamos las librerías necesarias
 from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel
-from app.services import ProyectoService
-from app.repositories import repo_instancia
+from app.daos.maquina_dao import MaquinaDAO
+from app.daos.mantenimiento_dao import MantenimientoDAO
+from app.models.Mantenimiento import Mantenimiento
+from app.dtos.informe_dto import InformeMaquinaDTO
 
 # Creamos un router para agrupar todas las rutas de mantenimientos
 # El prefix significa que todas las rutas empezarán con /api/mantenimiento
 router = APIRouter(prefix="/api/mantenimiento")
 
-# Creamos una instancia del servicio que maneja la lógica
-service = ProyectoService(repo_instancia.maquina_dao, repo_instancia.mantenimiento_dao)
+# Creamos instancias directas de los DAOs
+maquina_dao = MaquinaDAO()
+mantenimiento_dao = MantenimientoDAO()
 
 # Definimos cómo deben ser los datos que recibimos del frontend
 class MantenimientoSchema(BaseModel):
@@ -27,49 +30,90 @@ class MantenimientoSchema(BaseModel):
 # Esta ruta se ejecuta cuando el frontend hace POST a /api/mantenimiento/agregar
 @router.post("/agregar")
 async def agregar(datos: MantenimientoSchema):
-    # Convertimos los datos a un diccionario y los enviamos al servicio
-    resultado, error = service.registrar_mantenimiento(datos.model_dump())
+    datos_dict = datos.model_dump()
+    codigo = datos_dict.get("codigo_maquina")
     
-    # Si hubo un error, retornamos un error HTTP 400
-    if error:
-        raise HTTPException(status_code=400, detail=error)
+    # Verificamos que la máquina exista
+    maquina_db = maquina_dao.buscar_por_codigo(codigo)
+    if not maquina_db:
+        raise HTTPException(status_code=404, detail=f"La máquina {codigo} no existe.")
     
-    # Si todo salió bien, retornamos un mensaje de éxito
-    return {"mensaje": "Mantenimiento guardado exitosamente"}
+    # Creamos el objeto mantenimiento
+    nuevo_mtto = Mantenimiento(
+        maquina_db,  # Pasamos el objeto máquina encontrado
+        datos_dict.get("empresa"),
+        datos_dict.get("tecnico"),
+        datos_dict.get("tipo"),
+        datos_dict.get("fecha"),
+        datos_dict.get("observaciones"),
+        datos_dict.get("usuario")
+    )
+    
+    # Guardamos el mantenimiento
+    mantenimiento_dao.guardar(nuevo_mtto)
+    return {"mensaje": "Mantenimiento registrado", "codigo_maquina": codigo}
 
 # Esta ruta se ejecuta cuando el frontend hace GET a /api/mantenimiento/listar/{codigo}
-# El {codigo} es un parámetro que viene en la URL
 @router.get("/listar/{codigo}")
 async def listar_mantenimientos_equipo(codigo: str, response: Response):
     # Configuramos los headers para que el navegador no guarde una copia en caché
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     
-    # Pedimos al servicio que nos traiga todos los mantenimientos de esa máquina
-    registros = service.obtener_historial_por_maquina(codigo)
+    # Pedimos al DAO que nos traiga todos los mantenimientos de esa máquina
+    registros = mantenimiento_dao.listar_por_maquina(codigo)
     
     # MongoDB guarda los IDs de forma especial, los convertimos a string
-    # para que se puedan enviar como JSON
     for r in registros:
         if "_id" in r:
             r["_id"] = str(r["_id"])
     
-    # Retornamos la lista de mantenimientos
     return registros
 
 # Esta ruta se ejecuta cuando el frontend hace GET a /api/mantenimiento/informe-general
-# Puede recibir un código opcional como parámetro para filtrar
 @router.get("/informe-general")
 async def informe_general(codigo: str = None):
-    # Pedimos al servicio que genere el reporte completo
-    resultado, error = service.obtener_informe_completo(codigo)
-    
-    # Si hubo un error, retornamos un error HTTP 404
-    if error:
-        raise HTTPException(status_code=404, detail=error)
-    
-    # Si no hay resultados, retornamos un error
-    if resultado is None:
-        raise HTTPException(status_code=404, detail="No se encontraron datos")
-    
-    # Retornamos el reporte
-    return resultado
+    try:
+        # Obtenemos todas las máquinas
+        todas_las_maquinas = maquina_dao.listar_todas()
+        
+        # Si nos dieron un código, filtramos solo esa máquina
+        if codigo:
+            todas_las_maquinas = [m for m in todas_las_maquinas if m.get("codigo") == codigo]
+        
+        if not todas_las_maquinas:
+            return []
+        
+        # Obtenemos todos los mantenimientos
+        todos_mttos = mantenimiento_dao.listar_todos() or []
+        
+        # Agrupamos los mantenimientos por código de máquina
+        mttos_por_maquina = {}
+        for mt in todos_mttos:
+            codigo_mt = mt.get("codigo_maquina")
+            if codigo_mt:
+                codigo_key = str(codigo_mt).strip().lower()
+                if codigo_key not in mttos_por_maquina:
+                    mttos_por_maquina[codigo_key] = []
+                if "_id" in mt:
+                    mt["_id"] = str(mt["_id"])
+                if "tipo" not in mt:
+                    mt["tipo"] = "N/A"
+                mttos_por_maquina[codigo_key].append(mt)
+        
+        # Construimos el reporte final usando DTO
+        resultado = []
+        for maq in todas_las_maquinas:
+            codigo_maq = str(maq.get("codigo", "")).strip().lower()
+            mttos = mttos_por_maquina.get(codigo_maq, [])
+            
+            resultado.append(InformeMaquinaDTO(
+                codigo=maq["codigo"],
+                tipo=maq["tipo"],
+                area=maq["area"],
+                estado=maq["estado"],
+                mantenimientos=mttos
+            ))
+        
+        return resultado
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al generar informe: {str(e)}")
