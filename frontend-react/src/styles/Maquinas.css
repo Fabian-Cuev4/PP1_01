@@ -1,0 +1,279 @@
+/* Quita espacios automáticos y define la letra principal */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Estilo general del cuerpo de la página */
+body {
+    background-color: #ffffff;
+    /* Fondo blanco */
+    min-height: 100vh;
+    /* Ocupa toda la pantalla */
+    display: flex;
+    flex-direction: column;
+    /* Deja margen arriba y abajo para que el contenido no quede debajo del Header/Footer */
+    padding-top: 100px;
+    padding-bottom: 140px;
+}
+
+/* La barra azul superior que se queda siempre pegada arriba */
+.main-header {
+    background-color: #3498db;
+    height: 85px;
+    display: flex;
+    justify-content: space-between;
+    /* Elementos repartidos a los extremos */
+    align-items: center;
+    padding: 0 40px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+/* Contenedor del avatar del usuario */
+.user-profile {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+/* Círculo naranja para la foto del perfil */
+.avatar {
+    background-color: #ec7063;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* Imagen de perfil ajustada al círculo */
+.avatar img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+}
+
+/* Sección del botón de cerrar sesión en la derecha */
+.logout-section {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+/* Botón de texto blanco "Cerrar Sesión" */
+.btn-logout {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Estilo del cuadro para filtrar máquinas */
+.search-container {
+    display: flex;
+    align-items: center;
+}
+
+/* El cuadrito de texto donde escribes para buscar */
+#input-busqueda {
+    width: 320px;
+    height: 45px;
+    padding: 0 20px;
+    font-size: 15px;
+    color: #2c3e50;
+    background-color: #f8f9fa;
+    border: 2px solid #d6dbdf;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    /* Hace que el cambio de tamaño sea suave */
+}
+
+/* Cuando clicas el buscador, se hace un poco más ancho */
+#input-busqueda:focus {
+    width: 380px;
+    border-color: #3498db;
+    background-color: #ffffff;
+    outline: none;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+    /* Sombra azulada */
+}
+
+/* La zona donde aparecen las máquinas */
+.content {
+    flex: 1;
+    padding: 30px 80px;
+}
+
+/* Barra que contiene los botones principales y el buscador */
+.action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+/* Botones azules de "Agregar Máquina", "Reporte", etc. */
+.btn-create {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 16px 34px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 17px;
+}
+
+/* Diseño de las tarjetas de máquinas */
+.detail-container {
+    display: flex;
+    /* Tarjeta a la izquierda y botones a la derecha */
+    gap: 15px;
+    width: 100%;
+    margin-bottom: 30px;
+    align-items: stretch;
+    /* Ambos bloques miden lo mismo de alto */
+}
+
+/* Bloque principal de info de la máquina */
+.card-space {
+    background-color: #f8f9fa;
+    flex: 1;
+    display: flex;
+    border: 1px solid #d6dbdf;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Cuadrado muy oscuro a la izquierda de la tarjeta */
+.card-icon {
+    background-color: #031825;
+    width: 160px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Zona de textos de la máquina */
+.card-info {
+    padding: 30px;
+    flex: 1;
+}
+
+/* Etiquetas de colores para el ESTADO (Operativa, etc) */
+.status-badge {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    text-transform: uppercase;
+}
+
+/* Colores dinámicos según el estado */
+.status-operativa {
+    background-color: #2ecc71;
+}
+
+/* Verde */
+.status-mantenimiento {
+    background-color: #f1c40f;
+}
+
+/* Amarillo */
+.status-baja {
+    background-color: #e74c3c;
+}
+
+/* Rojo */
+
+/* La columna de acciones a la derecha de cada máquina */
+.side-buttons {
+    width: 200px;
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #d6dbdf;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    justify-content: center;
+}
+
+/* Estilo base de los botones de acción pequeñitos */
+.btn-action {
+    border: none;
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* Colores para cada tipo de acción */
+.btn-red {
+    background-color: #e74c3c;
+}
+
+.btn-red:hover {
+    background-color: #c0392b;
+}
+
+/* Borrar */
+.btn-green {
+    background-color: #2ecc71;
+}
+
+.btn-green:hover {
+    background-color: #27ae60;
+}
+
+/* Actualizar */
+.btn-blue-act {
+    background-color: #3498db;
+}
+
+.btn-blue-act:hover {
+    background-color: #2980b9;
+}
+
+/* Mantenimiento */
+.btn-yellow-history {
+    background-color: #e4bc0b;
+}
+
+.btn-yellow-history:hover {
+    background-color: #d4ac0a;
+}
+
+/* Historial */
+
+/* La barra azul de abajo que siempre se queda en su sitio */
+.main-footer {
+    background-color: #3498db;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    height: 125px;
+    padding: 0 40px;
+}

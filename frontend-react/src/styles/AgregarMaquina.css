@@ -1,0 +1,272 @@
+/* Quita los espacios automáticos que pone el navegador para que todo encaje bien */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    /* El tamaño total de las cajas incluye rellenos y bordes */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* El fondo oscuro que aparece detrás del formulario para resaltarlo */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    /* Negro con transparencia */
+    display: flex;
+    justify-content: center;
+    /* Centra el formulario horizontalmente */
+    align-items: center;
+    /* Centra el formulario verticalmente */
+}
+
+/* Caja blanca donde se encuentra el formulario de agregar máquina */
+.modal-head {
+    background-color: white;
+    width: 500px;
+    padding: 35px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    /* Sombra para dar profundidad */
+}
+
+/* Estilo del título principal "Agregar Máquina" */
+.modal-content-head {
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 25px;
+    color: #1a1a1a;
+}
+
+/* Espaciado del contenedor de cada dato (Tipo, Código, Área, etc.) */
+.form-content {
+    flex: 1;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    /* Pone la etiqueta arriba y el cuadrito abajo */
+}
+
+/* Estilo de los nombres de los campos (labels) */
+.form-content label {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 3px;
+    font-weight: 500;
+}
+
+/* Estilo común de las cajas para escribir y listas desplegables */
+input[type="text"],
+input[type="date"],
+select {
+    background-color: #f1f3f5;
+    /* Gris muy suave */
+    border: 1px solid transparent;
+    /* Bordes invisibles por defecto */
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+    outline: none;
+    /* Quita el borde azul automático del navegador */
+    width: 100%;
+    transition: all 0.3s ease;
+    /* Transición suave al enfocar */
+}
+
+/* Efecto cuando clicas en una caja o lista: cambia el color de fondo y borde */
+input:focus,
+select:focus {
+    background-color: #ffffff;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    /* Brillo azulado alrededor */
+}
+
+/* --- CORRECCIÓN CHECKBOX --- */
+/* Alinea el cuadrito de verificación con el texto horizontalmente */
+.form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.checkbox-group {
+    flex-direction: row !important;
+    /* Fuerza a que sea fila y no columna */
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 18px;
+    /* Tamaño fijo para el checkbox */
+    height: 18px;
+    cursor: pointer;
+}
+
+.checkbox-group label {
+    margin-bottom: 0 !important;
+    /* Quita el espacio de abajo para que quede centrado con el checkbox */
+    cursor: pointer;
+    font-size: 13px;
+    color: #666;
+}
+
+/* Botones finales de Guardar y Cancelar */
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    /* Uno a cada lado */
+    gap: 15px;
+    margin-top: 35px;
+}
+
+/* Estilo general para ambos botones inferiorés */
+.btn-save,
+.btn-cancel {
+    padding: 12px 28px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* Botón azul de Guardar */
+.btn-save {
+    background-color: #3498db;
+    color: white;
+}
+
+/* Botón rojo de Cancelar */
+.btn-cancel {
+    background-color: #e74c3c;
+    color: white;
+}
+
+/* Los botones se elevan un poquito al pasar el ratón por encima */
+.btn-save:hover,
+.btn-cancel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* --- ESTILOS PARA LA VENTANA DE VALIDACIÓN (MODAL JS) - CORREGIDO --- */
+.validation-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    /* Empieza oculto y JS lo muestra con 'active' */
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* Activa la visualización de la ventana flotante */
+.validation-modal-overlay.active {
+    display: flex;
+}
+
+/* Tarjeta informativa del aviso (Éxito o Error) */
+.validation-card {
+    background-color: white;
+    padding: 30px;
+    border-radius: 16px;
+    width: 400px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Icono dentro del modal */
+.modal-icon {
+    font-size: 50px;
+    margin-bottom: 15px;
+}
+
+/* Título informativo dentro del modal */
+.modal-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Cuerpo del mensaje dentro del modal */
+.modal-message {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 30px;
+    line-height: 1.4;
+}
+
+/* Botón de "Entendido" con estilo azul y redondeado */
+.btn-modal-ok {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 12px 40px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-modal-ok:hover {
+    background-color: #2980b9;
+}
+
+.btn-modal-ok:active {
+    transform: scale(0.95);
+}
+
+/* Colores dinámicos para los iconos de advertencia en el modal */
+.icon-error {
+    color: #e74c3c;
+}
+
+/* Rojo */
+.icon-success {
+    color: #2ecc71;
+}
+
+/* Verde */
+.icon-warning {
+    color: #f1c40f;
+}
+
+/* Amarillo */
+
+/* Estilos para campos deshabilitados (solo lectura) */
+input:disabled,
+select:disabled {
+    background-color: #e8e8e8 !important;
+    /* Fondo gris más oscuro para indicar que está deshabilitado */
+    color: #666 !important;
+    /* Texto gris */
+    cursor: not-allowed;
+    /* Cursor que indica que no se puede editar */
+    opacity: 0.7;
+    /* Hace que se vea un poco transparente */
+    border-color: #ccc !important;
+    /* Borde gris */
+}
+
+input:disabled:focus,
+select:disabled:focus {
+    box-shadow: none !important;
+    /* Sin sombra al hacer focus */
+    border-color: #ccc !important;
+    /* Mantiene el borde gris */
+}
