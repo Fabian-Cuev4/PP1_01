@@ -10,8 +10,8 @@
 
 /* Estilo general de la página principal */
 body {
-    background-color: #ffffff;
-    /* Fondo blanco */
+    background-color: #ffffff !important;
+    /* Fondo blanco forzado */
     min-height: 100vh;
     /* Asegura que ocupe al menos toda la altura de la pantalla */
     display: flex;
@@ -111,6 +111,9 @@ body {
     flex: 1;
     /* Hace que el contenido crezca para llenar el espacio libre */
     padding: 50px 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 /* Alinea a la derecha el botón de '+ Crear Espacio' */
@@ -118,6 +121,7 @@ body {
     display: flex;
     justify-content: flex-end;
     margin-bottom: 40px;
+    width: 100%;
 }
 
 /* Botón azul para añadir nuevos laboratorios */
@@ -138,6 +142,7 @@ body {
     font-size: 36px;
     color: #333;
     margin-bottom: 45px;
+    align-self: flex-start;
 }
 
 /* Contenedor que permite que las tarjetas se pongan una al lado de la otra */
@@ -147,6 +152,7 @@ body {
     /* Si no caben, bajan a la siguiente fila */
     gap: 40px;
     /* Separación entre tarjetas */
+    align-self: flex-start;
 }
 
 /* Hace que toda la tarjeta sea un enlace clicable */

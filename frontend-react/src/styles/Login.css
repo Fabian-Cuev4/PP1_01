@@ -6,13 +6,13 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* fondo gris y centra el contenido en toda la pantalla */
+/* Fondo gris específico para login y registro - Muy específico */
 body {
     background-color: #9da1a5 !important;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    height: 100vh !important;
 }
 
 /* tarjeta blanca del formulario de login/registro */
@@ -20,8 +20,9 @@ body {
     background-color: #ffffff;
     width: 500px;
     border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
     text-align: center;
+    padding: 35px;
 }
 
 /* Estilos específicos para registro (compacto, sin logo) */
