@@ -18,7 +18,7 @@ body {
 /* tarjeta blanca del formulario de login/registro */
 .login-card {
     background-color: #ffffff;
-    width: 700px;
+    width: 500px;
     padding: 50px;
     border-radius: 20px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
@@ -27,16 +27,16 @@ body {
 
 /* espacio debajo del logo */
 .logo-section {
-    margin-bottom: 35px;
+    margin-bottom: 15px;
 }
 
 /* tamaño del logo */
 .logo {
-    width: 600px !important;
-    height: 600px !important;
+    width: 300px !important;
+    height: 300px !important;
     object-fit: contain !important;
-    max-width: 600px !important;
-    max-height: 600px !important;
+    max-width: 300px !important;
+    max-height: 300px !important;
     display: block !important;
     margin: 0 auto !important;
 }
@@ -67,13 +67,31 @@ body {
     border-radius: 10px;
     font-size: 15px;
     outline: none;
+    color: #000000 !important;
 }
 
 /* Asegurar que inputs de contraseña también tengan el mismo fondo */
 .input-information input[type="text"],
 .input-information input[type="password"] {
     background-color: #f2f4f7 !important;
-    color: #333 !important;
+    color: #000000 !important;
+}
+
+/* Forzar estilos para autocompletar y cache */
+.input-information input:-webkit-autofill,
+.input-information input:-webkit-autofill:hover,
+.input-information input:-webkit-autofill:focus,
+.input-information input:-webkit-autofill:active {
+    background-color: #f2f4f7 !important;
+    color: #000000 !important;
+    -webkit-box-shadow: 0 0 0 30px #f2f4f7 inset !important;
+    -webkit-text-fill-color: #000000 !important;
+}
+
+/* Forzar estilos para inputs con valores guardados */
+.input-information input:-internal-autofill-selected {
+    background-color: #f2f4f7 !important;
+    color: #000000 !important;
 }
 
 /* color del placeholder */
