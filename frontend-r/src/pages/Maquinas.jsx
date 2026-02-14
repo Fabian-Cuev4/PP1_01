@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../utils/api'
 import Modal from '../components/Modal'
+import iconoUser from '../assets/img/icono_user.png'
+import iconoMaquina from '../assets/img/icono_maquina.png'
 import './Maquinas.css'
 
 function Maquinas() {
@@ -101,7 +103,7 @@ function Maquinas() {
       <header className="main-header">
         <div className="user-profile">
           <div className="avatar">
-            <img src="/static/img/icono_user.png" alt="Usuario" />
+            <img src={iconoUser} alt="Usuario" />
           </div>
         </div>
       </header>
@@ -133,7 +135,7 @@ function Maquinas() {
               <div key={maquina.codigo} className="detail-container">
                 <div className="card-space">
                   <div className="card-icon">
-                    <img src="/static/img/icono_maquina.png" alt="Máquina" />
+                    <img src={iconoMaquina} alt="Máquina" />
                   </div>
                   <div className="card-info">
                     <h3>{maquina.codigo}</h3>

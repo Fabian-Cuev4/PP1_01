@@ -1,4 +1,7 @@
 import { useNavigate } from 'react-router-dom'
+import iconoUser from '../assets/img/icono_user.png'
+import iconoCerrarSesion from '../assets/img/icono_cerrar_sesion.png'
+import iconoMaquina from '../assets/img/icono_maquina.png'
 import './Inicio.css'
 
 function Inicio() {
@@ -15,13 +18,13 @@ function Inicio() {
       <header className="main-header">
         <div className="user-profile">
           <div className="avatar">
-            <img src="/static/img/icono_user.png" alt="Usuario" />
+            <img src={iconoUser} alt="Usuario" />
           </div>
         </div>
         <div className="logout-section">
           <button type="button" onClick={handleLogout} className="btn-logout">
             Cerrar Sesión
-            <img src="/static/img/icono_cerrar_sesion.png" alt="Cerrar" />
+            <img src={iconoCerrarSesion} alt="Cerrar" />
           </button>
         </div>
       </header>
@@ -36,7 +39,7 @@ function Inicio() {
           <div className="card-target" onClick={() => navigate('/pagina/maquinas')}>
             <div className="card-space">
               <div className="card-icon">
-                <img src="/static/img/icono_maquina.png" alt="Máquinas" />
+                <img src={iconoMaquina} alt="Máquinas" />
               </div>
               <div className="card-info">
                 <h3>Gestión de Equipos</h3>
