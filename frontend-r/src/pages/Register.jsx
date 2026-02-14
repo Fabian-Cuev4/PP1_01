@@ -88,7 +88,7 @@ function Register() {
     <div className="login-container">
       <div className="login-card">
         <div className="logo-section">
-          <img src="/static/img/Logo.png" alt="SIGLAB Logo" className="logo" />
+          <img src="/static/img/Logo.png" alt="SIGLAB Logo" className="logo" onError={(e) => {e.target.src='/vite.svg'}} />
         </div>
 
         <h2>Crear Cuenta</h2>
