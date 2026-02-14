@@ -1,0 +1,76 @@
+const API_BASE_URL = '/api';
+
+export const api = {
+  // Auth endpoints
+  login: async (credentials) => {
+    const response = await fetch(`${API_BASE_URL}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(credentials)
+    });
+    return response.json();
+  },
+
+  register: async (userData) => {
+    const response = await fetch(`${API_BASE_URL}/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData)
+    });
+    return response.json();
+  },
+
+  // Máquinas endpoints
+  listarMaquinas: async () => {
+    const response = await fetch(`${API_BASE_URL}/maquinas/listar`);
+    return response.json();
+  },
+
+  agregarMaquina: async (maquinaData) => {
+    const response = await fetch(`${API_BASE_URL}/maquinas/agregar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(maquinaData)
+    });
+    return response.json();
+  },
+
+  actualizarMaquina: async (maquinaData) => {
+    const response = await fetch(`${API_BASE_URL}/maquinas/actualizar`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(maquinaData)
+    });
+    return response.json();
+  },
+
+  eliminarMaquina: async (codigo) => {
+    const response = await fetch(`${API_BASE_URL}/maquinas/eliminar/${codigo}`, {
+      method: 'DELETE'
+    });
+    return response.json();
+  },
+
+  // Mantenimiento endpoints
+  listarMantenimientos: async (codigo) => {
+    const response = await fetch(`${API_BASE_URL}/mantenimiento/listar/${codigo}`);
+    return response.json();
+  },
+
+  agregarMantenimiento: async (mantenimientoData) => {
+    const response = await fetch(`${API_BASE_URL}/mantenimiento/agregar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(mantenimientoData)
+    });
+    return response.json();
+  },
+
+  informeGeneral: async (codigo = null) => {
+    const url = codigo 
+      ? `${API_BASE_URL}/mantenimiento/informe-general?codigo=${codigo}`
+      : `${API_BASE_URL}/mantenimiento/informe-general`;
+    const response = await fetch(url);
+    return response.json();
+  }
+};

@@ -5,6 +5,8 @@ function Inicio() {
   const navigate = useNavigate()
 
   const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
     navigate('/pagina/login')
   }
 
@@ -37,10 +39,8 @@ function Inicio() {
                 <img src="/static/img/icono_maquina.png" alt="Máquinas" />
               </div>
               <div className="card-info">
-                <h3>Laboratorio de Redes</h3>
-                <p><strong>Ubicación:</strong> Edificio A - Piso 2</p>
-                <p><strong>Entidad:</strong> FICA - Ing. en Sistemas</p>
-                <p><strong>N° Equipos:</strong> 5</p>
+                <h3>Gestión de Equipos</h3>
+                <p>Administra todas las máquinas del laboratorio</p>
               </div>
             </div>
           </div>

@@ -1,11 +1,60 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Register.css'
 
 function Register() {
   const navigate = useNavigate()
+  const [formData, setFormData] = useState({
+    nombre_completo: '',
+    username: '',
+    password: '',
+    'confirm-password': ''
+  })
 
-  const handleRegister = () => {
-    navigate('/pagina/login')
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value
+    })
+  }
+
+  const handleRegister = async (e) => {
+    e.preventDefault()
+    
+    if (formData.password !== formData['confirm-password']) {
+      alert('Las contraseñas no coinciden')
+      return
+    }
+
+    if (formData.password.length < 8) {
+      alert('La contraseña debe tener mínimo 8 caracteres')
+      return
+    }
+
+    try {
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          nombre_completo: formData.nombre_completo,
+          username: formData.username,
+          password: formData.password
+        })
+      })
+
+      if (response.ok) {
+        alert('Usuario registrado exitosamente')
+        navigate('/pagina/login')
+      } else {
+        const errorData = await response.json()
+        alert(errorData.detail || 'Error en el registro')
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      alert('Error de conexión con el servidor')
+    }
   }
 
   return (
@@ -18,36 +67,64 @@ function Register() {
         <h2>Crear Cuenta</h2>
         <br />
 
-        <form>
+        <form onSubmit={handleRegister}>
           <div className="input-user">
-            <label htmlFor="nombre">Nombre Completo</label>
+            <label htmlFor="nombre_completo">Nombre Completo</label>
             <div className="input-information">
-              <input type="text" id="nombre" placeholder="Tu nombre y apellido" />
+              <input 
+                type="text" 
+                id="nombre_completo" 
+                placeholder="Tu nombre y apellido"
+                value={formData.nombre_completo}
+                onChange={handleChange}
+                required
+              />
             </div>
           </div>
 
           <div className="input-user">
-            <label htmlFor="usuario">Usuario</label>
+            <label htmlFor="username">Usuario</label>
             <div className="input-information">
-              <input type="text" id="usuario" placeholder="Crea un nombre de usuario" />
+              <input 
+                type="text" 
+                id="username" 
+                placeholder="Crea un nombre de usuario"
+                value={formData.username}
+                onChange={handleChange}
+                required
+              />
             </div>
           </div>
 
           <div className="input-password">
             <label htmlFor="password">Contraseña</label>
             <div className="input-information">
-              <input type="password" id="password" placeholder="Mínimo 8 caracteres" />
+              <input 
+                type="password" 
+                id="password" 
+                placeholder="Mínimo 8 caracteres"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
             </div>
           </div>
 
           <div className="input-password">
             <label htmlFor="confirm-password">Confirmar Contraseña</label>
             <div className="input-information">
-              <input type="password" id="confirm-password" placeholder="Repite tu contraseña" />
+              <input 
+                type="password" 
+                id="confirm-password" 
+                placeholder="Repite tu contraseña"
+                value={formData['confirm-password']}
+                onChange={handleChange}
+                required
+              />
             </div>
           </div>
 
-          <button type="button" onClick={handleRegister} className="btn-signin">Registrarse</button>
+          <button type="submit" className="btn-signin">Registrarse</button>
         </form>
 
         <p className="footer-text">

@@ -15,7 +15,7 @@ class Mantenimiento:
 
     def to_dict(self):
         return {
-            "codigo_maquina": self.maquina.codigo_equipo,
+            "codigo_maquina": self.maquina.get("codigo", "") if isinstance(self.maquina, dict) else self.maquina.codigo_equipo,
             "empresa": self.empresa,
             "tecnico": self.tecnico,
             "tipo": self.tipo,

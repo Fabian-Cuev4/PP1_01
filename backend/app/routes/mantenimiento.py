@@ -106,13 +106,13 @@ async def informe_general(codigo: str = None):
             codigo_maq = str(maq.get("codigo", "")).strip().lower()
             mttos = mttos_por_maquina.get(codigo_maq, [])
             
-            resultado.append(InformeMaquinaDTO(
-                codigo=maq["codigo"],
-                tipo=maq["tipo"],
-                area=maq["area"],
-                estado=maq["estado"],
-                mantenimientos=mttos
-            ))
+            resultado.append({
+                "codigo": maq["codigo"],
+                "tipo": maq["tipo"],
+                "area": maq["area"],
+                "estado": maq["estado"],
+                "mantenimientos": mttos  # Aseguramos que sea una lista
+            })
         
         return resultado
     except Exception as e:
