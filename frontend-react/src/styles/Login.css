@@ -8,7 +8,7 @@
 
 /* fondo gris y centra el contenido en toda la pantalla */
 body {
-    background-color: #9da1a5;
+    background-color: #9da1a5 !important;
     display: flex;
     justify-content: center;
     align-items: center;

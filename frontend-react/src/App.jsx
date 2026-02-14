@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { useEffect } from 'react'
 import Login from './pages/Login'
 import Register from './pages/Register'
-import Dashboard from './pages/Dashboard'
+import Inicio from './pages/Inicio'
 import Maquinas from './pages/Maquinas'
 import AgregarMaquina from './pages/AgregarMaquina'
 import Historial from './pages/Historial'
@@ -27,7 +27,7 @@ function App() {
         <Routes>
           <Route path="/pagina/login" element={<Login />} />
           <Route path="/pagina/registro" element={<Register />} />
-          <Route path="/pagina/inicio" element={<Dashboard />} />
+          <Route path="/pagina/inicio" element={<Inicio />} />
           <Route path="/pagina/maquinas" element={<Maquinas />} />
           <Route path="/pagina/agregar-maquina" element={<AgregarMaquina />} />
           <Route path="/pagina/historial" element={<Historial />} />

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
-import '../styles/Dashboard.css'
+import '../styles/Inicio.css'
 
-function Dashboard() {
+function Inicio() {
   const navigate = useNavigate()
   const username = localStorage.getItem('username')
 
@@ -15,13 +15,12 @@ function Dashboard() {
   }
 
   return (
-    <div className="dashboard-container">
+    <>
       <header className="main-header">
         <div className="user-profile">
           <div className="avatar">
             <img src="/img/icono_user.png" alt="Usuario" />
           </div>
-          <span className="username">{username}</span>
         </div>
         <div className="logout-section">
           <button type="button" className="btn-logout" onClick={handleLogout}>
@@ -52,9 +51,11 @@ function Dashboard() {
         </div>
       </main>
 
-      <footer className="main-footer"></footer>
-    </div>
+      <footer className="main-footer">
+        <p> 2024 SIGLAB - Sistema de Gestión de Laboratorios</p>
+      </footer>
+    </>
   )
 }
 
-export default Dashboard
+export default Inicio
