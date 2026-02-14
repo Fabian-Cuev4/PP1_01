@@ -80,7 +80,7 @@ function Register() {
 
   return (
     <>
-      <div className="login-card">
+      <div className="login-card register-compact">
         {/* Contenedor para la imagen del logo */}
         <div className="logo-section">
           <img src="/img/Logo.png" alt="SIGLAB Logo" className="logo" />

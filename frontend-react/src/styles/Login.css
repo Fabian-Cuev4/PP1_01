@@ -19,26 +19,93 @@ body {
 .login-card {
     background-color: #ffffff;
     width: 500px;
-    padding: 50px;
     border-radius: 20px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     text-align: center;
 }
 
-/* espacio debajo del logo */
-.logo-section {
+/* Estilos específicos para registro (compacto, sin logo) */
+.login-card.register-compact {
+    width: 450px;
+    padding: 35px;
+}
+
+.login-card.register-compact .logo-section {
+    display: none; /* Ocultar logo en registro */
+}
+
+.login-card.register-compact .input-user,
+.login-card.register-compact .input-password {
+    margin-bottom: 18px;
+}
+
+.login-card.register-compact h2 {
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+.login-card.register-compact .footer-text {
+    margin-top: 30px;
+}
+
+.login-card.register-compact .btn-signin {
+    margin-top: 20px;
+    padding: 14px;
+}
+
+/* Estilos específicos para login (compacto, con logo) */
+.login-card:not(.register-compact) {
+    width: 450px;
+    padding: 35px;
+}
+
+.login-card:not(.register-compact) .logo-section {
     margin-bottom: 15px;
 }
 
-/* tamaño del logo */
-.logo {
-    width: 300px !important;
-    height: 300px !important;
+.login-card:not(.register-compact) .logo {
+    width: 350px !important;
+    height: 350px !important;
+    max-width: 350px !important;
+    max-height: 350px !important;
     object-fit: contain !important;
-    max-width: 300px !important;
-    max-height: 300px !important;
     display: block !important;
     margin: 0 auto !important;
+}
+
+.login-card:not(.register-compact) .input-user,
+.login-card:not(.register-compact) .input-password {
+    margin-bottom: 18px;
+}
+
+.login-card:not(.register-compact) h2 {
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+.login-card:not(.register-compact) .footer-text {
+    margin-top: 30px;
+}
+
+.login-card:not(.register-compact) .btn-signin {
+    margin-top: 20px;
+    padding: 14px;
+}
+
+/* Estilos específicos para login (logo más grande) */
+body:has(#usuario):not(:has(#nombre)) .logo {
+    width: 350px !important;
+    height: 350px !important;
+    max-width: 350px !important;
+    max-height: 350px !important;
+    object-fit: contain !important;
+    display: block !important;
+    margin: 0 auto !important;
+}
+
+/* espacio debajo del logo */
+.logo-section {
+    margin-bottom: 15px;
 }
 
 /* alineación de los campos de entrada */
