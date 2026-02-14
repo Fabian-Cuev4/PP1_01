@@ -5,6 +5,8 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from app.daos.usuario_dao import UsuarioDAO
+from app.models.Usuario import Usuario
+from app.dtos.usuario_dto import UsuarioDTO
 
 # Creamos un router para agrupar todas las rutas de autenticación
 router = APIRouter()
@@ -53,10 +55,24 @@ async def register(datos: RegisterRequest):
     if len(datos.password) < 6:
         raise HTTPException(status_code=400, detail="La contraseña debe tener al menos 6 caracteres")
     
-    # Llamamos directamente al DAO para crear el usuario
-    exito = usuario_dao.crear_usuario(datos.nombre_completo, datos.username, datos.password)
-    
-    if exito:
-        return {"mensaje": "Usuario creado correctamente"}
-    else:
-        raise HTTPException(status_code=400, detail="Error al crear usuario (quizás el usuario ya existe)")
+    try:
+        # Creamos el objeto usuario usando el modelo
+        nuevo_usuario = Usuario(
+            datos.nombre_completo,
+            datos.username,
+            datos.password,
+            "usuario"  # Rol por defecto
+        )
+        
+        # Validamos los datos usando el método del modelo
+        nuevo_usuario.validar_datos()
+        
+        # Guardamos usando el DAO con el objeto
+        exito = usuario_dao.guardar(nuevo_usuario)
+        
+        if exito:
+            return {"mensaje": "Usuario creado correctamente"}
+        else:
+            raise HTTPException(status_code=400, detail="Error al crear usuario (quizás el usuario ya existe)")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))

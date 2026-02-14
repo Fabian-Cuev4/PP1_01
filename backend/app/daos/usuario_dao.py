@@ -4,29 +4,80 @@
 # Importamos las clases necesarias
 from app.database.mysql import MySQLConnection
 from app.utils.encryption import Encryption
+from app.models.Usuario import Usuario
 
 class UsuarioDAO:
-    # Esta función crea un nuevo usuario en la base de datos
+    # Esta función guarda un usuario usando el objeto Usuario
     @staticmethod
-    def crear_usuario(nombre, username, password):
-        # Obtenemos una conexión a la base de datos
-        conn = MySQLConnection.conectar()
-        if not conn:
-            return False
-        
+    def guardar(usuario):
         try:
+            # Validamos los datos del usuario
+            usuario.validar_datos()
+            
+            # Obtenemos una conexión a la base de datos
+            conn = MySQLConnection.conectar()
+            if not conn:
+                return False
+            
+            # Encriptamos la contraseña antes de guardarla por seguridad
+            password_encriptado = Encryption.encriptar_password(usuario.password)
+            
+            # Creamos un cursor para ejecutar comandos SQL
+            cursor = conn.cursor()
+            # Definimos la consulta SQL para insertar un usuario
+            query = "INSERT INTO usuarios (nombre_completo, username, password, rol) VALUES (%s, %s, %s, %s)"
+            # Ejecutamos la consulta pasándole los datos
+            cursor.execute(query, (
+                usuario.nombre_completo, 
+                usuario.username, 
+                password_encriptado, 
+                usuario.rol
+            ))
+            # Confirmamos los cambios
+            conn.commit()
+            return True
+        except ValueError as e:
+            # Error de validación
+            print(f"Error de validación: {e}")
+            return False
+        except Exception as e:
+            # Si hay un error, lo imprimimos
+            print(f"Error al guardar usuario: {e}")
+            return False
+        finally:
+            # Siempre cerramos el cursor y la conexión
+            cursor.close()
+            conn.close()
+
+    # Esta función crea un nuevo usuario en la base de datos (método legacy)
+    @staticmethod
+    def crear_usuario(nombre_completo, username, password, rol="usuario"):
+        try:
+            # Creamos el objeto usuario y validamos los datos
+            usuario = Usuario(nombre_completo, username, password, rol)
+            usuario.validar_datos()  # Lanza excepción si hay error
+            
+            # Obtenemos una conexión a la base de datos
+            conn = MySQLConnection.conectar()
+            if not conn:
+                return False
+            
             # Encriptamos la contraseña antes de guardarla por seguridad
             password_encriptado = Encryption.encriptar_password(password)
             
             # Creamos un cursor para ejecutar comandos SQL
             cursor = conn.cursor()
             # Definimos la consulta SQL para insertar un usuario
-            query = "INSERT INTO usuarios (nombre_completo, username, password) VALUES (%s, %s, %s)"
+            query = "INSERT INTO usuarios (nombre_completo, username, password, rol) VALUES (%s, %s, %s, %s)"
             # Ejecutamos la consulta pasándole los datos
-            cursor.execute(query, (nombre, username, password_encriptado))
+            cursor.execute(query, (nombre_completo, username, password_encriptado, rol))
             # Confirmamos los cambios
             conn.commit()
             return True
+        except ValueError as e:
+            # Error de validación
+            print(f"Error de validación: {e}")
+            return False
         except Exception as e:
             # Si hay un error (por ejemplo, el usuario ya existe), lo imprimimos
             print(f"Error al crear usuario: {e}")

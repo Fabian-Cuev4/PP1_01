@@ -6,11 +6,11 @@ class Impresora(Maquina):
         super().__init__(codigo_equipo, "Impresora", estado_actual, area, fecha, usuario)
     
     def obtener_tipo_especifico(self):
-        """Retorna el tipo específico de impresora"""
+        # Retorna el tipo específico de impresora
         return "IMP"
     
     def validar_datos(self):
-        """Valida datos específicos de impresora"""
+        # Valida datos específicos de impresora
         if not self.codigo_equipo or not self.codigo_equipo.strip():
             raise ValueError("El código de la impresora es requerido")
         if not self.area or not self.area.strip():

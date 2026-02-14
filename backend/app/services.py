@@ -232,12 +232,10 @@ class ProyectoService:
         return resultado, None
     
     def listar_todas_maquinas(self):
-        """
-        Obtiene todas las máquinas del sistema
+        # Obtiene todas las máquinas del sistema
         
-        Returns:
-            list: Lista de todas las máquinas
-        """
+        # Returns:
+        #     list: Lista de todas las máquinas
         try:
             return self._dao_maq.listar_todas()
         except Exception as e:

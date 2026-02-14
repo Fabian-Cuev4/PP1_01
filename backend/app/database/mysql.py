@@ -39,13 +39,13 @@ class MySQLConnection:
                 cursor.execute(f"CREATE DATABASE IF NOT EXISTS {MySQLConnection.DATABASE}")
                 # Empezamos a usar nuestra base de datos
                 cursor.execute(f"USE {MySQLConnection.DATABASE}")
-
+                
                 # Creamos la tabla de usuarios
                 cursor.execute("""
                     CREATE TABLE IF NOT EXISTS usuarios (
                         id INT AUTO_INCREMENT PRIMARY KEY,
                         nombre_completo VARCHAR(100) NOT NULL,
-                        username VARCHAR(50) NOT NULL UNIQUE,
+                        username VARCHAR(50) UNIQUE NOT NULL,
                         password VARCHAR(255) NOT NULL,
                         rol VARCHAR(20) DEFAULT 'admin'
                     )

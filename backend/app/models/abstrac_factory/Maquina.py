@@ -12,16 +12,16 @@ class Maquina(ABC):
     
     @abstractmethod
     def obtener_tipo_especifico(self):
-        """Método abstracto que debe implementar cada tipo de máquina"""
+        # Método abstracto que debe implementar cada tipo de máquina
         pass
     
     @abstractmethod
     def validar_datos(self):
-        """Método abstracto para validar datos específicos del tipo"""
+        # Método abstracto para validar datos específicos del tipo
         pass
     
     def to_dict(self):
-        """Convierte la máquina a diccionario para guardar en BD"""
+        # Convierte la máquina a diccionario para guardar en BD
         return {
             "codigo_equipo": self.codigo_equipo,
             "tipo_equipo": self.tipo_equipo,
