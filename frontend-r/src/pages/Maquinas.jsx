@@ -40,7 +40,7 @@ function Maquinas() {
               </div>
             </div>
             <div className="side-buttons">
-              <button type="button" className="btn-action btn-yellow-history">Historial</button>
+              <button type="button" onClick={() => navigate('/pagina/historial')} className="btn-action btn-yellow-history">Historial</button>
               <button type="button" onClick={() => navigate('/pagina/mantenimiento')} className="btn-action btn-green">Mantenimiento</button>
               <button type="button" onClick={() => navigate('/pagina/actualizar-maquina')} className="btn-action btn-blue-act">Actualizar</button>
             </div>
@@ -59,7 +59,7 @@ function Maquinas() {
               </div>
             </div>
             <div className="side-buttons">
-              <button type="button" className="btn-action btn-yellow-history">Historial</button>
+              <button type="button" onClick={() => navigate('/pagina/historial')} className="btn-action btn-yellow-history">Historial</button>
               <button type="button" onClick={() => navigate('/pagina/mantenimiento')} className="btn-action btn-green">Mantenimiento</button>
               <button type="button" onClick={() => navigate('/pagina/actualizar-maquina')} className="btn-action btn-blue-act">Actualizar</button>
             </div>
@@ -78,7 +78,7 @@ function Maquinas() {
               </div>
             </div>
             <div className="side-buttons">
-              <button type="button" className="btn-action btn-yellow-history">Historial</button>
+              <button type="button" onClick={() => navigate('/pagina/historial')} className="btn-action btn-yellow-history">Historial</button>
               <button type="button" onClick={() => navigate('/pagina/mantenimiento')} className="btn-action btn-green">Mantenimiento</button>
               <button type="button" onClick={() => navigate('/pagina/actualizar-maquina')} className="btn-action btn-blue-act">Actualizar</button>
             </div>
