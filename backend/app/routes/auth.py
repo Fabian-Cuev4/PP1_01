@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from app.services.usuario_service import UsuarioService
 
-router = APIRouter()
+router = APIRouter(prefix="/api/auth")
 service = UsuarioService()
 
 # Modelos para validación de entrada
@@ -19,7 +19,7 @@ class RegisterRequest(BaseModel):
     password: str
     rol: str = "usuario"
 
-@router.post("/api/login")
+@router.post("/login")
 async def login(datos: LoginRequest):
     # Inicia sesión de usuario
     try:
@@ -30,7 +30,7 @@ async def login(datos: LoginRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/api/register")
+@router.post("/register")
 async def register(datos: RegisterRequest):
     # Registra un nuevo usuario
     try:
@@ -41,24 +41,3 @@ async def register(datos: RegisterRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/api/usuarios/activos")
-async def listar_usuarios_activos():
-    # Obtiene lista de usuarios activos
-    try:
-        resultado, error = service.obtener_usuarios_activos()
-        if error:
-            raise HTTPException(status_code=500, detail=error)
-        return {"usuarios_activos": resultado}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.post("/api/logout")
-async def logout(username: str):
-    # Cierra sesión de usuario
-    try:
-        resultado, error = service.cerrar_sesion(username)
-        if error:
-            raise HTTPException(status_code=400, detail=error)
-        return resultado
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))

@@ -8,8 +8,53 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
     proxy: {
-      '/api': {
-        target: 'http://backend:8000',
+      '/api/auth/login': {
+        target: 'http://backend-simple:8000',
+        changeOrigin: true,
+        secure: false
+      },
+      '/api/auth/register': {
+        target: 'http://backend-simple:8000',
+        changeOrigin: true,
+        secure: false
+      },
+      '/api/maquinas/agregar': {
+        target: 'http://nginx_balancer:80',
+        changeOrigin: true,
+        secure: false
+      },
+      '/api/maquinas/listar': {
+        target: 'http://backend-simple:8000',
+        changeOrigin: true,
+        secure: false
+      },
+      '/api/maquinas/buscar': {
+        target: 'http://backend-simple:8000',
+        changeOrigin: true,
+        secure: false
+      },
+      '/api/maquinas/actualizar': {
+        target: 'http://backend-simple:8000',
+        changeOrigin: true,
+        secure: false
+      },
+      '/api/maquinas/eliminar': {
+        target: 'http://backend-simple:8000',
+        changeOrigin: true,
+        secure: false
+      },
+      '/api/mantenimiento/agregar': {
+        target: 'http://backend-simple:8000',
+        changeOrigin: true,
+        secure: false
+      },
+      '/api/mantenimiento/listar': {
+        target: 'http://backend-simple:8000',
+        changeOrigin: true,
+        secure: false
+      },
+      '/api/mantenimiento/informe-general': {
+        target: 'http://backend-simple:8000',
         changeOrigin: true,
         secure: false
       }

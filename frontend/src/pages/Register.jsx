@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Modal from '../components/Modal'
 import logo from '../assets/img/Logo.png'
 import '../styles/Formularios.css'
+import { api } from '../utils/api'
 
 function Register() {
   const navigate = useNavigate()
@@ -63,29 +64,18 @@ function Register() {
     }
 
     try {
-      const response = await fetch('/api/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          nombre_completo: formData.nombre_completo,
-          username: formData.username,
-          password: formData.password
-        })
+      const data = await api.register({
+        nombre_completo: formData.nombre_completo,
+        username: formData.username,
+        password: formData.password
       })
-
-      if (response.ok) {
-        showModal('Registro Exitoso', 'Usuario registrado exitosamente', 'fa-check-circle', '#27ae60')
-        setTimeout(() => {
-          navigate('/login')
-        }, 2000)
-      } else {
-        const errorData = await response.json()
-        showModal('Error en el Registro', errorData.detail || 'Error en el registro', 'fa-exclamation-circle', '#e74c3c')
-      }
+      
+      showModal('Registro Exitoso', 'Usuario registrado exitosamente', 'fa-check-circle', '#27ae60')
+      setTimeout(() => {
+        navigate('/login')
+      }, 2000)
     } catch (error) {
-      showModal('Error de Conexión', 'Error de conexión con el servidor', 'fa-wifi', '#e74c3c')
+      showModal('Error en el Registro', error.message || 'Error en el registro', 'fa-exclamation-circle', '#e74c3c')
     }
   }
 

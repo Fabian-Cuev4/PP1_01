@@ -3,7 +3,7 @@
 import http from 'k6/http';
 import { sleep } from 'k6';
 
-const BASE_URL = __ENV.BASE_URL || 'http://host.docker.internal:18000';
+const BASE_URL = __ENV.BASE_URL || 'http://nginx_balancer:80';
 
 // Variables configurables
 const MACHINES_PER_GROUP = 20;  // Máquinas por grupo
@@ -20,26 +20,29 @@ function generateMaquinaData() {
   const estados = ['Operativo', 'Mantenimiento', 'Dañado'];
   const areas = ['IT', 'Ventas', 'Marketing', 'RH', 'Finanzas'];
   
-  // Generar código secuencial TM-001, TM-002, etc.
-  const codigoSecuencial = `TM-${String(machineCounter).padStart(3, '0')}`;
+  // Generar código único con timestamp para evitar duplicados
+  const timestamp = Date.now();
+  const codigoSecuencial = `TM-${timestamp}-${String(machineCounter).padStart(3, '0')}`;
   machineCounter++; // Incrementar contador para próxima máquina
+  
+  // Formato de fecha compatible: YYYY-MM-DD
+  const today = new Date();
+  const fechaFormateada = today.toISOString().split('T')[0];
   
   return {
     codigo_equipo: codigoSecuencial,
     tipo_equipo: tipos[Math.floor(Math.random() * tipos.length)],
     estado_actual: estados[Math.floor(Math.random() * estados.length)],
     area: areas[Math.floor(Math.random() * areas.length)],
-    fecha: new Date().toISOString().split('T')[0],
-    usuario: 'admin'  // Siempre admin para evitar problemas de autenticación
+    fecha: fechaFormateada
+    // Quitamos el campo usuario para evitar problemas
   };
 }
 
 export default function () {
   // Headers simples sin autenticación
   const headers = {
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    'Content-Type': 'application/json',
   };
   
   for (let group = 1; group <= TOTAL_GROUPS; group++) {

@@ -41,37 +41,87 @@ services:
       retries: 3 # Intenta 3 veces antes de marcar como "unhealthy"
       start_period: 15s # Da 15 segundos de gracia (MongoDB inicia más rápido que MySQL)
 
-  # SERVICIO 3: Backend (FastAPI)
+  # SERVICIO 3: Backend con Réplicas (FastAPI) - Escalable para máquinas
   backend:
     build:
-      # En lugar de usar una imagen pre-hecha, construye una personalizada
-      context: ./backend # Carpeta donde está el código del backend
-      dockerfile: Dockerfile # Archivo con instrucciones para construir la imagen
-    container_name: backend_siglab # Nombre del contenedor
-    restart: always # Reinicio automático
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
     environment:
-      # Variables de entorno que el backend necesita para conectarse a las bases de datos
-      MYSQL_HOST: mysql # Nombre del servicio MySQL (Docker resuelve esto como IP interna)
-      MYSQL_USER: root # Usuario de MySQL
-      MYSQL_PASSWORD: Clubpengui1 # Contraseña de MySQL
-      MYSQL_DATABASE: proyecto_maquinas # Base de datos a usar
-      MONGO_HOST: mongodb # Nombre del servicio MongoDB
-      MONGO_PORT: 27017 # Puerto interno de MongoDB
-    ports:
-      - "18000:8000" # Mapea puerto 18000 de tu PC al puerto 8000 del contenedor (FastAPI)
+      MYSQL_HOST: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: Clubpengui1
+      MYSQL_DATABASE: proyecto_maquinas
+      MONGO_HOST: mongodb
+      MONGO_PORT: 27017
+      SERVER_ID: ${HOSTNAME:-backend}  # ID único por contenedor para dashboard
     volumes:
-      # Monta carpetas de tu PC dentro del contenedor (cambios en vivo)
-      - ./backend:/app # Carpeta del backend se sincroniza con /app en el contenedor
+      - ./backend:/app
     depends_on:
-      # Este contenedor solo inicia cuando MySQL y MongoDB estén "healthy"
       mysql:
-        condition: service_healthy # Espera a que MySQL pase el healthcheck
+        condition: service_healthy
       mongodb:
-        condition: service_healthy # Espera a que MongoDB pase el healthcheck
+        condition: service_healthy
     networks:
-      - siglab_network # Conecta a la red interna
+      - siglab_network
+      - frontend_network  # Para comunicación con nginx
+    deploy:
+      replicas: 3  # 3 réplicas para balanceo de máquinas
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    profiles:
+      - all  # Perfil completo con todo menos k6
 
-  # SERVICIO 4: Frontend (React + Vite)
+  # SERVICIO 3.1: Backend Único (para desarrollo sin balanceo)
+  backend-simple:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend_siglab_simple
+    restart: always
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: Clubpengui1
+      MYSQL_DATABASE: proyecto_maquinas
+      MONGO_HOST: mongodb
+      MONGO_PORT: 27017
+      SERVER_ID: 0  # Servidor único
+    ports:
+      - "18000:8000"  # Backend simple para desarrollo
+    volumes:
+      - ./backend:/app
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    networks:
+      - siglab_network
+      - frontend_network  # Red exclusiva para frontend
+    profiles:
+      - all  # Todo junto
+
+  # SERVICIO 4: Balanceador de Carga Nginx (SOLO para microservicio máquinas)
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: nginx_balancer
+    restart: always
+    ports:
+      - "8888:80"      # Balanceador principal para máquinas (cambiado de 80)
+      - "8080:8080"   # Monitoreo de estado
+    networks:
+      - siglab_network
+      - frontend_network  # Para comunicación con frontend
+    profiles:
+      - all  # Solo en perfil completo
+
+  # SERVICIO 5: Frontend
   frontend:
     build:
       context: ./frontend
@@ -85,24 +135,25 @@ services:
       - ./frontend:/app
       - /app/node_modules  # Evitar sobreescribir node_modules
     depends_on:
-      - backend
+      - backend-simple  # Solo backend simple
     networks:
-      - siglab_network
+      - frontend_network  # Red exclusiva con backend-simple
+    profiles:
+      - all  # Todo junto
 
-# SERVICIO 5: Saturador k6 para pruebas de carga
+# SERVICIO 6: Saturador k6 para pruebas de carga
   k6-saturator:
     build:
       context: ./k6
       dockerfile: Dockerfile
     container_name: k6_saturator
     environment:
-      BASE_URL: http://host.docker.internal:18000  # URL del backend desde el contenedor k6
-    depends_on:
-      - backend
+      BASE_URL: http://nginx_balancer:80  # URL de nginx para máquinas
     networks:
       - siglab_network
+      - frontend_network  # Para comunicación con nginx
     profiles:
-      - load-test  # Solo se inicia con --profile load-test
+      - load-test  # Solo k6 (asume que el resto ya corre)
 
 # VOLÚMENES (Almacenamiento Persistente)
 volumes:
@@ -118,3 +169,7 @@ networks:
   siglab_network:
     # Red interna para que los contenedores se comuniquen entre sí
     driver: bridge # Tipo de red: bridge (red virtual privada)
+  
+  frontend_network:
+    # Red exclusiva para frontend y backend-simple
+    driver: bridge

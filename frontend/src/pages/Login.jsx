@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Modal from '../components/Modal'
 import logo from '../assets/img/Logo.png'
 import '../styles/Formularios.css'
+import { api } from '../utils/api'
 
 function Login() {
   const navigate = useNavigate()
@@ -51,27 +52,15 @@ function Login() {
     }
     
     try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        // Limpiar sessionStorage antes de guardar nuevos datos
-        sessionStorage.clear()
-        sessionStorage.setItem('token', data.token)
-        sessionStorage.setItem('user', JSON.stringify(data.usuario))
-        navigate('/inicio')
-      } else {
-        const errorData = await response.json()
-        showModal('Error de Login', errorData.detail || 'Error en el login', 'fa-exclamation-circle', '#e74c3c')
-      }
+      const data = await api.login(formData)
+      
+      // Limpiar sessionStorage antes de guardar nuevos datos
+      sessionStorage.clear()
+      sessionStorage.setItem('token', data.token)
+      sessionStorage.setItem('user', JSON.stringify(data.usuario))
+      navigate('/inicio')
     } catch (error) {
-      showModal('Error de Conexión', 'Error de conexión con el servidor', 'fa-wifi', '#e74c3c')
+      showModal('Error de Login', error.message || 'Error en el login', 'fa-exclamation-circle', '#e74c3c')
     }
   }
 
