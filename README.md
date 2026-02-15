@@ -19,14 +19,134 @@ Este sistema permite:
 - **FastAPI**: Framework para crear la API (interfaz de comunicación)
 - **MySQL**: Base de datos para guardar máquinas y usuarios
 - **MongoDB**: Base de datos para guardar los mantenimientos
+- **Nginx Load Balancer**: Balanceo de carga con 4 algoritmos disponibles
 
 ### Frontend (Interfaz de usuario)
 - **HTML**: Estructura de las páginas
 - **CSS**: Estilos y diseño visual
 - **JavaScript**: Lógica y comunicación con el servidor
-- **Nginx**: Servidor web que muestra las páginas
+
+## Arquitectura
+
+### Load Balancer (Nginx)
+- **4 algoritmos de balanceo**: Round Robin, Least Connections, IP Hash, Weighted Round Robin
+- **3 servidores backend**: Escalable y con failover automático
+- **Health checks**: Monitoreo continuo de disponibilidad
+- **Configuración dinámica**: Cambio de algoritmo sin reconstrucción completa
+
+### Base de Datos
+- **MySQL**: Persistencia de datos estructurados (máquinas, usuarios)
+- **MongoDB**: Logs y mantenimientos (estructura flexible)
 
 ## Cómo instalar y usar
+
+### Requisitos
+- Docker y Docker Compose
+- 4GB RAM mínima
+- 10GB espacio en disco
+
+### Iniciar el sistema
+```bash
+# Iniciar todos los servicios
+docker-compose --profile all up --build
+
+# Iniciar solo con load testing
+docker-compose --profile load-test up --build
+```
+
+### Acceder al sistema
+- **Frontend**: http://localhost:18080
+- **API Backend**: http://localhost:8888 (balanceado)
+- **Health Check**: http://localhost:8888/health
+- **Estadísticas Nginx**: http://localhost:8080/nginx_status
+
+## Load Balancer
+
+### Algoritmos Disponibles
+1. **Round Robin**: Distribución equitativa en orden circular
+2. **Least Connections**: Envía al servidor con menos conexiones activas
+3. **IP Hash**: Mismo cliente siempre al mismo servidor (sesiones persistentes)
+4. **Weighted Round Robin**: Distribución según pesos asignados
+
+### Cambiar Algoritmo
+1. Editar `nginx/nginx.conf`
+2. Comentar upstream actual y descomentar el deseado
+3. Reiniciar: `docker restart nginx_balancer`
+
+### Escalabilidad
+```bash
+# Añadir más servidores backend
+docker-compose up --scale backend=4 -d
+```
+
+## Testing de Carga
+
+### Pruebas automatizadas con k6
+```bash
+# Ejecutar pruebas de saturación
+docker-compose --profile load-test up --build
+```
+
+### Métricas monitoreadas
+- Requests por segundo
+- Tiempo de respuesta
+- Tasa de errores
+- Distribución de carga entre servidores
+
+## Estructura del Proyecto
+
+```
+PP1_01/
+├── backend/              # Código FastAPI
+│   ├── main.py          # Entry point principal
+│   ├── routes/          # Endpoints de la API
+│   ├── services/        # Lógica de negocio
+│   ├── models/          # Modelos de datos
+│   └── dao/            # Acceso a bases de datos
+├── frontend/            # Interfaz web
+│   ├── index.html       # Página principal
+│   ├── styles.css       # Estilos
+│   └── script.js       # Lógica frontend
+├── nginx/              # Load balancer
+│   ├── nginx.conf       # Configuración principal
+│   └── README.md       # Documentación de algoritmos
+├── k6/                 # Pruebas de carga
+│   └── scripts/         # Scripts de testing
+└── docker-compose.yml    # Orquestación de contenedores
+```
+
+## Configuración Avanzada
+
+### Variables de Entorno
+- `MYSQL_ROOT_PASSWORD`: Contraseña MySQL
+- `REDIS_HOST`: Host de Redis
+- `MONGODB_URI`: URI de conexión MongoDB
+
+### Redes Docker
+- `siglab_network`: Comunicación interna servicios
+- `frontend_network`: Comunicación con frontend
+
+### Volúmenes Persistentes
+- `mysql_data`: Datos MySQL
+- `mongo_data`: Datos MongoDB
+
+## Monitoreo y Logs
+
+### Ver logs en tiempo real
+```bash
+# Logs del load balancer
+docker logs nginx_balancer -f
+
+# Logs de los backends
+docker logs pp1_01-backend-1 -f
+docker logs pp1_01-backend-2 -f
+docker logs pp1_01-backend-3 -f
+```
+
+### Métricas de rendimiento
+- **Nginx**: Requests por segundo, distribución de carga
+- **k6**: Latencia, throughput, errores
+- **Docker**: Consumo de recursos por contenedor
 
 ### Requisitos
 - Tener instalado **Docker Desktop** (Windows/Mac) o Docker (Linux)

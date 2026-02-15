@@ -1,128 +1,157 @@
-# Balanceador con Nginx ESPECÍFICO para Microservicio de Máquinas
+# Load Balancer Nginx - Configuración y Algoritmos
 
-## Configuración Implementada
+## Archivo de Configuración
+`nginx.conf` - Configuración principal del load balancer
 
-He configurado nginx como balanceador de carga **ÚNICAMENTE** para el microservicio de máquinas con las siguientes características:
+## Algoritmos Disponibles
 
-### 1. **Arquitectura Híbrida**
-- **Microservicio Máquinas**: Balanceado con nginx (N servidores)
-- **Resto de funcionalidades**: Directas al backend principal (sin balanceo)
-- **Frontend**: Directo sin pasar por nginx para rutas no específicas
+### 1. Round Robin (por defecto)
+- **Descripción**: Distribuye peticiones equitativamente en orden circular
+- **Uso**: Ideal cuando todos los servidores tienen similar capacidad
+- **Configuración**: Sin directiva especial (comportamiento por defecto)
 
-### 2. **Rutas Manejadas por Nginx (Balanceadas)**
+### 2. Least Connections
+- **Descripción**: Envía al servidor con menos conexiones activas
+- **Uso**: Óptimo cuando las peticiones tienen diferentes duraciones
+- **Configuración**: Directiva `least_conn`
+
+### 3. Weighted Round Robin
+- **Descripción**: Distribuye según pesos asignados a cada servidor
+- **Uso**: Cuando los servidores tienen diferentes capacidades
+- **Configuración**: Parámetro `weight` en cada servidor
+
+## Configuración Actual
+
+### Servidores Backend
+- `pp1_01-backend-1:8000` - Réplica 1
+- `pp1_01-backend-2:8000` - Réplica 2  
+- `pp1_01-backend-3:8000` - Réplica 3
+
+### Algoritmo Activo
+**Weighted Round Robin** con pesos:
+- Servidor 1: weight=3 (37.5% del tráfico)
+- Servidor 2: weight=2 (25% del tráfico)
+- Servidor 3: weight=3 (37.5% del tráfico)
+
+## Cómo Cambiar de Algoritmo
+
+1. Abre el archivo `nginx.conf`
+2. Busca la sección `SELECCIONAR UNO SOLO - DESCOMENTAR EL DESEADO`
+3. Comenta el upstream actual y descomenta el deseado:
+
 ```nginx
-/api/maquinas/           # Todas las operaciones de máquinas
-/api/maquinas/agregar     # POST crítico con configuración especial
-```
+# Para activar Round Robin:
+# upstream maquinas_backend {
+#    server pp1_01-backend-1:8000 weight=1 max_fails=3 fail_timeout=5s;
+#    server pp1_01-backend-2:8000 weight=1 max_fails=3 fail_timeout=5s;
+#    server pp1_01-backend-3:8000 weight=1 max_fails=3 fail_timeout=5s;
+#    keepalive 32;
+# }
 
-### 3. **Rutas Directas (Sin Balanceo)**
-```nginx
-/                        # Frontend directo
-/api/login               # Autenticación directa
-/api/register            # Registro directo  
-/api/mantenimiento/      # Mantenimiento directo
-/api/                    # Cualquier otra ruta API directa
-```
+# Para activar Least Connections:
+# upstream maquinas_backend {
+#     least_conn;
+#     server pp1_01-backend-1:8000 weight=1 max_fails=3 fail_timeout=5s;
+#     server pp1_01-backend-2:8000 weight=1 max_fails=3 fail_timeout=5s;
+#     server pp1_01-backend-3:8000 weight=1 max_fails=3 fail_timeout=5s;
+#     keepalive 32;
+# }
 
-### 4. **Servidores Backend Configurados**
-
-#### Para Balanceo (Máquinas):
-- **backend1**: Servidor dedicado para balanceo de máquinas
-- **backend2**: Servidor dedicado para balanceo de máquinas  
-- **backend3**: Servidor dedicado para balanceo de máquinas
-
-#### Para Resto de Funcionalidades:
-- **backend**: Servidor principal para login, registro, mantenimiento, etc.
-
-### 5. **Configuración Específica por Ruta**
-
-#### Microservicio Máquinas (Balanceado):
-- **Upstream**: `maquinas_backend` con 3+ servidores
-- **Reintentos**: 3 intentos estándar, 5 para `/agregar`
-- **Timeouts**: 3-10s (optimizados para operaciones críticas)
-- **Health checks**: `max_fails=3 fail_timeout=30s`
-
-#### Resto de Rutas (Directas):
-- **Proxy directo**: `http://backend:8000`
-- **Timeouts**: 30s estándar
-- **Sin reintentos de balanceo**
-
-### 6. **Ventajas de esta Arquitectura**
-
-#### Especificidad:
-- **Solo máquinas usa balanceo**: Donde más se necesita alta concurrencia
-- **Resto sin complejidad**: Operaciones simples sin overhead de balanceo
-- **Mantenimiento simple**: Solo un backend principal para la mayoría de funciones
-
-#### Rendimiento:
-- **Máquinas escalable**: Puede manejar alta carga de operaciones CRUD
-- **Operaciones rápidas**: Login/registro sin latencia extra
-- **Optimización por caso**: Timeouts diferentes por tipo de operación
-
-### 7. **Escalabilidad**
-
-#### Para agregar más servidores de máquinas:
-1. Editar `nginx.conf` en sección `upstream maquinas_backend`
-2. Agregar nuevos servicios `backend4`, `backend5`, etc. en docker-compose.yml
-3. Las demás rutas no se ven afectadas
-
-#### Ejemplo para 5 servidores de máquinas:
-```nginx
+# Para activar Weighted Round Robin (actual):
 upstream maquinas_backend {
-    server backend1:8000 weight=1 max_fails=3 fail_timeout=30s;
-    server backend2:8000 weight=1 max_fails=3 fail_timeout=30s;
-    server backend3:8000 weight=1 max_fails=3 fail_timeout=30s;
-    server backend4:8000 weight=1 max_fails=3 fail_timeout=30s;
-    server backend5:8000 weight=1 max_fails=3 fail_timeout=30s;
+    server pp1_01-backend-1:8000 weight=3 max_fails=3 fail_timeout=5s;
+    server pp1_01-backend-2:8000 weight=2 max_fails=3 fail_timeout=5s;
+    server pp1_01-backend-3:8000 weight=3 max_fails=3 fail_timeout=5s;
+    keepalive 32;
 }
 ```
 
-### 8. **Uso y Comandos**
+## Aplicar Cambios
 
-#### Iniciar arquitectura completa:
 ```bash
-# Con balanceo para máquinas
-docker-compose --profile multi-server up --build
+# Reiniciar nginx para aplicar cambios
+docker restart nginx_balancer
 
-# Sin balanceo (desarrollo)
-docker-compose --profile single-server up --build
+# O usando docker-compose
+docker-compose restart nginx
 ```
 
-#### Verificar funcionamiento:
-```bash
-# Microservicio máquinas (balanceado)
-curl -X POST http://localhost/api/maquinas/agregar \
-  -H "Content-Type: application/json" \
-  -d '{"codigo_equipo":"TEST","tipo_equipo":"test","estado_actual":"activo","area":"test","fecha":"2024-01-01"}'
+## Monitoreo
 
-# Otras rutas (directas)
-curl http://localhost/api/login
-curl http://localhost/api/mantenimiento/listar
+- **Health Check**: `GET http://localhost:8888/health`
+- **Estadísticas Nginx**: `GET http://localhost:8080/nginx_status`
+- **Logs de nginx**: `docker logs nginx_balancer -f`
+
+## Configuración de Failover
+
+- **max_fails=3**: Permite 3 fallos antes de marcar servidor como no disponible
+- **fail_timeout=5s**: Servidor no disponible por 5 segundos después de fallos
+- **Reintentos automáticos**: nginx envía tráfico a servidores disponibles
+
+## Escalabilidad
+
+### Para añadir más servidores:
+
+1. **Escalar el servicio**:
+   ```bash
+   docker-compose up --scale backend=4 -d
+   ```
+
+2. **Agregar nuevo servidor al nginx.conf**:
+   ```nginx
+   upstream maquinas_backend {
+       server pp1_01-backend-1:8000 weight=3 max_fails=3 fail_timeout=5s;
+       server pp1_01-backend-2:8000 weight=2 max_fails=3 fail_timeout=5s;
+       server pp1_01-backend-3:8000 weight=3 max_fails=3 fail_timeout=5s;
+       server pp1_01-backend-4:8000 weight=2 max_fails=3 fail_timeout=5s;  # Nuevo
+       keepalive 32;
+   }
+   ```
+
+3. **Reiniciar nginx**:
+   ```bash
+   docker restart nginx_balancer
+   ```
+
+## Rutas Balanceadas
+
+El load balancer solo balancea la ruta:
+- `/api/maquinas/agregar` - Endpoint para agregar máquinas
+
+## Arquitectura
+
+```
+Cliente → Nginx Load Balancer (puerto 8888)
+    ↓
+├── pp1_01-backend-1:8000
+├── pp1_01-backend-2:8000
+└── pp1_01-backend-3:8000
 ```
 
-#### Probar balanceo específico:
-```bash
-# Múltiples requests para ver distribución en máquinas
-for i in {1..10}; do
-  curl -X POST http://localhost/api/maquinas/agregar \
-    -H "Content-Type: application/json" \
-    -d '{"codigo_equipo":"TEST'$i'","tipo_equipo":"test","estado_actual":"activo","area":"test","fecha":"2024-01-01"}'
-  sleep 0.1
-done
-```
+## Redes Docker
 
-### 9. **Monitoreo**
-- **Puerto 80**: Balanceador principal
-- **Puerto 8080**: Monitoreo de estado nginx
-- **Health check**: `curl http://localhost/health`
+- **siglab_network**: Comunicación interna entre servicios
+- **frontend_network**: Comunicación con frontend
+- **nginx_balancer**: Actúa como gateway para tráfico externo
 
-### 10. **Resumen de Flujo**
+## Comparación de Algoritmos
 
-```
-Cliente → Nginx → [MÁQUINAS] backend1/backend2/backend3 (balanceado)
-         → Nginx → [LOGIN] backend (directo)
-         → Nginx → [MANTENIMIENTO] backend (directo)
-         → Nginx → [FRONTEND] frontend (directo)
-```
+| Algoritmo | Ventajas | Desventajas | Uso Recomendado |
+|------------|------------|--------------|-------------------|
+| Round Robin | Simple, equitativo | No considera carga | Servidores iguales |
+| Least Connections | Balanceo inteligente | Requiere más cómputo | Cargas variables |
+| Weighted | Control total | Configuración manual | Servidores diferentes |
 
-Esta arquitectura proporciona balanceo de carga **selectivo** donde más se necesita (máquinas) manteniendo la simplicidad para el resto de funcionalidades.
+## Optimización
+
+### Parámetros de Rendimiento
+- **keepalive 32**: Conexiones persistentes
+- **max_fails 3**: Detección rápida de fallos
+- **fail_timeout 5s**: Recuperación rápida
+- **Timeouts agresivos**: 5-10s para microservicios
+
+### Métricas Importantes
+- **Request Rate**: Peticiones por segundo
+- **Response Time**: Tiempo de respuesta promedio
+- **Error Rate**: Porcentaje de fallos
+- **Distribution**: Balanceo entre servidores
