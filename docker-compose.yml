@@ -41,6 +41,34 @@ services:
       retries: 3 # Intenta 3 veces antes de marcar como "unhealthy"
       start_period: 15s # Da 15 segundos de gracia (MongoDB inicia más rápido que MySQL)
 
+  # SERVICIO: Memoria en cache Redis
+  redis:
+    image: redis:7.2-alpine # Recomendado usar versión específica
+    container_name: redis_siglab
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - siglab_network # <--- FUNDAMENTAL: Si no, el backend no lo encuentra
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  # SERVICIO EXTRA: RedisInsight
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: redisinsight_siglab
+    restart: always
+    ports:
+      - "5540:5540"
+    networks:
+      - siglab_network
+    depends_on:
+      - redis
+
+
   # SERVICIO 3: Backend (FastAPI)
   backend:
     build:
@@ -57,6 +85,10 @@ services:
       MYSQL_DATABASE: proyecto_maquinas # Base de datos a usar
       MONGO_HOST: mongodb # Nombre del servicio MongoDB
       MONGO_PORT: 27017 # Puerto interno de MongoDB
+
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
     ports:
       - "18000:8000" # Mapea puerto 18000 de tu PC al puerto 8000 del contenedor (FastAPI)
     volumes:
@@ -68,6 +100,8 @@ services:
         condition: service_healthy # Espera a que MySQL pase el healthcheck
       mongodb:
         condition: service_healthy # Espera a que MongoDB pase el healthcheck
+      redis:
+        condition: service_healthy # Vital para evitar errores de conexión al arrancar
     networks:
       - siglab_network # Conecta a la red interna
 

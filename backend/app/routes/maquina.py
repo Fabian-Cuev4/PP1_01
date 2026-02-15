@@ -10,6 +10,11 @@ from app.daos.mantenimiento_dao import MantenimientoDAO
 from app.models.Computadora import Computadora
 from app.models.Impresora import Impresora
 
+import redis
+import os
+import json
+
+
 # Creamos un router para agrupar todas las rutas de máquinas
 # El prefix significa que todas las rutas empezarán con /api/maquinas
 router = APIRouter(prefix="/api/maquinas")
@@ -17,6 +22,13 @@ router = APIRouter(prefix="/api/maquinas")
 # Creamos instancias directas de los DAOs
 maquina_dao = MaquinaDAO()
 mantenimiento_dao = MantenimientoDAO()
+
+# Creamos la instancia del cliente de Redis
+redis_client = redis.Redis(
+    host=os.getenv("REDIS_HOST", "redis"),
+    port=int(os.getenv("REDIS_PORT", 6379)),
+    decode_responses=True
+)
 
 # Definimos cómo deben ser los datos que recibimos del frontend
 class MaquinaSchema(BaseModel):
@@ -64,6 +76,17 @@ async def agregar_maquina(datos: MaquinaSchema):
     # Guardamos la máquina
     try:
         maquina_dao.guardar(nueva)
+
+        # 🔥 invalidamos la lista cacheada
+        redis_client.delete("maquinas:lista")
+
+        # 🔥 guardamos esta máquina individualmente
+        redis_client.set(
+            f"maquina:{nueva.codigo_equipo}",
+            json.dumps(datos_dict),
+            ex=300
+        )
+
         return {"mensaje": "Máquina guardada", "codigo": nueva.codigo_equipo}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al guardar: {str(e)}")
@@ -102,6 +125,17 @@ async def actualizar_maquina(datos: MaquinaSchema):
     
     # Actualizamos en la base de datos
     if maquina_dao.actualizar(maquina_obj):
+
+        # invalidamos cache de lista
+        redis_client.delete("maquinas:lista")
+
+        # actualizamos cache individual
+        redis_client.set(
+            f"maquina:{codigo}",
+            json.dumps(datos_dict),
+            ex=300
+        )
+
         return {"mensaje": "Máquina actualizada", "codigo": maquina_obj.codigo_equipo}
     else:
         raise HTTPException(status_code=500, detail="Error al actualizar la máquina.")
@@ -118,6 +152,10 @@ async def eliminar_maquina(codigo: str):
     
     # Luego eliminamos la máquina
     if maquina_dao.eliminar(codigo):
+
+        redis_client.delete("maquinas:lista")
+        redis_client.delete(f"maquina:{codigo}")
+
         return {"mensaje": "Máquina y mantenimientos eliminados"}
     else:
         raise HTTPException(status_code=500, detail="Error al eliminar la máquina.")
@@ -126,8 +164,20 @@ async def eliminar_maquina(codigo: str):
 @router.get("/listar")
 async def listar_maquinas():
     try:
-        # Pedimos al DAO que nos traiga todas las máquinas
+        cache = redis_client.get("maquinas:lista")
+        if cache:
+            return json.loads(cache)
+
         maquinas = maquina_dao.listar_todas()
+
+        # 🔥 Convertimos fechas a string
+        for m in maquinas:
+            if m.get("fecha"):
+                m["fecha"] = str(m["fecha"])
+
+        redis_client.set("maquinas:lista", json.dumps(maquinas), ex=300)
+
         return maquinas
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -7,6 +7,9 @@ from app.models.Impresora import Impresora
 from app.models.Mantenimiento import Mantenimiento
 from app.models.abstrac_factory.MaquinaFactory import MaquinaFactory
 from app.dtos.informe_dto import InformeMaquinaDTO
+import json
+from app.database.redis_client import RedisClient
+
 
 # Esta clase coordina todas las operaciones del sistema
 class ProyectoService:
@@ -15,6 +18,10 @@ class ProyectoService:
         # Guardamos las referencias para usarlas después
         self._dao_maq = maquina_dao  # Objeto para acceder a la tabla de máquinas
         self._dao_mtto = mantenimiento_dao  # Objeto para acceder a la tabla de mantenimientos
+
+        # --- Cliente Redis
+        self._redis = RedisClient.get_client()
+        self._cache_ttl = 120  # segundos
 
     def registrar_maquina(self, datos_dict):
         # Esta función registra una nueva máquina en el sistema
@@ -50,6 +57,11 @@ class ProyectoService:
         try:
             self._dao_maq.guardar(nueva)
             # Si todo salió bien, retornamos la máquina creada
+
+            # --- Invalidar cache relacionada
+            self._redis.delete("maquinas:all")
+            self._redis.delete(f"maquina:{codigo.lower()}")
+
             return nueva, None
         except Exception as e:
             # Si hubo un error, retornamos el mensaje de error
@@ -90,6 +102,11 @@ class ProyectoService:
         
         # Intentamos actualizar en la base de datos
         if self._dao_maq.actualizar(maquina_obj):
+
+            # 🔥 Invalidar cache
+            self._redis.delete("maquinas:all")
+            self._redis.delete(f"maquina:{codigo.lower()}")
+
             return maquina_obj, None
         return None, "Error al actualizar la máquina."
 
@@ -104,6 +121,12 @@ class ProyectoService:
         
         # Luego eliminamos la máquina
         if self._dao_maq.eliminar(codigo):
+
+            # --- Invalidar cache
+            self._redis.delete("maquinas:all")
+            self._redis.delete(f"maquina:{codigo.lower()}")
+            self._redis.delete(f"informe:{codigo.lower()}")
+
             return True, None
         return False, "Error al eliminar la máquina."
 
@@ -157,6 +180,11 @@ class ProyectoService:
         
         # Guardamos el mantenimiento en la base de datos
         self._dao_mtto.guardar(nuevo_mtto)
+
+        # --- Invalidar informe y máquina
+        self._redis.delete(f"informe:{codigo.lower()}")
+        self._redis.delete("informe:all")
+        
         return nuevo_mtto, None
 
     def obtener_historial_por_maquina(self, codigo):
@@ -165,6 +193,17 @@ class ProyectoService:
         return self._dao_mtto.listar_por_maquina(codigo)
 
     def obtener_informe_completo(self, codigo=None):
+        # Generar clave de cache
+        cache_key = f"informe:{codigo.lower()}" if codigo else "informe:all"
+
+        try:
+            cache = self._redis.get(cache_key)
+            if cache:
+                print("⚡ Informe desde Redis")
+                return json.loads(cache), None
+        except:
+            pass
+
         # Esta función genera un reporte completo de máquinas y mantenimientos
         # Primero obtenemos todas las máquinas
         todas_las_maquinas = self._dao_maq.listar_todas()
@@ -228,15 +267,36 @@ class ProyectoService:
                 mantenimientos=mttos
             ))
         
+        # Guardar en cache
+        try:
+            self._redis.setex(
+                cache_key,
+                self._cache_ttl,
+                json.dumps([dto.__dict__ for dto in resultado], default=str)
+            )
+        except:
+            pass
+
         # Retornamos el resultado
         return resultado, None
     
     def listar_todas_maquinas(self):
-        # Obtiene todas las máquinas del sistema
-        
-        # Returns:
-        #     list: Lista de todas las máquinas
+        cache_key = "maquinas:all"
         try:
-            return self._dao_maq.listar_todas()
+            cache = self._redis.get(cache_key)
+            if cache:
+                print("⚡ Listado desde Redis")
+                return json.loads(cache)
+        except:
+            pass
+        try:
+            data = self._dao_maq.listar_todas()
+            # Guardar en cache
+            self._redis.setex(
+                cache_key,
+                self._cache_ttl,
+                json.dumps(data, default=str)
+            )
+            return data
         except Exception as e:
             raise Exception(f"Error al listar máquinas: {str(e)}")
