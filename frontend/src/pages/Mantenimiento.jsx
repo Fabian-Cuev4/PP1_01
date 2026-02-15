@@ -14,7 +14,8 @@ function Mantenimiento() {
     tipo: '',
     fecha: '',
     observaciones: '',
-    codigo_maquina: codigoMaquina
+    codigo_maquina: codigoMaquina,
+    usuario: ''
   })
   const [loading, setLoading] = useState(false)
   const [modal, setModal] = useState({

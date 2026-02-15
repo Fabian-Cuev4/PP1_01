@@ -1,141 +1,113 @@
-# Este archivo se encarga de guardar y buscar máquinas en la base de datos MySQL
-# DAO significa "Data Access Object" (Objeto de Acceso a Datos)
+# DAO LIMPIO - Solo acceso a datos MySQL
+# Responsabilidades: consultas SQL puras, sin lógica de negocio
 
-# Importamos la clase que maneja la conexión a MySQL
 from app.database.mysql import MySQLConnection
 
 class MaquinaDAO:
-    # Esta función guarda una máquina nueva en la base de datos
-    def guardar(self, maquina):
-        # Obtenemos una conexión a la base de datos
-        conn = MySQLConnection.conectar()
-        # Si no hay conexión, salimos de la función
-        if not conn:
-            return
-        
-        try:
-            # Creamos un cursor para ejecutar comandos SQL
-            cursor = conn.cursor()
-            # Definimos la consulta SQL para insertar una máquina
-            query = """
-                INSERT INTO maquinas (codigo, tipo, estado, area, fecha, usuario) 
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """
-            # Ejecutamos la consulta pasándole los valores de la máquina
-            cursor.execute(query, (
-                maquina.codigo_equipo, 
-                maquina.tipo_equipo, 
-                maquina.estado_actual, 
-                maquina.area, 
-                maquina.fecha,
-                maquina.usuario
-            ))
-            # Confirmamos los cambios (commit)
-            conn.commit()
-            # Cerramos el cursor y la conexión
-            cursor.close()
-            conn.close()
-        except Exception as e:
-            raise e
-
-    # Esta función actualiza los datos de una máquina existente
-    def actualizar(self, maquina):
-        # Obtenemos una conexión a la base de datos
+    # Inserta una máquina con datos primitivos
+    def insertar(self, codigo: str, tipo: str, estado: str, area: str, fecha: str, usuario: str = None) -> bool:
         conn = MySQLConnection.conectar()
         if not conn:
             return False
         
         try:
-            # Creamos un cursor para ejecutar comandos SQL
             cursor = conn.cursor()
-            # Definimos la consulta SQL para actualizar una máquina
+            query = """
+                INSERT INTO maquinas (codigo, tipo, estado, area, fecha, usuario) 
+                VALUES (%s, %s, %s, %s, %s, %s)
+                """
+            cursor.execute(query, (codigo, tipo, estado, area, fecha, usuario))
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return True
+        except Exception:
+            return False
+
+    # Actualiza una máquina con datos primitivos
+    def actualizar(self, codigo: str, tipo: str, estado: str, area: str, fecha: str, usuario: str = None) -> bool:
+        conn = MySQLConnection.conectar()
+        if not conn:
+            return False
+        
+        try:
+            cursor = conn.cursor()
             query = """
                 UPDATE maquinas 
                 SET tipo = %s, estado = %s, area = %s, fecha = %s, usuario = %s
                 WHERE codigo = %s
-            """
-            # Ejecutamos la consulta pasándole los nuevos valores
-            cursor.execute(query, (
-                maquina.tipo_equipo,
-                maquina.estado_actual,
-                maquina.area,
-                maquina.fecha,
-                maquina.usuario,
-                maquina.codigo_equipo
-            ))
-            # Confirmamos los cambios
+                """
+            cursor.execute(query, (tipo, estado, area, fecha, usuario, codigo))
             conn.commit()
-            # Cerramos el cursor y la conexión
             cursor.close()
             conn.close()
             return True
-        except Exception as e:
+        except Exception:
             return False
 
-    # Esta función elimina una máquina de la base de datos
-    def eliminar(self, codigo):
-        # Obtenemos una conexión a la base de datos
+    # Elimina una máquina por código exacto
+    def eliminar(self, codigo: str) -> bool:
         conn = MySQLConnection.conectar()
         if not conn:
             return False
         
         try:
-            # Creamos un cursor para ejecutar comandos SQL
             cursor = conn.cursor()
-            # Definimos la consulta SQL para eliminar una máquina
             query = "DELETE FROM maquinas WHERE codigo = %s"
-            # Ejecutamos la consulta pasándole el código
             cursor.execute(query, (codigo,))
-            # Confirmamos los cambios
             conn.commit()
-            # Cerramos el cursor y la conexión
             cursor.close()
             conn.close()
             return True
-        except Exception as e:
+        except Exception:
             return False
 
-    # Esta función busca una máquina por su código
-    def buscar_por_codigo(self, codigo):
-        # Obtenemos una conexión a la base de datos
+    # Busca por código exacto (case-sensitive)
+    def buscar_por_codigo_exacto(self, codigo: str) -> dict:
         conn = MySQLConnection.conectar()
         if not conn:
             return None
         
         try:
-            # Creamos un cursor que retorna diccionarios (más fácil de usar)
             cursor = conn.cursor(dictionary=True)
-            # Definimos la consulta SQL para buscar una máquina
-            # Usamos LOWER para que la búsqueda no sea sensible a mayúsculas/minúsculas
-            query = "SELECT * FROM maquinas WHERE LOWER(codigo) = LOWER(%s)"
-            # Ejecutamos la consulta pasándole el código
-            cursor.execute(query, (codigo.strip().lower(),))
-            # Obtenemos el primer resultado (si existe)
+            query = "SELECT * FROM maquinas WHERE codigo = %s"
+            cursor.execute(query, (codigo,))
             resultado = cursor.fetchone()
-            # Cerramos el cursor y la conexión
             cursor.close()
             conn.close()
             return resultado
-        except Exception as e:
+        except Exception:
             return None
 
-    # Esta función obtiene todas las máquinas de la base de datos
-    def listar_todas(self):
-        # Obtenemos una conexión a la base de datos
+    # Obtiene todas las máquinas sin filtrar
+    def listar_todas(self) -> list:
         conn = MySQLConnection.conectar()
         if not conn:
             return []
         
         try:
-            # Creamos un cursor que retorna diccionarios
             cursor = conn.cursor(dictionary=True)
-            # Ejecutamos la consulta para obtener todas las máquinas
             cursor.execute("SELECT * FROM maquinas")
-            # Obtenemos todos los resultados
             lista = cursor.fetchall()
-            # Cerramos el cursor y la conexión
             cursor.close()
             conn.close()
             return lista
-        except Exception as e:
+        except Exception:
+            return []
+
+    # Busca con filtro LIKE (para búsquedas parciales)
+    def buscar_similares(self, codigo_parcial: str) -> list:
+        conn = MySQLConnection.conectar()
+        if not conn:
+            return []
+        
+        try:
+            cursor = conn.cursor(dictionary=True)
+            query = "SELECT * FROM maquinas WHERE codigo LIKE %s"
+            cursor.execute(query, (f"%{codigo_parcial}%",))
+            lista = cursor.fetchall()
+            cursor.close()
+            conn.close()
+            return lista
+        except Exception:
             return []

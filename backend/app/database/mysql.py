@@ -15,10 +15,8 @@ class MySQLConnection:
 
     @staticmethod
     def inicializar_base_datos():
-        
-        #Esta función se asegura de que la base de datos y las tablas existan al arrancar.
-        #Tiene un sistema de 'reintentos' por si MySQL tarda en encender.
-        
+        # Esta función se asegura de que la base de datos y las tablas existan al arrancar.
+        # Tiene un sistema de 'reintentos' por si MySQL tarda en encender.
         import time
         max_retries = 15  # Intentaremos conectar hasta 15 veces
         retry_delay = 3   # Esperaremos 3 segundos entre cada intento
@@ -104,9 +102,7 @@ class MySQLConnection:
 
     @classmethod
     def get_pool(cls):
-        
-        #Administra una piscina de conexiones para que el servidor sea más rápido.
-        
+        # Administra una piscina de conexiones para que el servidor sea más rápido.
         if cls._pool is None:
             try:
                 cls._pool = mysql.connector.pooling.MySQLConnectionPool(
@@ -126,8 +122,7 @@ class MySQLConnection:
 
     @staticmethod
     def conectar():
-        
-        #Pide una conexión del pool para usarla en los DAOs.
+        # Pide una conexión del pool para usarla en los DAOs.
         pool = MySQLConnection.get_pool()
         if not pool:
             return None

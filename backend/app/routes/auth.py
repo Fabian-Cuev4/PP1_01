@@ -1,81 +1,64 @@
-# Este archivo maneja la autenticación: login y registro de usuarios
-# Las rutas son las direcciones que el frontend usa para comunicarse con el backend
+# ROUTES LIMPIAS - Solo validación HTTP y respuestas
+# Responsabilidades: validación de entrada, respuestas HTTP, coordinación con services
 
-# Importamos las librerías necesarias
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from app.daos.usuario_dao import UsuarioDAO
-from app.models.Usuario import Usuario
-from app.dtos.usuario_dto import UsuarioDTO
+from app.services.usuario_service import UsuarioService
 
-# Creamos un router para agrupar todas las rutas de autenticación
 router = APIRouter()
+service = UsuarioService()
 
-# Creamos instancia directa del DAO
-usuario_dao = UsuarioDAO()
-
-# Definimos cómo deben ser los datos que recibimos del frontend para login
+# Modelos para validación de entrada
 class LoginRequest(BaseModel):
-    username: str  # Nombre de usuario
-    password: str  # Contraseña
+    username: str
+    password: str
 
-# Definimos cómo deben ser los datos que recibimos del frontend para registro
 class RegisterRequest(BaseModel):
-    nombre_completo: str  # Nombre completo de la persona
-    username: str         # Nombre de usuario único
-    password: str         # Contraseña
+    nombre_completo: str
+    username: str
+    password: str
+    rol: str = "usuario"
 
-# Esta ruta se ejecuta cuando el frontend hace POST a /api/login
 @router.post("/api/login")
 async def login(datos: LoginRequest):
-    # Validamos datos de entrada
-    if not datos.username or not datos.password:
-        raise HTTPException(status_code=400, detail="Usuario y contraseña son requeridos")
-    
-    # Llamamos directamente al DAO para verificar credenciales
-    usuario = usuario_dao.verificar_credenciales(datos.username, datos.password)
-    
-    if usuario:
-        return {
-            "mensaje": "Login exitoso", 
-            "token": datos.username,  # Usamos username como token temporal
-            "usuario": {
-                "nombre_completo": usuario['nombre_completo'],
-                "username": usuario['username'],
-                "rol": usuario['rol']
-            }
-        }
-    else:
-        raise HTTPException(status_code=401, detail="Usuario o contraseña incorrectos")
+    # Inicia sesión de usuario
+    try:
+        resultado, error = service.autenticar_usuario(datos.username, datos.password)
+        if error:
+            raise HTTPException(status_code=401, detail=error)
+        return resultado
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-# Esta ruta se ejecuta cuando el frontend hace POST a /api/register
 @router.post("/api/register")
 async def register(datos: RegisterRequest):
-    # Validamos datos de entrada
-    if not all([datos.nombre_completo, datos.username, datos.password]):
-        raise HTTPException(status_code=400, detail="Todos los campos son requeridos")
-    
-    if len(datos.password) < 6:
-        raise HTTPException(status_code=400, detail="La contraseña debe tener al menos 6 caracteres")
-    
+    # Registra un nuevo usuario
     try:
-        # Creamos el objeto usuario usando el modelo
-        nuevo_usuario = Usuario(
-            datos.nombre_completo,
-            datos.username,
-            datos.password,
-            "usuario"  # Rol por defecto
-        )
-        
-        # Validamos los datos usando el método del modelo
-        nuevo_usuario.validar_datos()
-        
-        # Guardamos usando el DAO con el objeto
-        exito = usuario_dao.guardar(nuevo_usuario)
-        
-        if exito:
-            return {"mensaje": "Usuario creado correctamente"}
-        else:
-            raise HTTPException(status_code=400, detail="Error al crear usuario (quizás el usuario ya existe)")
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        resultado, error = service.registrar_usuario(datos.model_dump())
+        if error:
+            raise HTTPException(status_code=400, detail=error)
+        return resultado
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/api/usuarios/activos")
+async def listar_usuarios_activos():
+    # Obtiene lista de usuarios activos
+    try:
+        resultado, error = service.obtener_usuarios_activos()
+        if error:
+            raise HTTPException(status_code=500, detail=error)
+        return {"usuarios_activos": resultado}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/api/logout")
+async def logout(username: str):
+    # Cierra sesión de usuario
+    try:
+        resultado, error = service.cerrar_sesion(username)
+        if error:
+            raise HTTPException(status_code=400, detail=error)
+        return resultado
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
