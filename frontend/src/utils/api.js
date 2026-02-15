@@ -8,6 +8,12 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(credentials)
     });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || `Error ${response.status}: ${response.statusText}`);
+    }
+    
     return response.json();
   },
 
@@ -17,6 +23,12 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(userData)
     });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || `Error ${response.status}: ${response.statusText}`);
+    }
+    
     return response.json();
   },
 

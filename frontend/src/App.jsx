@@ -21,7 +21,7 @@ function App() {
       <Route path="/actualizar-maquina" element={<ActualizarMaquina />} />
       <Route path="/mantenimiento" element={<Mantenimiento />} />
       <Route path="/historial" element={<Historial />} />
-      <Route path="/" element={<Login />} />
+      <Route path="/" element={<Navigate to="/login" replace />} />
     </Routes>
   )
 }

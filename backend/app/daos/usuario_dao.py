@@ -52,7 +52,8 @@ class UsuarioDAO:
             if usuario and Encryption.verificar_password(password, usuario['password']):
                 return usuario
             return None
-        except Exception:
+        except Exception as e:
+            print(f"Error en verificar_credenciales: {e}")
             return None
 
     # Obtiene usuario por username

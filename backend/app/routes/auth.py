@@ -27,6 +27,9 @@ async def login(datos: LoginRequest):
         if error:
             raise HTTPException(status_code=401, detail=error)
         return resultado
+    except HTTPException:
+        # Dejar pasar las excepciones HTTP (como 401)
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
