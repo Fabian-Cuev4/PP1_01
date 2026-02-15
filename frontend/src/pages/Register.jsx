@@ -57,8 +57,8 @@ function Register() {
       return
     }
 
-    if (formData.password.length < 8) {
-      showModal('Error de Validación', 'La contraseña debe tener mínimo 8 caracteres', 'fa-exclamation-triangle', '#e74c3c')
+    if (formData.password.length < 6) {
+      showModal('Error de Validación', 'La contraseña debe tener mínimo 6 caracteres', 'fa-exclamation-triangle', '#e74c3c')
       return
     }
 
@@ -132,7 +132,7 @@ function Register() {
               <input 
                 type="password" 
                 id="password" 
-                placeholder="Mínimo 8 caracteres"
+                placeholder="Mínimo 6 caracteres"
                 value={formData.password}
                 onChange={handleChange}
               />

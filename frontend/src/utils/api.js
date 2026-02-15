@@ -75,6 +75,14 @@ export const api = {
       ? `${API_BASE_URL}/mantenimiento/informe-general?codigo=${codigo}`
       : `${API_BASE_URL}/mantenimiento/informe-general`;
     const response = await fetch(url);
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const error = new Error(errorData.detail || `Error ${response.status}: ${response.statusText}`);
+      error.status = response.status;
+      throw error;
+    }
+    
     return response.json();
   }
 };

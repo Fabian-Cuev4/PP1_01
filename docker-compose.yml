@@ -123,6 +123,21 @@ services:
     networks:
       - siglab_network
 
+# SERVICIO 5: Saturador k6 para pruebas de carga
+  k6-saturator:
+    build:
+      context: ./k6
+      dockerfile: Dockerfile
+    container_name: k6_saturator
+    environment:
+      BASE_URL: http://host.docker.internal:18000  # URL del backend desde el contenedor k6
+    depends_on:
+      - backend
+    networks:
+      - siglab_network
+    profiles:
+      - load-test  # Solo se inicia con --profile load-test
+
 # VOLÚMENES (Almacenamiento Persistente)
 volumes:
   mysql_data:

@@ -1,27 +1,26 @@
-# Este archivo define las rutas (URLs) relacionadas con las máquinas
-# Las rutas son las direcciones que el frontend usa para comunicarse con el backend
+# ROUTES LIMPIAS - Solo validación HTTP y respuestas
+# Responsabilidades: validación de entrada, respuestas HTTP, coordinación con services
 
-# Importamos las librerías necesarias
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from datetime import date
-from app.daos.maquina_dao import MaquinaDAO
-from app.daos.mantenimiento_dao import MantenimientoDAO
-from app.models.Computadora import Computadora
-from app.models.Impresora import Impresora
-
+from app.services.maquina_service import MaquinaService
 import redis
 import os
 import json
 
-
 # Creamos un router para agrupar todas las rutas de máquinas
 # El prefix significa que todas las rutas empezarán con /api/maquinas
 router = APIRouter(prefix="/api/maquinas")
+service = MaquinaService()
 
-# Creamos instancias directas de los DAOs
-maquina_dao = MaquinaDAO()
-mantenimiento_dao = MantenimientoDAO()
+# Modelos para validación de entrada
+class MaquinaRequest(BaseModel):
+    codigo_equipo: str
+    tipo_equipo: str
+    estado_actual: str
+    area: str
+    fecha: str
+    usuario: str = None
 
 # Creamos la instancia del cliente de Redis
 redis_client = redis.Redis(
@@ -31,153 +30,101 @@ redis_client = redis.Redis(
 )
 
 # Definimos cómo deben ser los datos que recibimos del frontend
-class MaquinaSchema(BaseModel):
-    codigo_equipo: str      # Código único de la máquina
-    tipo_equipo: str         # Tipo: PC o IMP
-    estado_actual: str       # Estado: operativa, fuera de servicio, etc.
-    area: str                # Área donde está ubicada
-    fecha: str               # Fecha de adquisición (acepta string del frontend)
-    usuario: str = None      # Usuario que registró la máquina (opcional)
+# class MaquinaSchema(BaseModel):
+#     codigo_equipo: str      # Código único de la máquina
+#     tipo_equipo: str         # Tipo: PC o IMP
+#     estado_actual: str       # Estado: operativa, fuera de servicio, etc.
+#     area: str                # Área donde está ubicada
+#     fecha: str               # Fecha de adquisición (acepta string del frontend)
+#     usuario: str = None      # Usuario que registró la máquina (opcional)
 
 # Esta ruta se ejecuta cuando el frontend hace POST a /api/maquinas/agregar
 @router.post("/agregar")
-async def agregar_maquina(datos: MaquinaSchema):
-    # Convertimos los datos a diccionario
-    datos_dict = datos.model_dump()
-    
-    # Verificamos que no exista otra máquina con el mismo código
-    if maquina_dao.buscar_por_codigo(datos_dict.get("codigo_equipo")):
-        raise HTTPException(status_code=400, detail=f"El código '{datos_dict.get('codigo_equipo')}' ya existe.")
-    
-    # Creamos el objeto máquina según el tipo usando Abstract Factory
-    tipo = datos_dict.get("tipo_equipo", "").upper()
+async def agregar_maquina(datos: MaquinaRequest):
+    # Agrega una nueva máquina
     try:
-        if tipo == "PC":
-            nueva = Computadora(
-                datos_dict.get("codigo_equipo"), 
-                datos_dict.get("estado_actual"), 
-                datos_dict.get("area"), 
-                datos_dict.get("fecha"),
-                datos_dict.get("usuario")
-            )
-        elif tipo == "IMP":
-            nueva = Impresora(
-                datos_dict.get("codigo_equipo"), 
-                datos_dict.get("estado_actual"), 
-                datos_dict.get("area"), 
-                datos_dict.get("fecha"),
-                datos_dict.get("usuario")
-            )
-        else:
-            raise HTTPException(status_code=400, detail=f"Tipo de equipo '{tipo}' no válido.")
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    
-    # Guardamos la máquina
-    try:
-        maquina_dao.guardar(nueva)
 
-        # 🔥 invalidamos la lista cacheada
-        redis_client.delete("maquinas:lista")
+        resultado, error = service.registrar_maquina(datos.model_dump())
+        if error:
+            raise HTTPException(status_code=400, detail=error)
+        return resultado
 
-        # 🔥 guardamos esta máquina individualmente
-        redis_client.set(
-            f"maquina:{nueva.codigo_equipo}",
-            json.dumps(datos_dict),
-            ex=300
-        )
-
-        return {"mensaje": "Máquina guardada", "codigo": nueva.codigo_equipo}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error al guardar: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-# Esta ruta se ejecuta cuando el frontend hace PUT a /api/maquinas/actualizar
 @router.put("/actualizar")
-async def actualizar_maquina(datos: MaquinaSchema):
-    datos_dict = datos.model_dump()
-    codigo = datos_dict.get("codigo_equipo")
-    
-    if not codigo:
-        raise HTTPException(status_code=400, detail="El código de la máquina es obligatorio.")
-    
-    # Verificamos que la máquina exista
-    maquina_db = maquina_dao.buscar_por_codigo(codigo)
-    if not maquina_db:
-        raise HTTPException(status_code=404, detail=f"La máquina {codigo} no existe.")
-    
-    # Obtenemos los datos nuevos, si no vienen usamos los antiguos
-    tipo = datos_dict.get("tipo_equipo", "").upper() or maquina_db.get('tipo', '').upper()
-    estado = datos_dict.get("estado_actual") or maquina_db.get('estado')
-    area = datos_dict.get("area") or maquina_db.get('area')
-    fecha = datos_dict.get("fecha") or maquina_db.get('fecha')
-    usuario = datos_dict.get("usuario") or maquina_db.get('usuario')
-    
-    # Creamos el objeto máquina según su tipo
+async def actualizar_maquina(datos: MaquinaRequest):
+    # Actualiza una máquina existente
     try:
-        if tipo in ['COMPUTADORA', 'PC']:
-            maquina_obj = Computadora(codigo, estado, area, fecha, usuario)
-        elif tipo in ['IMPRESORA', 'IMP']:
-            maquina_obj = Impresora(codigo, estado, area, fecha, usuario)
-        else:
-            raise HTTPException(status_code=400, detail="Tipo de máquina no reconocido.")
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    
-    # Actualizamos en la base de datos
-    if maquina_dao.actualizar(maquina_obj):
-
-        # invalidamos cache de lista
+        # 1. Usamos el service de GitHub para la lógica
+        resultado, error = service.actualizar_maquina(datos.model_dump())
+        
+        if error:
+            # Esta lógica de error 404 o 400 es la que trajeron de GitHub, mantenla
+            raise HTTPException(status_code=404 if "no existe" in error else 400, detail=error)
+        
+        # 2. 🔥 TU MEJORA: Actualizamos Redis
+        # Borramos la lista general porque un elemento cambió
         redis_client.delete("maquinas:lista")
 
-        # actualizamos cache individual
+        # Actualizamos el caché individual (usamos datos.codigo_equipo)
         redis_client.set(
-            f"maquina:{codigo}",
-            json.dumps(datos_dict),
+            f"maquina:{datos.codigo_equipo}",
+            json.dumps(datos.model_dump()),
             ex=300
         )
 
-        return {"mensaje": "Máquina actualizada", "codigo": maquina_obj.codigo_equipo}
-    else:
-        raise HTTPException(status_code=500, detail="Error al actualizar la máquina.")
+        return resultado
 
-# Esta ruta se ejecuta cuando el frontend hace DELETE a /api/maquinas/eliminar/{codigo}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.delete("/eliminar/{codigo}")
 async def eliminar_maquina(codigo: str):
-    # Verificamos que la máquina exista
-    if not maquina_dao.buscar_por_codigo(codigo):
-        raise HTTPException(status_code=404, detail="La máquina no existe.")
-    
-    # Eliminamos primero todos los mantenimientos de esa máquina
-    mantenimiento_dao.eliminar_por_maquina(codigo)
-    
-    # Luego eliminamos la máquina
-    if maquina_dao.eliminar(codigo):
-
+    # Elimina una máquina y sus mantenimientos
+    try:
+        # 1. Llamamos al servicio (Lógica de GitHub)
+        exito, mensaje = service.eliminar_maquina(codigo)
+        
+        if not exito:
+            raise HTTPException(status_code=404, detail=mensaje)
+            
+        # 2. 🔥 TU MEJORA: Si el servicio borró con éxito, limpiamos Redis
         redis_client.delete("maquinas:lista")
         redis_client.delete(f"maquina:{codigo}")
 
-        return {"mensaje": "Máquina y mantenimientos eliminados"}
-    else:
-        raise HTTPException(status_code=500, detail="Error al eliminar la máquina.")
+        return {"mensaje": mensaje}
 
-# Esta ruta se ejecuta cuando el frontend hace GET a /api/maquinas/listar
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.get("/listar")
 async def listar_maquinas():
+    # Lista todas las máquinas usando Caché
     try:
+        # 1. Intentamos obtener de Redis (Tu lógica)
         cache = redis_client.get("maquinas:lista")
         if cache:
             return json.loads(cache)
 
-        maquinas = maquina_dao.listar_todas()
+        # 2. Si no hay caché, usamos el Service (Estructura de GitHub)
+        maquinas = service.buscar_maquinas()
 
-        # 🔥 Convertimos fechas a string
-        for m in maquinas:
-            if m.get("fecha"):
-                m["fecha"] = str(m["fecha"])
-
+        # 3. Guardamos en Redis para la próxima consulta (Tu lógica)
+        # Nota: El service probablemente ya devuelve strings, 
+        # así que el bucle de "fecha" podrías omitirlo si el service ya lo maneja.
         redis_client.set("maquinas:lista", json.dumps(maquinas), ex=300)
 
         return maquinas
 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/buscar")
+async def buscar_maquinas(termino: str = None):
+    # Esta es la ruta nueva que trajeron de GitHub, la dejamos tal cual
+    try:
+        maquinas = service.buscar_maquinas(termino)
+        return maquinas
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

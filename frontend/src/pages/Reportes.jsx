@@ -48,7 +48,8 @@ function Reportes() {
       const data = await api.informeGeneral()
       setReportes(data)
     } catch (error) {
-      showModal('Error', 'Error al cargar los reportes', 'fa-exclamation-circle', '#e74c3c')
+      const errorMessage = error.message || 'Error al cargar los reportes'
+      showModal('Error', errorMessage, 'fa-exclamation-circle', '#e74c3c')
     } finally {
       setLoading(false)
     }
@@ -60,7 +61,8 @@ function Reportes() {
       const data = await api.informeGeneral(busqueda)
       setReportes(data)
     } catch (error) {
-      showModal('Error', 'Error al buscar reportes', 'fa-search', '#e74c3c')
+      const errorMessage = error.message || 'Error al buscar reportes'
+      showModal('Error', errorMessage, 'fa-search', '#e74c3c')
     } finally {
       setLoading(false)
     }
@@ -124,8 +126,8 @@ function Reportes() {
                     <th>ID Equipo</th>
                     <th>Ubicación</th>
                     <th>Técnico</th>
-                    <th>Fecha</th>
-                    <th>Tipo</th>
+                    <th>Fecha Mantenimiento</th>
+                    <th>Tipo Mantenimiento</th>
                     <th>Estado</th>
                     <th>Descripción</th>
                     <th>Acciones</th>

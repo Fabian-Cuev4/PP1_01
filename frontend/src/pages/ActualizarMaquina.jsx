@@ -181,6 +181,7 @@ function ActualizarMaquina() {
                     id="area" 
                     placeholder="Ingresa el área"
                     value={formData.area}
+                    onChange={handleChange}
                   />
                 </div>
               </div>
@@ -193,6 +194,7 @@ function ActualizarMaquina() {
                   type="date" 
                   id="fecha"
                   value={formData.fecha}
+                  onChange={handleChange}
                 />
               </div>
             </div>

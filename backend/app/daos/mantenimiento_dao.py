@@ -1,55 +1,69 @@
-# Este archivo se encarga de guardar y buscar mantenimientos en la base de datos MongoDB
-# DAO significa "Data Access Object" (Objeto de Acceso a Datos)
+# DAO LIMPIO - Solo acceso a datos MongoDB
+# Responsabilidades: consultas MongoDB puras, sin lógica de negocio
 
-# Importamos la clase que maneja la conexión a MongoDB
 from app.database.mongodb import MongoDB
 
 class MantenimientoDAO:
-    # El constructor se ejecuta cuando creamos un objeto de esta clase
     def __init__(self):
-        # Obtenemos la conexión a MongoDB
         self.db = MongoDB.conectar()
-        # Seleccionamos la colección (tabla) de mantenimientos
         self.collection = self.db["mantenimientos"]
 
-    # Esta función guarda un mantenimiento en MongoDB
-    def guardar(self, mantenimiento):
+    # Inserta un mantenimiento con datos primitivos
+    def insertar(self, codigo_maquina: str, empresa: str, tecnico: str, 
+                 tipo: str, fecha: str, observaciones: str, usuario: str = None) -> bool:
         try:
-            # Convertimos el objeto mantenimiento a un diccionario
-            documento = mantenimiento.to_dict()
-            # Insertamos el documento en la colección de MongoDB
+            documento = {
+                "codigo_maquina": codigo_maquina,
+                "empresa": empresa,
+                "tecnico": tecnico,
+                "tipo": tipo,
+                "fecha": fecha,
+                "observaciones": observaciones,
+                "usuario": usuario
+            }
             self.collection.insert_one(documento)
-        except Exception as e:
-            pass
+            return True
+        except Exception:
+            return False
 
-    # Esta función elimina todos los mantenimientos de una máquina
-    def eliminar_por_maquina(self, codigo_maquina):
+    # Elimina mantenimientos por código de máquina exacto
+    def eliminar_por_maquina(self, codigo_maquina: str) -> int:
         try:
-            # Buscamos y eliminamos todos los mantenimientos que tengan ese código de máquina
             resultado = self.collection.delete_many({"codigo_maquina": codigo_maquina})
-            # Retornamos cuántos documentos se eliminaron
             return resultado.deleted_count
-        except Exception as e:
+        except Exception:
             return 0
 
-    # Esta función obtiene todos los mantenimientos de una máquina específica
-    def listar_por_maquina(self, codigo):
+    # Obtiene mantenimientos por código de máquina (sin ordenar)
+    def listar_por_maquina(self, codigo: str) -> list:
         try:
-            # Creamos un filtro para buscar solo los mantenimientos de esa máquina
             query = {"codigo_maquina": codigo}
-            # Buscamos y ordenamos por fecha descendente (los más recientes primero)
-            cursor = self.collection.find(query).sort("fecha", -1)
-            # Convertimos el cursor a una lista y la retornamos
+            cursor = self.collection.find(query)
             return list(cursor)
-        except Exception as e:
+        except Exception:
             return []
 
-    # Esta función obtiene todos los mantenimientos de todas las máquinas
-    def listar_todos(self):
+    # Obtiene todos los mantenimientos (sin ordenar)
+    def listar_todos(self) -> list:
         try:
-            # Buscamos todos los documentos en la colección (sin filtro)
             cursor = self.collection.find()
-            # Convertimos el cursor a una lista y la retornamos
             return list(cursor)
-        except Exception as e:
+        except Exception:
+            return []
+
+    # Obtiene mantenimientos ordenados por fecha
+    def listar_por_maquina_ordenados(self, codigo: str, orden: int = -1) -> list:
+        try:
+            query = {"codigo_maquina": codigo}
+            cursor = self.collection.find(query).sort("fecha", orden)
+            return list(cursor)
+        except Exception:
+            return []
+
+    # Busca mantenimientos por filtros múltiples
+    def buscar_con_filtros(self, filtros: dict) -> list:
+        try:
+            cursor = self.collection.find(filtros)
+            return list(cursor)
+        except Exception:
             return []
