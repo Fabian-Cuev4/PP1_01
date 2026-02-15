@@ -24,7 +24,7 @@ class MaquinaSchema(BaseModel):
     tipo_equipo: str         # Tipo: PC o IMP
     estado_actual: str       # Estado: operativa, fuera de servicio, etc.
     area: str                # Área donde está ubicada
-    fecha: date              # Fecha de adquisición
+    fecha: str               # Fecha de adquisición (acepta string del frontend)
     usuario: str = None      # Usuario que registró la máquina (opcional)
 
 # Esta ruta se ejecuta cuando el frontend hace POST a /api/maquinas/agregar

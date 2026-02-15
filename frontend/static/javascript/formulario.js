@@ -38,10 +38,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // cierra el modal al hacer clic en "entendido" y ejecuta callback si existe
         btnModalOk.onclick = () => {
-            console.log("Botón Entendido presionado");
             validationModal.classList.remove("active");
             if (callback) {
-                console.log("Ejecutando callback");
                 callback();
             }
         };
@@ -94,7 +92,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 // si el servidor responde ok, muestra éxito y redirige
                 if (response.ok) {
                     mostrarModal('success', '¡Registro Exitoso!', 'La máquina ha sido registrada correctamente.', () => {
-                        console.log("Redirigiendo a /pagina/maquinas");
                         window.location.href = "/pagina/maquinas";
                     });
                 } else {
@@ -157,7 +154,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 // si se guardó correctamente, muestra éxito y redirige
                 if (response.ok) {
                     mostrarModal('success', 'Mantenimiento Guardado', `Se registró el mantenimiento para ${codigoVinculado}.`, () => {
-                        console.log("Redirigiendo a /pagina/maquinas");
                         window.location.href = "/pagina/maquinas";
                     });
                 } else {

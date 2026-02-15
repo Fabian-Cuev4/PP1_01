@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Modal from '../components/Modal'
 import logo from '../assets/img/Logo.png'
-import './Register.css'
+import './Formularios.css'
 
 function Register() {
   const navigate = useNavigate()
@@ -80,7 +80,6 @@ function Register() {
         showModal('Error en el Registro', errorData.detail || 'Error en el registro', 'fa-exclamation-circle', '#e74c3c')
       }
     } catch (error) {
-      console.error('Error:', error)
       showModal('Error de Conexión', 'Error de conexión con el servidor', 'fa-wifi', '#e74c3c')
     }
   }

@@ -32,7 +32,11 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(maquinaData)
     });
-    return response.json();
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.detail || 'Error al agregar la máquina');
+    }
+    return data;
   },
 
   actualizarMaquina: async (maquinaData) => {

@@ -30,15 +30,12 @@ class MongoDB:
                     # Verificar conexión
                     cls._client.admin.command('ping')
                     cls._db = cls._client["siglab_db"]
-                    print("¡Conexión a MongoDB establecida con éxito! :V")
                     return cls._db
                 except Exception as e:
                     if attempt < max_retries - 1:
-                        print(f"Intento {attempt + 1}/{max_retries} de conexión a MongoDB fallido. Reintentando en {retry_delay} segundos... Error: {e}")
                         time.sleep(retry_delay)
                     else:
-                        print(f"ERROR: No se pudo conectar a MongoDB después de {max_retries} intentos: {e}")
-                        raise
+                        raise Exception(f"No se pudo conectar a MongoDB después de {max_retries} intentos: {e}")
         return cls._db
 
     @classmethod

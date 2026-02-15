@@ -45,7 +45,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     mostrarModal("Error de autenticación", "Usuario o contraseña incorrectos.");
                 }
             } catch (error) {
-                console.error("Error al iniciar sesión:", error);
                 mostrarModal("Error de conexión", "Error de conexión con el servidor.");
             }
         });
@@ -69,32 +68,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // función para mostrar el modal de notificación
 function mostrarModal(titulo, mensaje) {
-    console.log("mostrarModal llamado con:", titulo, mensaje);
     const modal = document.getElementById("modal-notificacion");
     const tituloElement = document.getElementById("modal-titulo");
     const mensajeElement = document.getElementById("modal-mensaje");
-
-    console.log("Elementos encontrados:", {
-        modal: !!modal,
-        tituloElement: !!tituloElement,
-        mensajeElement: !!mensajeElement
-    });
 
     if (modal && tituloElement && mensajeElement) {
         tituloElement.textContent = titulo;
         mensajeElement.textContent = mensaje;
         
-        console.log("Clases antes:", modal.className);
-        // Mostrar el modal
         modal.classList.remove("hidden");
         modal.classList.add("show");
-        console.log("Clases después:", modal.className);
-        console.log("Estilos computados:", {
-            display: window.getComputedStyle(modal).display,
-            visibility: window.getComputedStyle(modal).visibility,
-            opacity: window.getComputedStyle(modal).opacity,
-            zIndex: window.getComputedStyle(modal).zIndex
-        });
     } else {
         console.error("No se encontraron los elementos del modal");
     }
@@ -102,11 +85,8 @@ function mostrarModal(titulo, mensaje) {
 
 // función para ocultar el modal de notificación
 function ocultarModal() {
-    console.log("ocultarModal llamado");
     const modal = document.getElementById("modal-notificacion");
     if (modal) {
-        console.log("Clases antes:", modal.className);
-        // Ocultar el modal
         modal.classList.remove("show");
         modal.classList.add("hidden");
     }

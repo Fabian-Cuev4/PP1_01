@@ -15,15 +15,13 @@ class DatabaseManager:
         try:
             MySQLConnection.inicializar_base_datos()
         except Exception as e:
-            # Si hay un error, lo imprimimos pero no detenemos el servidor
-            print(f"Advertencia MySQL: {e}")
+            pass
         
         # Intentamos conectar a MongoDB
         try:
             MongoDB.conectar()
         except Exception as e:
-            # Si hay un error, lo imprimimos pero no detenemos el servidor
-            print(f"Advertencia MongoDB: {e}")
+            pass
     
     # Este método cierra todas las conexiones cuando se apaga el servidor
     @staticmethod

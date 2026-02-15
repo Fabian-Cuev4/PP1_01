@@ -1,3 +1,10 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
 .login-container {
   background-color: #9da1a5;
   display: flex;
@@ -47,6 +54,17 @@
   border-radius: 10px;
   font-size: 15px;
   outline: none;
+}
+
+.input-information select {
+  width: 100%;
+  padding: 14px 16px;
+  background-color: #f2f4f7;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+  cursor: pointer;
 }
 
 .input-information input::placeholder {

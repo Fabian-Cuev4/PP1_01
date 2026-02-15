@@ -19,11 +19,8 @@ class MantenimientoDAO:
             documento = mantenimiento.to_dict()
             # Insertamos el documento en la colección de MongoDB
             self.collection.insert_one(documento)
-            # Imprimimos un mensaje de confirmación
-            print(f"Mantenimiento guardado para: {mantenimiento.maquina.codigo_equipo}")
         except Exception as e:
-            # Si hay un error, lo imprimimos
-            print(f"Error al guardar mantenimiento: {e}")
+            pass
 
     # Esta función elimina todos los mantenimientos de una máquina
     def eliminar_por_maquina(self, codigo_maquina):
@@ -33,8 +30,6 @@ class MantenimientoDAO:
             # Retornamos cuántos documentos se eliminaron
             return resultado.deleted_count
         except Exception as e:
-            # Si hay un error, lo imprimimos y retornamos 0
-            print(f"Error al eliminar mantenimientos: {e}")
             return 0
 
     # Esta función obtiene todos los mantenimientos de una máquina específica
@@ -47,8 +42,6 @@ class MantenimientoDAO:
             # Convertimos el cursor a una lista y la retornamos
             return list(cursor)
         except Exception as e:
-            # Si hay un error, lo imprimimos y retornamos una lista vacía
-            print(f"Error al buscar historial: {e}")
             return []
 
     # Esta función obtiene todos los mantenimientos de todas las máquinas
@@ -59,6 +52,4 @@ class MantenimientoDAO:
             # Convertimos el cursor a una lista y la retornamos
             return list(cursor)
         except Exception as e:
-            # Si hay un error, lo imprimimos y retornamos una lista vacía
-            print(f"Error al listar mantenimientos: {e}")
             return []

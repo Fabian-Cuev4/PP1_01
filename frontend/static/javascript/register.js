@@ -15,7 +15,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // muestra el modal con un mensaje de éxito o error
     function mostrarModal(mensaje, tipo = "error") {
-        console.log("mostrarModal registro llamado con:", mensaje, tipo);
         modalMensaje.textContent = mensaje;
 
         if (tipo === "success") {
@@ -26,17 +25,8 @@ document.addEventListener("DOMContentLoaded", () => {
             modalIcon.parentElement.style.color = "#e74c3c";
         }
 
-        console.log("Clases antes:", modal.className);
-        // Mostrar el modal
         modal.classList.remove("hidden");
         modal.classList.add("show");
-        console.log("Clases después:", modal.className);
-        console.log("Estilos computados:", {
-            display: window.getComputedStyle(modal).display,
-            visibility: window.getComputedStyle(modal).visibility,
-            opacity: window.getComputedStyle(modal).opacity,
-            zIndex: window.getComputedStyle(modal).zIndex
-        });
     }
 
     // cierra el modal al hacer clic en el botón
@@ -78,8 +68,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 password: password
             };
 
-            console.log("Enviando registro...", datosRegistro);
-
             try {
                 // envía la petición de registro al backend
                 const response = await fetch('/api/register', {
@@ -106,7 +94,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     mostrarModal(msg);
                 }
             } catch (error) {
-                console.error("Error de red:", error);
                 mostrarModal("Error crítico al conectar con el servidor.");
             }
         });

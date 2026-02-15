@@ -37,12 +37,8 @@ class UsuarioDAO:
             conn.commit()
             return True
         except ValueError as e:
-            # Error de validación
-            print(f"Error de validación: {e}")
             return False
         except Exception as e:
-            # Si hay un error, lo imprimimos
-            print(f"Error al guardar usuario: {e}")
             return False
         finally:
             # Siempre cerramos el cursor y la conexión
@@ -75,12 +71,8 @@ class UsuarioDAO:
             conn.commit()
             return True
         except ValueError as e:
-            # Error de validación
-            print(f"Error de validación: {e}")
             return False
         except Exception as e:
-            # Si hay un error (por ejemplo, el usuario ya existe), lo imprimimos
-            print(f"Error al crear usuario: {e}")
             return False
         finally:
             # Siempre cerramos el cursor y la conexión, aunque haya un error
@@ -111,8 +103,6 @@ class UsuarioDAO:
             # Si no encontramos el usuario o la contraseña es incorrecta, retornamos None
             return None
         except Exception as e:
-            # Si hay un error, lo imprimimos y retornamos None
-            print(f"Error en login: {e}")
             return None
         finally:
             # Siempre cerramos el cursor y la conexión
@@ -137,8 +127,6 @@ class UsuarioDAO:
             # Obtenemos el primer resultado (si existe)
             return cursor.fetchone()
         except Exception as e:
-            # Si hay un error, lo imprimimos y retornamos None
-            print(f"Error al buscar usuario: {e}")
             return None
         finally:
             # Siempre cerramos el cursor y la conexión

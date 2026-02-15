@@ -44,7 +44,6 @@ function Reportes() {
       const data = await api.informeGeneral()
       setReportes(data)
     } catch (error) {
-      console.error('Error al cargar reportes:', error)
       showModal('Error', 'Error al cargar los reportes', 'fa-exclamation-circle', '#e74c3c')
     } finally {
       setLoading(false)
@@ -57,7 +56,6 @@ function Reportes() {
       const data = await api.informeGeneral(busqueda)
       setReportes(data)
     } catch (error) {
-      console.error('Error al buscar reportes:', error)
       showModal('Error', 'Error al buscar reportes', 'fa-search', '#e74c3c')
     } finally {
       setLoading(false)

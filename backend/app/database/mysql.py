@@ -86,7 +86,6 @@ class MySQLConnection:
 
                 # Guardamos los cambios
                 conn.commit()
-                print("¡ÉXITO! MySQL configurado correctamente. :V")
                 
                 # Cerramos la conexión temporal
                 cursor.close()
@@ -96,10 +95,9 @@ class MySQLConnection:
             except (Error, Exception) as e:
                 # Si falla, esperamos un poco y volvemos a intentar
                 if attempt < max_retries - 1:
-                    print(f"Intento {attempt + 1}/{max_retries} fallido. Reintentando... Error: {e}")
                     time.sleep(retry_delay)
                 else:
-                    print(f"ERROR: No se pudo conectar a MySQL tras muchos intentos.")
+                    raise Exception(f"No se pudo conectar a MySQL tras muchos intentos.")
 
     # El 'Pool' es como una reserva de conexiones abiertas para no tener que abrir una nueva cada vez.
     _pool = None
@@ -123,7 +121,6 @@ class MySQLConnection:
                     autocommit=False
                 )
             except Error as e:
-                print(f"Error al crear el pool: {e}")
                 return None
         return cls._pool
 
@@ -141,5 +138,4 @@ class MySQLConnection:
                 return conn
             return None
         except Exception as e:
-            print(f"Error al conectar a MySQL: {e}")
             return None

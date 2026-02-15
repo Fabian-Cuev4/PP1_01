@@ -2,20 +2,19 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { api } from '../utils/api'
 import Modal from '../components/Modal'
-import './Mantenimiento.css'
+import './Formularios.css'
 
 function Mantenimiento() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const codigoMaquina = searchParams.get('codigo') || ''
   const [formData, setFormData] = useState({
-    codigo_maquina: codigoMaquina,
     empresa: '',
     tecnico: '',
     tipo: '',
     fecha: '',
     observaciones: '',
-    usuario: ''
+    codigo_maquina: codigoMaquina
   })
   const [loading, setLoading] = useState(false)
   const [modal, setModal] = useState({
@@ -27,16 +26,26 @@ function Mantenimiento() {
   })
 
   useEffect(() => {
-    setFormData(prev => ({ ...prev, codigo_maquina: codigoMaquina }))
-  }, [codigoMaquina])
+    const userData = localStorage.getItem('user')
+    if (userData) {
+      let usuario = ''
+      try {
+        usuario = JSON.parse(userData)
+      } catch {
+        usuario = userData.replace(/"/g, '')
+      }
+      if (typeof usuario === 'object') {
+        usuario = usuario.nombre_completo || usuario.username || ''
+      }
+      setFormData(prev => ({...prev, usuario}))
+    }
+  }, [])
 
   const handleChange = (e) => {
-    const { id, value } = e.target
-    const fieldName = id.replace('mant-', '')
-    setFormData(prev => ({
-      ...prev,
-      [fieldName]: value
-    }))
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value
+    })
   }
 
   const showModal = (title, message, icon = 'fa-exclamation-circle', iconColor = '#e74c3c') => {
@@ -59,7 +68,7 @@ function Mantenimiento() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     
-    if (!formData.empresa || !formData.tecnico || !formData.tipo || !formData.fecha) {
+    if (!formData.empresa || !formData.tecnico || !formData.tipo || !formData.fecha || !formData.observaciones) {
       showModal('Campos Requeridos', 'Por favor complete todos los campos requeridos', 'fa-exclamation-triangle', '#e74c3c')
       return
     }
@@ -72,55 +81,55 @@ function Mantenimiento() {
         navigate('/pagina/maquinas')
       }, 2000)
     } catch (error) {
-      console.error('Error al registrar mantenimiento:', error)
-      showModal('Error al Registrar', error.detail || 'Error al registrar el mantenimiento', 'fa-exclamation-circle', '#e74c3c')
+      showModal('Error al Registrar', error.message || 'Error al registrar el mantenimiento', 'fa-exclamation-circle', '#e74c3c')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleCancel = () => {
-    navigate('/pagina/maquinas')
-  }
-
   return (
-    <div className="mantenimiento-container">
-      <div className="modal-overlay">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h2 className="modal-title-main">Registro de mantenimiento</h2>
-            <p>Código máquina: <strong>{codigoMaquina}</strong></p>
-          </div>
+    <div className="login-container">
+      <div className="login-card">
+        <div className="logo-section">
+          <h2>Registro de Mantenimiento</h2>
+          <p style={{marginTop: '5px', color: '#666'}}>Código máquina: <strong>{codigoMaquina}</strong></p>
+        </div>
 
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>Empresa / Institución</label>
+        <form onSubmit={handleSubmit}>
+          <div className="input-user">
+            <label htmlFor="empresa">Empresa / Institución</label>
+            <div className="input-information">
               <input 
                 type="text" 
-                id="mant-empresa" 
+                id="empresa" 
                 placeholder="Añade la empresa y especificar el cargo"
                 value={formData.empresa}
                 onChange={handleChange}
                 required
               />
             </div>
+          </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label>Técnico Responsable</label>
+          <div style={{display: 'flex', gap: '15px'}}>
+            <div className="input-user" style={{flex: 1}}>
+              <label htmlFor="tecnico">Técnico Responsable</label>
+              <div className="input-information">
                 <input 
                   type="text" 
-                  id="mant-tecnico" 
-                  placeholder="Ingresa nombres completos"
+                  id="tecnico" 
+                  placeholder="Ingresa nombres"
                   value={formData.tecnico}
                   onChange={handleChange}
                   required
                 />
               </div>
-              <div className="form-group">
-                <label>Tipo de mantenimiento</label>
+            </div>
+
+            <div className="input-user" style={{flex: 1}}>
+              <label htmlFor="tipo">Tipo de mantenimiento</label>
+              <div className="input-information">
                 <select 
-                  id="mant-tipo" 
+                  id="tipo"
                   value={formData.tipo}
                   onChange={handleChange}
                   required
@@ -131,52 +140,55 @@ function Mantenimiento() {
                 </select>
               </div>
             </div>
+          </div>
 
-            <div className="form-group" style={{ width: '50%' }}>
-              <label>Fecha de mantenimiento</label>
+          <div className="input-user">
+            <label htmlFor="fecha">Fecha de mantenimiento</label>
+            <div className="input-information">
               <input 
                 type="date" 
-                id="mant-fecha"
+                id="fecha"
                 value={formData.fecha}
                 onChange={handleChange}
                 required
               />
             </div>
+          </div>
 
-            <div className="form-group">
-              <label>Observaciones</label>
+          <div className="input-user">
+            <label htmlFor="observaciones">Descripción del trabajo realizado</label>
+            <div className="input-information">
               <textarea 
-                id="mant-observaciones" 
-                placeholder="Ingresa un comentario" 
-                rows="3"
+                id="observaciones" 
+                placeholder="Describe detalladamente el trabajo realizado..."
                 value={formData.observaciones}
                 onChange={handleChange}
-              ></textarea>
-            </div>
-
-            <div className="form-group">
-              <label>Usuario que registra</label>
-              <input 
-                type="text" 
-                id="mant-usuario" 
-                placeholder="Usuario que registra"
-                value={formData.usuario}
-                onChange={handleChange}
+                required
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: '1px solid transparent',
+                  backgroundColor: '#f1f3f5',
+                  fontSize: '14px',
+                  color: '#333',
+                  outline: 'none',
+                  minHeight: '100px',
+                  resize: 'vertical'
+                }}
               />
             </div>
+          </div>
 
-            <div className="form-actions">
-              <button 
-                type="submit" 
-                className="btn-save"
-                disabled={loading}
-              >
-                {loading ? 'Guardando...' : 'Guardar'}
-              </button>
-              <button type="button" onClick={handleCancel} className="btn-cancel">Cancelar</button>
-            </div>
-          </form>
-        </div>
+          <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
+            <button type="submit" className="btn-signin" disabled={loading}>
+              {loading ? 'Registrando...' : 'Guardar'}
+            </button>
+            <button type="button" className="btn-signin" onClick={() => navigate('/pagina/maquinas')} style={{background: '#95a5a6'}}>
+              Cancelar
+            </button>
+          </div>
+        </form>
       </div>
 
       <Modal

@@ -49,7 +49,6 @@ function Maquinas() {
       const data = await api.listarMaquinas()
       setMaquinas(data)
     } catch (error) {
-      console.error('Error al cargar máquinas:', error)
       showModal('Error', 'Error al cargar las máquinas', 'fa-exclamation-circle', '#e74c3c')
     } finally {
       setLoading(false)
@@ -66,7 +65,6 @@ function Maquinas() {
           cargarMaquinas()
         }, 1500)
       } catch (error) {
-        console.error('Error al eliminar máquina:', error)
         showModal('Error al Eliminar', 'Error al eliminar la máquina', 'fa-exclamation-circle', '#e74c3c')
       }
     }
@@ -117,6 +115,7 @@ function Maquinas() {
           </div>
           <div className="search-container">
             <input 
+              id="input-busqueda"
               type="text" 
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}

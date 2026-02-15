@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Modal from '../components/Modal'
 import logo from '../assets/img/Logo.png'
-import './Login.css'
+import './Formularios.css'
 
 function Login() {
   const navigate = useNavigate()
@@ -64,7 +64,6 @@ function Login() {
         showModal('Error de Login', errorData.detail || 'Error en el login', 'fa-exclamation-circle', '#e74c3c')
       }
     } catch (error) {
-      console.error('Error:', error)
       showModal('Error de Conexión', 'Error de conexión con el servidor', 'fa-wifi', '#e74c3c')
     }
   }

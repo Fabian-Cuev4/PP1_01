@@ -47,7 +47,6 @@ function Historial() {
       const data = await api.listarMantenimientos(codigoMaquina)
       setHistorial(data)
     } catch (error) {
-      console.error('Error al cargar historial:', error)
       showModal('Error', 'Error al cargar el historial de mantenimientos', 'fa-exclamation-circle', '#e74c3c')
     } finally {
       setLoading(false)

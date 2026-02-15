@@ -36,8 +36,6 @@ class MaquinaDAO:
             cursor.close()
             conn.close()
         except Exception as e:
-            # Si hay un error, lo imprimimos y lo relanzamos
-            print(f"Error al guardar máquina: {e}")
             raise e
 
     # Esta función actualiza los datos de una máquina existente
@@ -72,8 +70,6 @@ class MaquinaDAO:
             conn.close()
             return True
         except Exception as e:
-            # Si hay un error, lo imprimimos y retornamos False
-            print(f"Error al actualizar máquina: {e}")
             return False
 
     # Esta función elimina una máquina de la base de datos
@@ -97,8 +93,6 @@ class MaquinaDAO:
             conn.close()
             return True
         except Exception as e:
-            # Si hay un error, lo imprimimos y retornamos False
-            print(f"Error al eliminar máquina: {e}")
             return False
 
     # Esta función busca una máquina por su código
@@ -123,8 +117,6 @@ class MaquinaDAO:
             conn.close()
             return resultado
         except Exception as e:
-            # Si hay un error, lo imprimimos y retornamos None
-            print(f"Error al buscar máquina: {e}")
             return None
 
     # Esta función obtiene todas las máquinas de la base de datos
@@ -146,6 +138,4 @@ class MaquinaDAO:
             conn.close()
             return lista
         except Exception as e:
-            # Si hay un error, lo imprimimos y retornamos una lista vacía
-            print(f"Error al listar máquinas: {e}")
             return []

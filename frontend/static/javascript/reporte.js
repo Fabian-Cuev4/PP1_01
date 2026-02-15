@@ -97,7 +97,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             tablaBody.innerHTML = HTML_CONTENT;
         } catch (error) {
-            console.error("Error al cargar datos:", error);
             tablaBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red;">Error al cargar reportes.</td></tr>`;
         }
     };
