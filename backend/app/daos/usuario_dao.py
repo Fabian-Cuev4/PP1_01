@@ -1,11 +1,11 @@
-# DAO LIMPIO - Solo acceso a datos MySQL
+# DAO - Acceso a datos MySQL
 # Responsabilidades: consultas SQL puras, sin lógica de negocio
 
 from app.database.mysql import MySQLConnection
 from app.utils.encryption import Encryption
 
 class UsuarioDAO:
-    # Inserta un usuario con datos primitivos
+    # Inserta usuario con datos primitivos
     def insertar(self, nombre_completo: str, username: str, password: str, rol: str = "usuario") -> bool:
         conn = MySQLConnection.conectar()
         if not conn:

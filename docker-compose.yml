@@ -1,45 +1,45 @@
 services:
   # SERVICIO 1: Base de datos MySQL
   mysql:
-    image: mysql:8.0 # Usa la imagen oficial de MySQL versión 8.0
-    container_name: mysql_siglab # Nombre del contenedor para identificarlo fácilmente
-    restart: always # Si el contenedor se cae, Docker lo reinicia automáticamente
+    image: mysql:8.0 # Imagen oficial MySQL 8.0
+    container_name: mysql_siglab # Nombre del contenedor
+    restart: always # Reinicio automático
     environment:
-      # Variables de entorno para configurar MySQL
-      MYSQL_ROOT_PASSWORD: Clubpengui1 # Contraseña del usuario root
-      MYSQL_DATABASE: proyecto_maquinas # Crea automáticamente esta base de datos al iniciar
+      # Variables de entorno MySQL
+      MYSQL_ROOT_PASSWORD: Clubpengui1 # Contraseña root
+      MYSQL_DATABASE: proyecto_maquinas # Base de datos automática
     ports:
-      - "13306:3306" # Mapea puerto 13306 de tu PC al puerto 3306 del contenedor (evita conflictos)
+      - "13306:3306" # Mapeo puerto 13306 -> 3306
     volumes:
-      - mysql_data:/var/lib/mysql # Guarda los datos en un volumen para que persistan al reiniciar
+      - mysql_data:/var/lib/mysql # Persistencia de datos
     networks:
-      - siglab_network # Conecta este contenedor a la red interna para comunicarse con otros
+      - siglab_network # Red interna
     healthcheck:
-      # Verifica que MySQL esté funcionando correctamente
-      test: [ "CMD-SHELL", "mysqladmin ping -h localhost -u root -pClubpengui1 || exit 1" ] # Comando para verificar salud
-      interval: 30s # Verifica cada 30 segundos
-      timeout: 10s # Espera máximo 10 segundos por respuesta
-      retries: 5 # Intenta 5 veces antes de marcar como "unhealthy"
-      start_period: 40s # Da 40 segundos de gracia antes de empezar a verificar (MySQL tarda en iniciar)
+      # Verificación de salud MySQL
+      test: [ "CMD-SHELL", "mysqladmin ping -h localhost -u root -pClubpengui1 || exit 1" ]
+      interval: 30s # Verificación cada 30s
+      timeout: 10s # Timeout 10s
+      retries: 5 # 5 reintentos
+      start_period: 40s # Periodo de gracia 40s
 
   # SERVICIO 2: Base de datos MongoDB
   mongodb:
-    image: mongo:latest # Usa la imagen oficial de MongoDB (última versión)
+    image: mongo:latest # Imagen oficial MongoDB
     container_name: mongo_siglab # Nombre del contenedor
-    restart: always # Reinicio automático si falla
+    restart: always # Reinicio automático
     ports:
-      - "27018:27017" # Mapea puerto 27018 de tu PC al puerto 27017 del contenedor
+      - "27018:27017" # Mapeo puerto 27018 -> 27017
     volumes:
-      - mongo_data:/data/db # Guarda los datos de MongoDB en un volumen persistente
+      - mongo_data:/data/db # Persistencia MongoDB
     networks:
-      - siglab_network # Conecta a la red interna
+      - siglab_network # Red interna
     healthcheck:
-      # Verifica que MongoDB esté funcionando
-      test: [ "CMD-SHELL", "mongosh --eval \"db.adminCommand('ping')\" --quiet || exit 1" ] # Comando de verificación
-      interval: 30s # Verifica cada 30 segundos
-      timeout: 10s # Espera máximo 10 segundos
-      retries: 3 # Intenta 3 veces antes de marcar como "unhealthy"
-      start_period: 15s # Da 15 segundos de gracia (MongoDB inicia más rápido que MySQL)
+      # Verificación de salud MongoDB
+      test: [ "CMD-SHELL", "mongosh --eval \"db.adminCommand('ping')\" --quiet || exit 1" ]
+      interval: 30s # Verificación cada 30s
+      timeout: 10s # Timeout 10s
+      retries: 3 # 3 reintentos
+      start_period: 15s # Periodo de gracia 15s
 
   # SERVICIO 3: Backend con Réplicas (FastAPI) - Escalable para máquinas
   backend:
@@ -155,21 +155,21 @@ services:
     profiles:
       - load-test  # Solo k6 (asume que el resto ya corre)
 
-# VOLÚMENES (Almacenamiento Persistente)
+# VOLÚMENES - Almacenamiento Persistente
 volumes:
   mysql_data:
-    # Volumen para guardar datos de MySQL
-    driver: local # Almacena en el disco local de tu PC
+    # Volumen datos MySQL
+    driver: local # Almacenamiento local
   mongo_data:
-    # Volumen para guardar datos de MongoDB
-    driver: local # Almacena en el disco local de tu PC
+    # Volumen datos MongoDB
+    driver: local # Almacenamiento local
 
-# REDES (Comunicación entre Contenedores)
+# REDES - Comunicación entre Contenedores
 networks:
   siglab_network:
-    # Red interna para que los contenedores se comuniquen entre sí
-    driver: bridge # Tipo de red: bridge (red virtual privada)
+    # Red interna principal
+    driver: bridge # Red virtual privada
   
   frontend_network:
-    # Red exclusiva para frontend y backend-simple
+    # Red exclusiva frontend
     driver: bridge

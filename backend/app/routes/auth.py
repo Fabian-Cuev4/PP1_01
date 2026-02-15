@@ -41,6 +41,9 @@ async def register(datos: RegisterRequest):
         if error:
             raise HTTPException(status_code=400, detail=error)
         return resultado
+    except HTTPException:
+        # Dejar pasar las excepciones HTTP (como 400)
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

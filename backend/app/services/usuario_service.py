@@ -1,4 +1,4 @@
-# SERVICE LIMPIO - Solo lógica de negocio, sin acceso a datos
+# Service - Lógica de negocio de usuarios
 # Responsabilidades: validación de negocio, coordinación con DAOs
 
 from app.daos.usuario_dao import UsuarioDAO
@@ -9,7 +9,7 @@ class UsuarioService:
         self.dao = UsuarioDAO()
     
     def registrar_usuario(self, datos: dict) -> tuple:
-        # Registra un nuevo usuario con validaciones de negocio
+        # Registra nuevo usuario con validaciones
         try:
             # Validaciones de negocio
             if not all([datos.get('nombre_completo'), datos.get('username'), datos.get('password')]):
@@ -18,7 +18,7 @@ class UsuarioService:
             if len(datos.get('password', '')) < 6:
                 return None, "La contraseña debe tener al menos 6 caracteres"
             
-            # Verificar si el usuario ya existe
+            # Verificar si usuario ya existe
             if self.dao.obtener_usuario_por_username(datos.get('username')):
                 return None, "El nombre de usuario ya existe"
             
@@ -42,7 +42,7 @@ class UsuarioService:
             return None, f"Error en el servicio: {str(e)}"
     
     def autenticar_usuario(self, username: str, password: str) -> tuple:
-        # Autentica un usuario y maneja la sesión
+        # Autentica usuario y maneja sesión
         try:
             if not username or not password:
                 return None, "Usuario y contraseña son requeridos"
@@ -67,7 +67,7 @@ class UsuarioService:
             return None, f"Error en el servicio: {str(e)}"
     
     def obtener_usuario(self, username: str) -> tuple:
-        # Obtiene datos de un usuario
+        # Obtiene datos de usuario
         try:
             usuario = self.dao.obtener_usuario_por_username(username)
             if usuario:
@@ -87,7 +87,7 @@ class UsuarioService:
             return [], f"Error al obtener usuarios activos: {str(e)}"
     
     def cerrar_sesion(self, username: str) -> tuple:
-        # Cierra la sesión de un usuario (sin Redis - solo confirma)
+        # Cierra sesión de usuario (sin Redis - solo confirma)
         try:
             return {"mensaje": "Sesión cerrada correctamente"}, None
         except Exception as e:
