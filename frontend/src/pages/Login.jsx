@@ -45,6 +45,11 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault()
     
+    if (!formData.username || !formData.password) {
+      showModal('Datos Incompletos', 'Por favor complete todos los campos para iniciar sesión', 'fa-exclamation-triangle', '#e74c3c')
+      return
+    }
+    
     try {
       const response = await fetch('/api/login', {
         method: 'POST',
@@ -87,7 +92,6 @@ function Login() {
                 placeholder="Ingresar usuario"
                 value={formData.username}
                 onChange={handleChange}
-                required
               />
             </div>
           </div>
@@ -101,7 +105,6 @@ function Login() {
                 placeholder="Ingresar contraseña"
                 value={formData.password}
                 onChange={handleChange}
-                required
               />
             </div>
           </div>

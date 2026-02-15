@@ -47,6 +47,11 @@ function Register() {
   const handleRegister = async (e) => {
     e.preventDefault()
     
+    if (!formData.nombre_completo || !formData.username || !formData.password || !formData['confirm-password']) {
+      showModal('Datos Incompletos', 'Por favor complete todos los campos para registrarse', 'fa-exclamation-triangle', '#e74c3c')
+      return
+    }
+    
     if (formData.password !== formData['confirm-password']) {
       showModal('Error de Validación', 'Las contraseñas no coinciden', 'fa-exclamation-triangle', '#e74c3c')
       return
@@ -104,7 +109,6 @@ function Register() {
                 placeholder="Tu nombre y apellido"
                 value={formData.nombre_completo}
                 onChange={handleChange}
-                required
               />
             </div>
           </div>
@@ -118,7 +122,6 @@ function Register() {
                 placeholder="Crea un nombre de usuario"
                 value={formData.username}
                 onChange={handleChange}
-                required
               />
             </div>
           </div>
@@ -132,7 +135,6 @@ function Register() {
                 placeholder="Mínimo 8 caracteres"
                 value={formData.password}
                 onChange={handleChange}
-                required
               />
             </div>
           </div>
@@ -146,7 +148,6 @@ function Register() {
                 placeholder="Repite tu contraseña"
                 value={formData['confirm-password']}
                 onChange={handleChange}
-                required
               />
             </div>
           </div>

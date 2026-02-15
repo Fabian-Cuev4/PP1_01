@@ -95,7 +95,7 @@ function ActualizarMaquina() {
     e.preventDefault()
     
     if (!formData.estado_actual) {
-      showModal('Campos Requeridos', 'Por favor seleccione el estado', 'fa-exclamation-triangle', '#e74c3c')
+      showModal('Datos Incompletos', 'Por favor complete el campo de estado para actualizar la máquina', 'fa-exclamation-triangle', '#e74c3c')
       return
     }
 
@@ -133,7 +133,6 @@ function ActualizarMaquina() {
                     value={formData.tipo_equipo}
                     disabled
                     style={{cursor: 'not-allowed'}}
-                    required
                   >
                     <option value="">Selecciona</option>
                     <option value="PC">Computadora</option>
@@ -152,7 +151,6 @@ function ActualizarMaquina() {
                     value={formData.codigo_equipo}
                     disabled
                     style={{cursor: 'not-allowed'}}
-                    required
                   />
                 </div>
               </div>
@@ -166,7 +164,6 @@ function ActualizarMaquina() {
                     id="estado_actual" 
                     value={formData.estado_actual}
                     onChange={handleChange}
-                    required
                   >
                     <option value="">Selecciona</option>
                     <option value="operativa">Operativa</option>
@@ -184,7 +181,6 @@ function ActualizarMaquina() {
                     id="area" 
                     placeholder="Ingresa el área"
                     value={formData.area}
-                    required
                   />
                 </div>
               </div>
@@ -197,7 +193,6 @@ function ActualizarMaquina() {
                   type="date" 
                   id="fecha"
                   value={formData.fecha}
-                  required
                 />
               </div>
             </div>

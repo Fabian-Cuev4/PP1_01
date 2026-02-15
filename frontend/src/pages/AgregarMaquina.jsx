@@ -71,7 +71,7 @@ function AgregarMaquina() {
     e.preventDefault()
     
     if (!formData.tipo_equipo || !formData.codigo_equipo || !formData.estado_actual || !formData.area || !formData.fecha) {
-      showModal('Campos Requeridos', 'Por favor complete todos los campos requeridos', 'fa-exclamation-triangle', '#e74c3c')
+      showModal('Datos Incompletos', 'Por favor complete todos los campos para agregar la máquina', 'fa-exclamation-triangle', '#e74c3c')
       return
     }
 
@@ -105,7 +105,6 @@ function AgregarMaquina() {
                   id="tipo_equipo" 
                   value={formData.tipo_equipo}
                   onChange={handleChange}
-                  required
                 >
                   <option value="">Selecciona</option>
                   <option value="PC">Computadora</option>
@@ -123,7 +122,6 @@ function AgregarMaquina() {
                   placeholder="Ingresa código"
                   value={formData.codigo_equipo}
                   onChange={handleChange}
-                  required
                 />
               </div>
             </div>
@@ -137,7 +135,6 @@ function AgregarMaquina() {
                   id="estado_actual" 
                   value={formData.estado_actual}
                   onChange={handleChange}
-                  required
                 >
                   <option value="">Selecciona</option>
                   <option value="operativa">Operativa</option>
@@ -156,7 +153,6 @@ function AgregarMaquina() {
                   placeholder="Ingresa el área"
                   value={formData.area}
                   onChange={handleChange}
-                  required
                 />
               </div>
             </div>
@@ -170,7 +166,6 @@ function AgregarMaquina() {
                 id="fecha"
                 value={formData.fecha}
                 onChange={handleChange}
-                required
               />
             </div>
           </div>

@@ -73,7 +73,7 @@ function Mantenimiento() {
     e.preventDefault()
     
     if (!formData.empresa || !formData.tecnico || !formData.tipo || !formData.fecha || !formData.observaciones) {
-      showModal('Campos Requeridos', 'Por favor complete todos los campos requeridos', 'fa-exclamation-triangle', '#e74c3c')
+      showModal('Datos Incompletos', 'Por favor complete todos los campos para registrar el mantenimiento', 'fa-exclamation-triangle', '#e74c3c')
       return
     }
 
@@ -109,7 +109,6 @@ function Mantenimiento() {
                 placeholder="Añade la empresa y especificar el cargo"
                 value={formData.empresa}
                 onChange={handleChange}
-                required
               />
             </div>
           </div>
@@ -124,7 +123,6 @@ function Mantenimiento() {
                   placeholder="Ingresa nombres"
                   value={formData.tecnico}
                   onChange={handleChange}
-                  required
                 />
               </div>
             </div>
@@ -136,7 +134,6 @@ function Mantenimiento() {
                   id="tipo"
                   value={formData.tipo}
                   onChange={handleChange}
-                  required
                 >
                   <option value="">Selecciona</option>
                   <option value="preventivo">Preventivo</option>
@@ -154,7 +151,6 @@ function Mantenimiento() {
                 id="fecha"
                 value={formData.fecha}
                 onChange={handleChange}
-                required
               />
             </div>
           </div>
@@ -167,7 +163,6 @@ function Mantenimiento() {
                 placeholder="Describe detalladamente el trabajo realizado..."
                 value={formData.observaciones}
                 onChange={handleChange}
-                required
                 style={{
                   width: '100%',
                   padding: '12px',
