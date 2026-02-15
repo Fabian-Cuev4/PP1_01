@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { api } from '../utils/api'
 import Modal from '../components/Modal'
-import './Formularios.css'
+import '../styles/Formularios.css'
 
 function ActualizarMaquina() {
   const navigate = useNavigate()
@@ -27,10 +27,14 @@ function ActualizarMaquina() {
   })
 
   useEffect(() => {
+    if (!sessionStorage.getItem('token')) {
+      navigate('/login')
+      return
+    }
     if (codigoMaquina) {
       cargarDatosMaquina()
     }
-  }, [codigoMaquina])
+  }, [codigoMaquina, navigate])
 
   const cargarDatosMaquina = async () => {
     try {
@@ -50,13 +54,13 @@ function ActualizarMaquina() {
       } else {
         showModal('Máquina No Encontrada', 'La máquina solicitada no existe', 'fa-search', '#e74c3c')
         setTimeout(() => {
-          navigate('/pagina/maquinas')
+          navigate('/maquinas')
         }, 2000)
       }
     } catch (error) {
       showModal('Error', 'Error al cargar los datos de la máquina', 'fa-exclamation-circle', '#e74c3c')
       setTimeout(() => {
-        navigate('/pagina/maquinas')
+        navigate('/maquinas')
       }, 2000)
     } finally {
       setLoadingData(false)
@@ -100,7 +104,7 @@ function ActualizarMaquina() {
       await api.actualizarMaquina(formData)
       showModal('Actualización Exitosa', 'Máquina actualizada exitosamente', 'fa-check-circle', '#27ae60')
       setTimeout(() => {
-        navigate('/pagina/maquinas')
+        navigate('/maquinas')
       }, 2000)
     } catch (error) {
       showModal('Error al Actualizar', error.message || 'Error al actualizar la máquina', 'fa-exclamation-circle', '#e74c3c')
@@ -216,7 +220,7 @@ function ActualizarMaquina() {
               <button type="submit" className="btn-signin" disabled={loading}>
                 {loading ? 'Actualizando...' : 'Actualizar'}
               </button>
-              <button type="button" className="btn-signin" onClick={() => navigate('/pagina/maquinas')} style={{background: '#95a5a6'}}>
+              <button type="button" className="btn-signin" onClick={() => navigate('/maquinas')} style={{background: '#95a5a6'}}>
                 Cancelar
               </button>
             </div>

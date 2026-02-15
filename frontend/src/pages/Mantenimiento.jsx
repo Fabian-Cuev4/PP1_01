@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { api } from '../utils/api'
 import Modal from '../components/Modal'
-import './Formularios.css'
+import '../styles/Formularios.css'
 
 function Mantenimiento() {
   const navigate = useNavigate()
@@ -26,7 +26,11 @@ function Mantenimiento() {
   })
 
   useEffect(() => {
-    const userData = localStorage.getItem('user')
+    if (!sessionStorage.getItem('token')) {
+      navigate('/login')
+      return
+    }
+    const userData = sessionStorage.getItem('user')
     if (userData) {
       let usuario = ''
       try {
@@ -39,7 +43,7 @@ function Mantenimiento() {
       }
       setFormData(prev => ({...prev, usuario}))
     }
-  }, [])
+  }, [navigate])
 
   const handleChange = (e) => {
     setFormData({
@@ -78,7 +82,7 @@ function Mantenimiento() {
       await api.agregarMantenimiento(formData)
       showModal('Registro Exitoso', 'Mantenimiento registrado exitosamente', 'fa-check-circle', '#27ae60')
       setTimeout(() => {
-        navigate('/pagina/maquinas')
+        navigate('/maquinas')
       }, 2000)
     } catch (error) {
       showModal('Error al Registrar', error.message || 'Error al registrar el mantenimiento', 'fa-exclamation-circle', '#e74c3c')
@@ -184,7 +188,7 @@ function Mantenimiento() {
             <button type="submit" className="btn-signin" disabled={loading}>
               {loading ? 'Registrando...' : 'Guardar'}
             </button>
-            <button type="button" className="btn-signin" onClick={() => navigate('/pagina/maquinas')} style={{background: '#95a5a6'}}>
+            <button type="button" className="btn-signin" onClick={() => navigate('/maquinas')} style={{background: '#95a5a6'}}>
               Cancelar
             </button>
           </div>

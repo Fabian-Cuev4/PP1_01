@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Modal from '../components/Modal'
 import logo from '../assets/img/Logo.png'
-import './Formularios.css'
+import '../styles/Formularios.css'
 
 function Login() {
   const navigate = useNavigate()
@@ -56,9 +56,11 @@ function Login() {
 
       if (response.ok) {
         const data = await response.json()
-        localStorage.setItem('token', data.token)
-        localStorage.setItem('user', JSON.stringify(data.usuario))
-        navigate('/pagina/inicio')
+        // Limpiar sessionStorage antes de guardar nuevos datos
+        sessionStorage.clear()
+        sessionStorage.setItem('token', data.token)
+        sessionStorage.setItem('user', JSON.stringify(data.usuario))
+        navigate('/inicio')
       } else {
         const errorData = await response.json()
         showModal('Error de Login', errorData.detail || 'Error en el login', 'fa-exclamation-circle', '#e74c3c')
@@ -108,7 +110,7 @@ function Login() {
         </form>
 
         <p className="footer-text">
-          ¿No tienes cuenta? <a href="/pagina/registro">Registrarse</a>
+          ¿No tienes cuenta? <a href="/registro">Registrarse</a>
         </p>
       </div>
 

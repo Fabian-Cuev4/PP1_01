@@ -1,16 +1,23 @@
 import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import iconoUser from '../assets/img/icono_user.png'
 import iconoCerrarSesion from '../assets/img/icono_cerrar_sesion.png'
 import iconoMaquina from '../assets/img/icono_maquina.png'
-import './Inicio.css'
+import '../styles/Inicio.css'
 
 function Inicio() {
   const navigate = useNavigate()
 
+  useEffect(() => {
+    if (!sessionStorage.getItem('token')) {
+      navigate('/login')
+    }
+  }, [navigate])
+
   const handleLogout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    navigate('/pagina/login')
+    sessionStorage.removeItem('token')
+    sessionStorage.removeItem('user')
+    navigate('/login')
   }
 
   return (
@@ -36,7 +43,7 @@ function Inicio() {
         <h1 className="title">Tu espacio de trabajo</h1>
 
         <div className="cards-conta">
-          <div className="card-target" onClick={() => navigate('/pagina/maquinas')}>
+          <div className="card-target" onClick={() => navigate('/maquinas')}>
             <div className="card-space">
               <div className="card-icon">
                 <img src={iconoMaquina} alt="Máquinas" />

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { api } from '../utils/api'
 import Modal from '../components/Modal'
-import './Historial.css'
+import '../styles/Historial.css'
 
 function Historial() {
   const navigate = useNavigate()
@@ -19,10 +19,14 @@ function Historial() {
   })
 
   useEffect(() => {
+    if (!sessionStorage.getItem('token')) {
+      navigate('/login')
+      return
+    }
     if (codigoMaquina) {
       cargarHistorial()
     }
-  }, [codigoMaquina])
+  }, [codigoMaquina, navigate])
 
   const showModal = (title, message, icon = 'fa-exclamation-circle', iconColor = '#e74c3c') => {
     setModal({
@@ -54,7 +58,7 @@ function Historial() {
   }
 
   const handleBack = () => {
-    navigate('/pagina/maquinas')
+    navigate('/maquinas')
   }
 
   return (

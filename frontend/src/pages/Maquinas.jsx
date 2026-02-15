@@ -4,7 +4,7 @@ import { api } from '../utils/api'
 import Modal from '../components/Modal'
 import iconoUser from '../assets/img/icono_user.png'
 import iconoMaquina from '../assets/img/icono_maquina.png'
-import './Maquinas.css'
+import '../styles/Maquinas.css'
 
 function Maquinas() {
   const navigate = useNavigate()
@@ -23,6 +23,10 @@ function Maquinas() {
   })
 
   useEffect(() => {
+    if (!sessionStorage.getItem('token')) {
+      navigate('/login')
+      return
+    }
     cargarMaquinas()
   }, [])
 
@@ -109,9 +113,9 @@ function Maquinas() {
       <main className="content">
         <div className="action-bar">
           <div className="left-actions">
-            <button type="button" onClick={() => navigate('/pagina/agregar-maquina')} className="btn-create">Agregar Máquina</button>
-            <button type="button" onClick={() => navigate('/pagina/reportes')} className="btn-create">Generar Reporte</button>
-            <button type="button" onClick={() => navigate('/pagina/inicio')} className="btn-create">Regresar</button>
+            <button type="button" onClick={() => navigate('/agregar-maquina')} className="btn-create">Agregar Máquina</button>
+            <button type="button" onClick={() => navigate('/reportes')} className="btn-create">Generar Reporte</button>
+            <button type="button" onClick={() => navigate('/inicio')} className="btn-create">Regresar</button>
           </div>
           <div className="search-container">
             <input 
@@ -146,21 +150,21 @@ function Maquinas() {
                 <div className="side-buttons">
                   <button 
                     type="button" 
-                    onClick={() => navigate(`/pagina/historial?codigo=${maquina.codigo}`)} 
+                    onClick={() => navigate(`/historial?codigo=${maquina.codigo}`)} 
                     className="btn-action btn-yellow-history"
                   >
                     Historial
                   </button>
                   <button 
                     type="button" 
-                    onClick={() => navigate(`/pagina/mantenimiento?codigo=${maquina.codigo}`)} 
+                    onClick={() => navigate(`/mantenimiento?codigo=${maquina.codigo}`)} 
                     className="btn-action btn-green"
                   >
                     Mantenimiento
                   </button>
                   <button 
                     type="button" 
-                    onClick={() => navigate(`/pagina/actualizar-maquina?codigo=${maquina.codigo}`)} 
+                    onClick={() => navigate(`/actualizar-maquina?codigo=${maquina.codigo}`)} 
                     className="btn-action btn-blue-act"
                   >
                     Actualizar

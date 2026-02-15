@@ -1,17 +1,19 @@
-# Usamos nginx en versión alpine (ligera) como base para servir archivos web
-FROM nginx:alpine
+# Usamos imagen de Node.js para desarrollo directo
+FROM node:20-alpine
 
-# Copiamos los archivos CSS, JS e imágenes al contenedor
-COPY static /usr/share/nginx/html/static
+WORKDIR /app
 
-# Copiamos las páginas HTML al contenedor
-COPY templates /usr/share/nginx/html/templates
+# Copiar package files
+COPY package*.json ./
 
-# Copiamos la configuración personalizada de nginx (rutas y proxy al backend)
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Instalar dependencias
+RUN npm ci
 
-# Exponemos el puerto 80 para que nginx pueda recibir peticiones HTTP
-EXPOSE 80
+# Copiar código fuente
+COPY . .
 
-# Iniciamos nginx en primer plano (daemon off es necesario para que Docker no lo detenga)
-CMD ["nginx", "-g", "daemon off;"]
+# Exponer puerto de Vite dev server
+EXPOSE 5173
+
+# Iniciar servidor de desarrollo de Vite
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

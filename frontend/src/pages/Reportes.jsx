@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../utils/api'
 import Modal from '../components/Modal'
-import './Reportes.css'
+import '../styles/Reportes.css'
 
 function Reportes() {
   const navigate = useNavigate()
@@ -18,6 +18,10 @@ function Reportes() {
   })
 
   useEffect(() => {
+    if (!sessionStorage.getItem('token')) {
+      navigate('/login')
+      return
+    }
     cargarReportes()
   }, [])
 
@@ -84,7 +88,7 @@ function Reportes() {
             <h1><i className="fa-solid fa-chart-pie"></i> Reporte de Mantenimientos</h1>
             <p>Genera consultas y exporta la información de los laboratorios.</p>
           </div>
-          <button type="button" onClick={() => navigate('/pagina/maquinas')} className="btn-back">Regresar</button>
+          <button type="button" onClick={() => navigate('/maquinas')} className="btn-back">Regresar</button>
         </div>
 
         <div className="filter-card">

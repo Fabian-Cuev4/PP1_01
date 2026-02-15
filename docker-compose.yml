@@ -74,7 +74,7 @@ services:
   # SERVICIO 4: Frontend (React + Vite)
   frontend:
     build:
-      context: ./frontend-r
+      context: ./frontend
       dockerfile: Dockerfile
     container_name: frontend_siglab
     restart: always
@@ -82,7 +82,7 @@ services:
       - "18080:5173"  # Vite dev server puerto 5173
     volumes:
       # Montar código para desarrollo en caliente
-      - ./frontend-r:/app
+      - ./frontend:/app
       - /app/node_modules  # Evitar sobreescribir node_modules
     depends_on:
       - backend

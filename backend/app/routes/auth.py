@@ -38,9 +38,12 @@ async def login(datos: LoginRequest):
     if usuario:
         return {
             "mensaje": "Login exitoso", 
-            "usuario": usuario['nombre_completo'], 
-            "username": usuario['username'],
-            "rol": usuario['rol']
+            "token": datos.username,  # Usamos username como token temporal
+            "usuario": {
+                "nombre_completo": usuario['nombre_completo'],
+                "username": usuario['username'],
+                "rol": usuario['rol']
+            }
         }
     else:
         raise HTTPException(status_code=401, detail="Usuario o contraseña incorrectos")

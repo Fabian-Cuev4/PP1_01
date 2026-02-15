@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Modal from '../components/Modal'
 import logo from '../assets/img/Logo.png'
-import './Formularios.css'
+import '../styles/Formularios.css'
 
 function Register() {
   const navigate = useNavigate()
@@ -73,7 +73,7 @@ function Register() {
       if (response.ok) {
         showModal('Registro Exitoso', 'Usuario registrado exitosamente', 'fa-check-circle', '#27ae60')
         setTimeout(() => {
-          navigate('/pagina/login')
+          navigate('/login')
         }, 2000)
       } else {
         const errorData = await response.json()
@@ -155,7 +155,7 @@ function Register() {
         </form>
 
         <p className="footer-text">
-          ¿Ya tienes cuenta? <a href="/pagina/login">Inicia sesión aquí</a>
+          ¿Ya tienes cuenta? <a href="/login">Inicia sesión aquí</a>
         </p>
       </div>
 

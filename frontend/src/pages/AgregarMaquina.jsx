@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../utils/api'
 import Modal from '../components/Modal'
-import './Formularios.css'
+import '../styles/Formularios.css'
 
 function AgregarMaquina() {
   const navigate = useNavigate()
@@ -16,7 +16,11 @@ function AgregarMaquina() {
   })
 
   useEffect(() => {
-    const userData = localStorage.getItem('user')
+    if (!sessionStorage.getItem('token')) {
+      navigate('/login')
+      return
+    }
+    const userData = sessionStorage.getItem('user')
     if (userData) {
       let usuario = ''
       try {
@@ -29,7 +33,7 @@ function AgregarMaquina() {
       }
       setFormData(prev => ({...prev, usuario}))
     }
-  }, [])
+  }, [navigate])
   const [loading, setLoading] = useState(false)
   const [modal, setModal] = useState({
     isVisible: false,
@@ -76,7 +80,7 @@ function AgregarMaquina() {
       await api.agregarMaquina(formData)
       showModal('Registro Exitoso', 'Máquina agregada exitosamente', 'fa-check-circle', '#27ae60')
       setTimeout(() => {
-        navigate('/pagina/maquinas')
+        navigate('/maquinas')
       }, 2000)
     } catch (error) {
       showModal('Error al Agregar', error.message || 'Error al agregar la máquina', 'fa-exclamation-circle', '#e74c3c')
@@ -189,7 +193,7 @@ function AgregarMaquina() {
             <button type="submit" className="btn-signin" disabled={loading}>
               {loading ? 'Guardando...' : 'Guardar'}
             </button>
-            <button type="button" className="btn-signin" onClick={() => navigate('/pagina/maquinas')} style={{background: '#95a5a6'}}>
+            <button type="button" className="btn-signin" onClick={() => navigate('/maquinas')} style={{background: '#95a5a6'}}>
               Cancelar
             </button>
           </div>
