@@ -3,7 +3,7 @@
 import http from 'k6/http';
 import { sleep } from 'k6';
 
-const BASE_URL = __ENV.BASE_URL || 'http://nginx_balancer:80';
+const BASE_URL = __ENV.BASE_URL || 'http://nginx:80';
 
 // Variables configurables
 const MACHINES_PER_GROUP = 20;  // Máquinas por grupo
