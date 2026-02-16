@@ -131,6 +131,11 @@ class DashboardServer:
                             
                             # Si es error, redistribuir sus peticiones a los servidores activos (algoritmo-aware)
                             if status == "000":
+                                # Marcar servidor como caído
+                                self.dead_servers.add(server_name)
+                                logger.info(f"Servidor caído detectado: {server_name} ({upstream_addr})")
+                                
+                                # Si tiene peticiones acumuladas, redistribuirlas
                                 if server_name in self.stats and self.stats[server_name] > 0:
                                     peticiones_a_redistribuir = self.stats[server_name]
                                     self.stats[server_name] = 0
@@ -144,11 +149,15 @@ class DashboardServer:
                                     else:
                                         # Si no hay servidores activos, mantener las peticiones para cuando vuelvan
                                         logger.info(f"No hay servidores activos para redistribuir {peticiones_a_redistribuir} peticiones de {server_name}")
-                                
-                                logger.info(f"Servidor caído detectado: {server_name} ({upstream_addr})")
                             
                             # Actualizar estadísticas solo si es status 200
                             elif int(status) == 200:
+                                # Si el servidor estaba "muerto" y ahora responde, solo marcarlo como activo
+                                if server_name in self.dead_servers:
+                                    self.dead_servers.remove(server_name)
+                                    self.active_servers.add(server_name)
+                                    logger.info(f"Servidor revivido: {server_name} - Reintegrado al balanceo")
+                                
                                 self.stats[server_name] += 1
                                 # Registrar secuencia para detectar algoritmo
                                 self.request_sequence.append(server_name)
@@ -321,7 +330,8 @@ class DashboardServer:
             for i, servidor in enumerate(servidores_activos):
                 extra = base + (1 if i < remainder else 0)
                 self.stats[servidor] += extra
-                
+    
+                    
     async def reset_checker(self):
         """Verificar si hay que resetear estadísticas por inactividad"""
         while True:
