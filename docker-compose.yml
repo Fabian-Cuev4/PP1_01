@@ -233,6 +233,12 @@ services:
       - nginx_logs:/var/log/nginx:ro  # Leer logs de nginx (solo lectura)
     networks:
       - siglab_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:18081 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
     profiles:
       - all
 

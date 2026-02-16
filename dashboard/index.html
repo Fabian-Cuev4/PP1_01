@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard SIGLAB - Monitoreo de Máquinas</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <style>
         * {
             margin: 0;
@@ -158,20 +159,8 @@
         
         <div class="stats-container">
             <div class="stat-card">
-                <h3>Total de Peticiones</h3>
+                <h3>TOTAL REQUESTS</h3>
                 <div class="number" id="totalRequests">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>Backend 1</h3>
-                <div class="number" id="backend1">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>Backend 2</h3>
-                <div class="number" id="backend2">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>Backend 3</h3>
-                <div class="number" id="backend3">0</div>
             </div>
         </div>
         
@@ -185,11 +174,7 @@
             constructor() {
                 this.ws = null;
                 this.chart = null;
-                this.stats = {
-                    'Backend 1': 0,
-                    'Backend 2': 0,
-                    'Backend 3': 0
-                };
+                this.stats = {};
                 this.lastActivity = Date.now();
                 this.initChart();
                 this.connect();
@@ -198,22 +183,15 @@
             initChart() {
                 const ctx = document.getElementById('monitorChart').getContext('2d');
                 this.chart = new Chart(ctx, {
+                    plugins: [ChartDataLabels],
                     type: 'bar',
                     data: {
-                        labels: ['Backend 1', 'Backend 2', 'Backend 3'],
+                        labels: ['Servidores'],
                         datasets: [{
                             label: 'Peticiones',
-                            data: [0, 0, 0],
-                            backgroundColor: [
-                                'rgba(75, 192, 192, 0.8)',
-                                'rgba(54, 162, 235, 0.8)',
-                                'rgba(153, 102, 255, 0.8)'
-                            ],
-                            borderColor: [
-                                'rgba(75, 192, 192, 1)',
-                                'rgba(54, 162, 235, 1)',
-                                'rgba(153, 102, 255, 1)'
-                            ],
+                            data: [0],
+                            backgroundColor: [],
+                            borderColor: [],
                             borderWidth: 2
                         }]
                     },
@@ -224,7 +202,19 @@
                             y: {
                                 beginAtZero: true,
                                 ticks: {
-                                    stepSize: 1
+                                    stepSize: 1,
+                                    padding: 20
+                                },
+                                afterDataLimits: (axis) => {
+                                    axis.max = axis.max * 1.1; // 10% extra de espacio
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    display: false
+                                },
+                                grid: {
+                                    display: false
                                 }
                             }
                         },
@@ -237,6 +227,22 @@
                                     label: function(context) {
                                         return `Peticiones: ${context.parsed.y}`;
                                     }
+                                }
+                            },
+                            datalabels: {
+                                anchor: 'end',
+                                align: 'top',
+                                offset: 8,
+                                color: '#333',
+                                font: {
+                                    weight: 'bold',
+                                    size: 14
+                                },
+                                formatter: function(value) {
+                                    return value;
+                                },
+                                display: function(context) {
+                                    return context.dataset.data[context.dataIndex] > 0;
                                 }
                             }
                         },
@@ -288,29 +294,14 @@
                 }
                 
                 // Actualizar estadísticas
-                if (data.server_id && data.stats) {
+                if (data.server_name && data.stats) {
                     this.stats = data.stats;
                     
-                    // Verificar si hay errores (status no 2xx)
-                    if (data.status < 200 || data.status >= 300) {
+                    // Verificar si hay errores (status no 200)
+                    if (data.status !== 200) {
                         this.showAlert();
-                        // Poner la barra en rojo
-                        const backendIndex = ['Backend 1', 'Backend 2', 'Backend 3'].indexOf(data.server_id);
-                        if (backendIndex !== -1) {
-                            this.chart.data.datasets[0].backgroundColor[backendIndex] = 'rgba(244, 67, 54, 0.8)';
-                        }
                     } else {
                         this.hideAlert();
-                        // Restaurar color normal
-                        const backendIndex = ['Backend 1', 'Backend 2', 'Backend 3'].indexOf(data.server_id);
-                        if (backendIndex !== -1) {
-                            const colors = [
-                                'rgba(75, 192, 192, 0.8)',
-                                'rgba(54, 162, 235, 0.8)',
-                                'rgba(153, 102, 255, 0.8)'
-                            ];
-                            this.chart.data.datasets[0].backgroundColor[backendIndex] = colors[backendIndex];
-                        }
                     }
                     
                     this.updateChart();
@@ -319,20 +310,37 @@
             }
             
             updateChart() {
-                this.chart.data.datasets[0].data = [
-                    this.stats['Backend 1'],
-                    this.stats['Backend 2'],
-                    this.stats['Backend 3']
-                ];
+                const servers = Object.keys(this.stats);
+                const values = Object.values(this.stats);
+                
+                // Asignar colores: azul si tiene peticiones, rojo si está inactivo
+                const colors = values.map(value => {
+                    if (value > 0) {
+                        return 'rgba(54, 162, 235, 0.8)'; // Azul - activo
+                    } else {
+                        return 'rgba(255, 99, 132, 0.8)'; // Rojo - inactivo
+                    }
+                });
+                
+                const borderColors = values.map(value => {
+                    if (value > 0) {
+                        return 'rgba(54, 162, 235, 1)'; // Azul - activo
+                    } else {
+                        return 'rgba(255, 99, 132, 1)'; // Rojo - inactivo
+                    }
+                });
+                
+                // Mostrar nombres de servidores reales
+                this.chart.data.labels = servers;
+                this.chart.data.datasets[0].data = values;
+                this.chart.data.datasets[0].backgroundColor = colors;
+                this.chart.data.datasets[0].borderColor = borderColors;
                 this.chart.update();
             }
             
             updateStats() {
                 const total = Object.values(this.stats).reduce((sum, val) => sum + val, 0);
                 document.getElementById('totalRequests').textContent = total;
-                document.getElementById('backend1').textContent = this.stats['Backend 1'];
-                document.getElementById('backend2').textContent = this.stats['Backend 2'];
-                document.getElementById('backend3').textContent = this.stats['Backend 3'];
             }
             
             updateConnectionStatus(connected) {
@@ -360,11 +368,7 @@
             checkInactivity() {
                 if (Date.now() - this.lastActivity > 7000) {
                     // Reset automático
-                    this.stats = {
-                        'Backend 1': 0,
-                        'Backend 2': 0,
-                        'Backend 3': 0
-                    };
+                    this.stats = {};
                     this.updateChart();
                     this.updateStats();
                     this.hideAlert();
