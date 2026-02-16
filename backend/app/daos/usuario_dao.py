@@ -9,21 +9,28 @@ class UsuarioDAO:
     def insertar(self, nombre_completo: str, username: str, password: str, rol: str = "usuario") -> bool:
         conn = MySQLConnection.conectar()
         if not conn:
+            print("DEBUG: No se pudo conectar a MySQL")
             return False
         
         try:
             cursor = conn.cursor()
             password_encriptado = Encryption.encriptar_password(password)
+            print(f"DEBUG: Password encriptado: {password_encriptado}")
             query = """
                 INSERT INTO usuarios (nombre_completo, username, password, rol) 
                 VALUES (%s, %s, %s, %s)
                 """
+            print(f"DEBUG: Query: {query}")
+            print(f"DEBUG: Parámetros: {nombre_completo}, {username}, {password_encriptado}, {rol}")
             cursor.execute(query, (nombre_completo, username, password_encriptado, rol))
             conn.commit()
             cursor.close()
             conn.close()
+            print("DEBUG: Usuario insertado correctamente")
             return True
-        except Exception:
+        except Exception as e:
+            print(f"DEBUG: Error en insertar: {e}")
+            print(f"DEBUG: Tipo de error: {type(e)}")
             return False
 
     # Guarda usuario usando objeto Usuario (compatibilidad)

@@ -11,15 +11,21 @@ class UsuarioService:
     def registrar_usuario(self, datos: dict) -> tuple:
         # Registra nuevo usuario con validaciones
         try:
+            print(f"DEBUG: Datos recibidos: {datos}")
+            
             # Validaciones de negocio
             if not all([datos.get('nombre_completo'), datos.get('username'), datos.get('password')]):
+                print("DEBUG: Faltan campos requeridos")
                 return None, "Todos los campos son requeridos"
             
             if len(datos.get('password', '')) < 6:
+                print("DEBUG: Contraseña muy corta")
                 return None, "La contraseña debe tener al menos 6 caracteres"
             
             # Verificar si usuario ya existe
-            if self.dao.obtener_usuario_por_username(datos.get('username')):
+            usuario_existente = self.dao.obtener_usuario_por_username(datos.get('username'))
+            print(f"DEBUG: Usuario existente: {usuario_existente}")
+            if usuario_existente:
                 return None, "El nombre de usuario ya existe"
             
             # Crear objeto usuario con rol por defecto
@@ -30,15 +36,30 @@ class UsuarioService:
                 datos.get('rol', 'usuario')
             )
             
+            print(f"DEBUG: Usuario creado: {usuario.to_dict()}")
+            
+            # Validar datos del modelo
+            try:
+                usuario.validar_datos()
+                print("DEBUG: Validación exitosa")
+            except ValueError as e:
+                print(f"DEBUG: Error en validación: {e}")
+                return None, str(e)
+            
             # Guardar usuario
-            if self.dao.guardar(usuario):
+            resultado = self.dao.guardar(usuario)
+            print(f"DEBUG: Resultado guardado: {resultado}")
+            
+            if resultado:
                 return {"mensaje": "Usuario creado correctamente"}, None
             
             return None, "Error al crear usuario"
             
         except ValueError as e:
+            print(f"DEBUG: ValueError: {e}")
             return None, str(e)
         except Exception as e:
+            print(f"DEBUG: Exception general: {e}")
             return None, f"Error en el servicio: {str(e)}"
     
     def autenticar_usuario(self, username: str, password: str) -> tuple:

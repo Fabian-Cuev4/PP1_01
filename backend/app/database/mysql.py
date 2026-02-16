@@ -96,6 +96,7 @@ class MySQLConnection:
         # Administra pool de conexiones para rendimiento
         if cls._pool is None:
             try:
+                print(f"DEBUG: Creando pool de conexiones con host={cls.HOST}, user={cls.USER}, database={cls.DATABASE}")
                 cls._pool = mysql.connector.pooling.MySQLConnectionPool(
                     pool_name="mypool",
                     pool_size=5,
@@ -107,7 +108,9 @@ class MySQLConnection:
                     connection_timeout=5,
                     autocommit=False
                 )
+                print("DEBUG: Pool de conexiones creado exitosamente")
             except Error as e:
+                print(f"DEBUG: Error creando pool de conexiones: {e}")
                 return None
         return cls._pool
 
