@@ -6,10 +6,10 @@ import { sleep } from 'k6';
 const BASE_URL = __ENV.BASE_URL || 'http://nginx_balancer:80';
 
 // Variables configurables
-const MACHINES_PER_GROUP = 20;  // Máquinas por grupo
+const MACHINES_PER_GROUP = 77;  // Máquinas por grupo
 const PAUSE_BETWEEN_MACHINES = 1;  // Segundos entre máquinas
-const REST_BETWEEN_GROUPS = 10;  // Segundos de reposo (reducido para prueba)
-const TOTAL_GROUPS = 2;  // Número de grupos
+const REST_BETWEEN_GROUPS = 0;  // Segundos de reposo (reducido para prueba)
+const TOTAL_GROUPS = 1;  // Número de grupos
 
 // Contador global para numeración secuencial
 let machineCounter = 1;
