@@ -1,6 +1,8 @@
 # SERVICE - Toda la lógica de negocio de máquinas
 # Responsabilidades: validación, transformación, normalización, lógica de negocio
 
+import json
+from app.database.redis_client import redis_client
 from app.daos.maquina_dao import MaquinaDAO
 from app.models.Computadora import Computadora
 from app.models.Impresora import Impresora
@@ -50,6 +52,7 @@ class MaquinaService:
                 maquina.fecha,
                 maquina.usuario
             ):
+                redis_client.delete("siglab:maquinas:listar")
                 return {"mensaje": "Máquina registrada", "codigo": codigo}, None
             else:
                 return None, "Error al guardar en base de datos"
@@ -88,6 +91,7 @@ class MaquinaService:
             datos.get("fecha") or maquina_existente.get("fecha"),
             datos.get("usuario") or maquina_existente.get("usuario")
         ):
+            redis_client.delete("siglab:maquinas:listar")
             return {"mensaje": "Máquina actualizada", "codigo": codigo}, None
         else:
             return None, "Error al actualizar la máquina"
@@ -102,26 +106,55 @@ class MaquinaService:
 
         # Eliminar (los mantenimientos se eliminan por cascade o en otro servicio)
         if self.dao.eliminar(codigo):
+            redis_client.delete("siglab:maquinas:listar")
             return True, "Máquina eliminada correctamente"
         else:
             return False, "Error al eliminar la máquina"
 
     # Busca máquinas con lógica de búsqueda flexible
     def buscar_maquinas(self, termino: str = None) -> list:
-        if termino:
-            # Búsqueda flexible (case-insensitive, parcial)
-            termino_normalizado = termino.strip().lower()
-            todas = self.dao.listar_todas()
+        cache_key = "siglab:maquinas:listar"
+
+        # SOLO cacheamos cuando es listado completo
+        if not termino:
+            # 1 Revisar cache
+            maquinas_cache = redis_client.get(cache_key)
+
+            if maquinas_cache:
+                print("📦 Desde Redis")
+                return json.loads(maquinas_cache)
+
+            # 2️ Consultar base de datos
+            maquinas = self.dao.listar_todas()
             
-            # Filtrado en memoria (case-insensitive)
-            filtradas = []
-            for maquina in todas:
-                codigo_maquina = str(maquina.get("codigo", "")).lower()
-                if termino_normalizado in codigo_maquina:
-                    filtradas.append(maquina)
-            return filtradas
-        else:
-            return self.dao.listar_todas()
+            # 3️ Convertir fechas a string para JSON
+            for maquina in maquinas:
+                if 'fecha' in maquina and hasattr(maquina['fecha'], 'strftime'):
+                    maquina['fecha'] = maquina['fecha'].strftime('%Y-%m-%d')
+            
+            # 4️ Guardar en Redis con TTL (60 segundos)
+            redis_client.setex(cache_key, 60, json.dumps(maquinas))
+            print("💾 Guardado en Redis")
+
+            return maquinas
+
+        # Si hay término, NO usamos cache
+        termino_normalizado = termino.strip().lower()
+        todas = self.dao.listar_todas()
+
+        # Convertir fechas para búsquedas con término
+        for maquina in todas:
+            if 'fecha' in maquina and hasattr(maquina['fecha'], 'strftime'):
+                maquina['fecha'] = maquina['fecha'].strftime('%Y-%m-%d')
+
+        filtradas = []
+        for maquina in todas:
+            codigo_maquina = str(maquina.get("codigo", "")).lower()
+            if termino_normalizado in codigo_maquina:
+                filtradas.append(maquina)
+
+        return filtradas
+
 
     # Verifica si existe código (case-insensitive)
     def _existe_codigo(self, codigo: str) -> bool:
