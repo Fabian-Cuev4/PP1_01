@@ -175,6 +175,7 @@
                 this.ws = null;
                 this.chart = null;
                 this.stats = {};
+                this.serverHealth = {};  // Nuevo: track salud de servidores
                 this.lastActivity = Date.now();
                 this.initChart();
                 this.connect();
@@ -293,12 +294,19 @@
                     return;
                 }
                 
+                // Actualizar estado de salud del servidor
+                if (data.server_name && data.server_health) {
+                    this.serverHealth[data.server_name] = data.server_health;
+                }
+                
                 // Actualizar estadísticas
                 if (data.server_name && data.stats) {
                     this.stats = data.stats;
                     
-                    // Verificar si hay errores (status no 200)
-                    if (data.status !== 200) {
+                    // Si un servidor murió, mostrar alerta
+                    if (data.server_died) {
+                        this.showAlert(`${data.server_name} se ha caído`);
+                    } else if (data.status !== 200) {
                         this.showAlert();
                     } else {
                         this.hideAlert();
@@ -313,20 +321,26 @@
                 const servers = Object.keys(this.stats);
                 const values = Object.values(this.stats);
                 
-                // Asignar colores: azul si tiene peticiones, rojo si está inactivo
-                const colors = values.map(value => {
-                    if (value > 0) {
+                // Asignar colores según salud del servidor
+                const colors = servers.map(server => {
+                    const health = this.serverHealth[server];
+                    if (health === 'dead') {
+                        return 'rgba(255, 99, 132, 0.8)'; // Rojo - muerto
+                    } else if (values[servers.indexOf(server)] > 0) {
                         return 'rgba(54, 162, 235, 0.8)'; // Azul - activo
                     } else {
-                        return 'rgba(255, 99, 132, 0.8)'; // Rojo - inactivo
+                        return 'rgba(255, 206, 86, 0.8)'; // Amarillo - vivo pero sin peticiones
                     }
                 });
                 
-                const borderColors = values.map(value => {
-                    if (value > 0) {
+                const borderColors = servers.map(server => {
+                    const health = this.serverHealth[server];
+                    if (health === 'dead') {
+                        return 'rgba(255, 99, 132, 1)'; // Rojo - muerto
+                    } else if (values[servers.indexOf(server)] > 0) {
                         return 'rgba(54, 162, 235, 1)'; // Azul - activo
                     } else {
-                        return 'rgba(255, 99, 132, 1)'; // Rojo - inactivo
+                        return 'rgba(255, 206, 86, 1)'; // Amarillo - vivo pero sin peticiones
                     }
                 });
                 
@@ -356,8 +370,10 @@
                 }
             }
             
-            showAlert() {
-                document.getElementById('alertBox').classList.add('show');
+            showAlert(message = '⚠️ Alerta: Se detectaron errores en las peticiones') {
+                const alertBox = document.getElementById('alertBox');
+                alertBox.innerHTML = `<strong>${message}</strong>`;
+                alertBox.classList.add('show');
             }
             
             hideAlert() {

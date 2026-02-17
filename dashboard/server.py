@@ -26,6 +26,8 @@ class DashboardServer:
         self.dead_servers = set()
         self.current_algorithm = "unknown"  # Se detectará automáticamente
         self.request_sequence = []  # Para seguir el orden de peticiones
+        self.server_status = {}  # Nuevo: track status de cada servidor
+        self.last_seen = {}  # Nuevo: track última vez visto de cada servidor
         self.app = web.Application()
         self.websockets = set()
         self.setup_routes()
@@ -92,8 +94,9 @@ class DashboardServer:
             
         logger.info(f"Monitoreando log: {log_path}")
         
-        # Patrón regex para extraer información del log (incluyendo errores)
-        log_pattern = r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+) - - \[.*?\] "POST /api/maquinas/agregar HTTP/1\.\d" (\d{3})|error.*?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+)'
+        # Patrón regex para extraer información del log (peticiones y errores)
+        log_pattern = r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+) - - \[.*?\] "POST /api/maquinas/agregar HTTP/1\.\d" (\d{3})'
+        error_pattern = r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+).*?(failed|timeout|connection refused|upstream timed out)'
         
         while True:
             try:
@@ -108,68 +111,74 @@ class DashboardServer:
                             continue
                             
                         # Procesar línea del log
-                        match = re.search(log_pattern, line.strip())
-                        if match:
+                        line = line.strip()
+                        match = re.search(log_pattern, line)
+                        error_match = re.search(error_pattern, line, re.IGNORECASE)
+                        
+                        # Detectar errores de conexión inmediatos
+                        if error_match:
+                            upstream_addr = error_match.group(1)
+                            if upstream_addr in self.server_mapping:
+                                server_name = self.server_mapping[upstream_addr]
+                                if server_name not in self.dead_servers:
+                                    self.dead_servers.add(server_name)
+                                    self.server_status[server_name] = "dead"
+                                    logger.info(f"Servidor caído detectado INMEDIATAMENTE: {server_name} ({upstream_addr})")
+                                    
+                                    # Enviar actualización de estado inmediata
+                                    data = {
+                                        'server_ip': upstream_addr,
+                                        'server_name': server_name,
+                                        'status': 000,
+                                        'server_health': 'dead',
+                                        'timestamp': time.time(),
+                                        'stats': self.stats.copy(),
+                                        'total_requests': sum(self.stats.values()),
+                                        'server_died': True
+                                    }
+                                    await self.broadcast(data)
+                        
+                        # Procesar peticiones normales
+                        elif match:
                             groups = match.groups()
                             
-                            # Detectar si es un error o una petición normal
-                            if groups[2]:  # Es un error (grupo 3 del regex)
-                                upstream_addr = groups[2]
-                                status = "000"  # Código especial para error
-                            else:  # Es una petición normal
-                                upstream_addr = groups[0]
-                                status = groups[1]
+                            # Extraer IP y status (solo peticiones normales)
+                            upstream_addr = groups[0]
+                            status = groups[1]
                             
                             # Mapeo dinámico por IP: si no existe, crear nuevo servidor
                             if upstream_addr not in self.server_mapping:
                                 server_name = f"Server_{len(self.server_mapping) + 1}"
                                 self.server_mapping[upstream_addr] = server_name
                                 self.stats[server_name] = 0
+                                self.server_status[server_name] = "alive"  # Nuevo: inicializar status
                                 logger.info(f"Nuevo servidor detectado: {upstream_addr} -> {server_name}")
                             else:
                                 server_name = self.server_mapping[upstream_addr]
                             
-                            # Si es error, redistribuir sus peticiones a los servidores activos (algoritmo-aware)
-                            if status == "000":
-                                # Marcar servidor como caído
-                                self.dead_servers.add(server_name)
-                                logger.info(f"Servidor caído detectado: {server_name} ({upstream_addr})")
-                                
-                                # Si tiene peticiones acumuladas, redistribuirlas
-                                if server_name in self.stats and self.stats[server_name] > 0:
-                                    peticiones_a_redistribuir = self.stats[server_name]
-                                    self.stats[server_name] = 0
-                                    
-                                    # Encontrar servidores realmente activos (con peticiones > 0)
-                                    servidores_activos = [name for name, count in self.stats.items() if count > 0 and name != server_name]
-                                    
-                                    if servidores_activos:
-                                        # Redistribución según algoritmo actual
-                                        self.redistribuir_segun_algoritmo(server_name, peticiones_a_redistribuir, servidores_activos)
-                                    else:
-                                        # Si no hay servidores activos, mantener las peticiones para cuando vuelvan
-                                        logger.info(f"No hay servidores activos para redistribuir {peticiones_a_redistribuir} peticiones de {server_name}")
+                            # Actualizar última vez visto
+                            self.last_seen[upstream_addr] = time.time()
                             
                             # Actualizar estadísticas solo si es status 200
-                            elif int(status) == 200:
-                                # Si el servidor estaba "muerto" y ahora responde, solo marcarlo como activo
-                                if server_name in self.dead_servers:
-                                    self.dead_servers.remove(server_name)
-                                    self.active_servers.add(server_name)
-                                    logger.info(f"Servidor revivido: {server_name} - Reintegrado al balanceo")
-                                
+                            if int(status) == 200:
                                 self.stats[server_name] += 1
                                 # Registrar secuencia para detectar algoritmo
                                 self.request_sequence.append(server_name)
+                                # Marcar como vivo si estaba muerto
+                                if server_name in self.dead_servers:
+                                    self.dead_servers.remove(server_name)
+                                    self.server_status[server_name] = "alive"
+                                    logger.info(f"Servidor revivido: {server_name}")
                             
                             # Actualizar tiempo de última actividad
                             self.last_data_time = time.time()
                             
-                            # Enviar datos a clientes
+                            # Enviar datos a clientes con status del servidor
                             data = {
                                 'server_ip': upstream_addr,
                                 'server_name': server_name,
                                 'status': int(status),
+                                'server_health': self.server_status.get(server_name, "alive"),
                                 'timestamp': time.time(),
                                 'stats': self.stats.copy(),
                                 'total_requests': sum(self.stats.values())
@@ -181,6 +190,36 @@ class DashboardServer:
             except Exception as e:
                 logger.error(f"Error leyendo log: {e}")
                 await asyncio.sleep(5)
+    
+    async def monitor_server_health(self):
+        """Monitorear salud de servidores detectando cuáles no aparecen en logs"""
+        while True:
+            await asyncio.sleep(3)  # Revisar cada 3 segundos (más reactivo)
+            
+            current_time = time.time()
+            
+            # Verificar servidores conocidos que no han aparecido recientemente
+            for upstream_addr, server_name in list(self.server_mapping.items()):
+                last_seen_time = self.last_seen.get(upstream_addr, 0)
+                
+                if current_time - last_seen_time > 5:  # 5 segundos sin actividad (más rápido)
+                    if server_name not in self.dead_servers:
+                        self.dead_servers.add(server_name)
+                        self.server_status[server_name] = "dead"
+                        logger.info(f"Servidor caído detectado: {server_name} ({upstream_addr})")
+                        
+                        # Enviar actualización de estado inmediata
+                        data = {
+                            'server_ip': upstream_addr,
+                            'server_name': server_name,
+                            'status': 000,  # Código especial para caído
+                            'server_health': 'dead',
+                            'timestamp': current_time,
+                            'stats': self.stats.copy(),
+                            'total_requests': sum(self.stats.values()),
+                            'server_died': True
+                        }
+                        await self.broadcast(data)
     
     def redistribuir_segun_algoritmo(self, servidor_caído, peticiones_a_redistribuir, servidores_activos):
         """Redistribuir peticiones analizando el patrón de distribución actual"""
@@ -355,6 +394,7 @@ class DashboardServer:
         """Iniciar tareas en segundo plano"""
         asyncio.create_task(self.watch_log_file())
         asyncio.create_task(self.reset_checker())
+        asyncio.create_task(self.monitor_server_health())
         
     async def start(self):
         """Iniciar servidor"""
