@@ -194,7 +194,7 @@ class DashboardServer:
     async def monitor_server_health(self):
         """Monitorear salud de servidores detectando cuáles no aparecen en logs"""
         while True:
-            await asyncio.sleep(3)  # Revisar cada 3 segundos (más reactivo)
+            await asyncio.sleep(5)  # Revisar cada 5 segundos
             
             current_time = time.time()
             
@@ -202,17 +202,17 @@ class DashboardServer:
             for upstream_addr, server_name in list(self.server_mapping.items()):
                 last_seen_time = self.last_seen.get(upstream_addr, 0)
                 
-                if current_time - last_seen_time > 5:  # 5 segundos sin actividad (más rápido)
+                if current_time - last_seen_time > 10:  # 10 segundos sin actividad
                     if server_name not in self.dead_servers:
                         self.dead_servers.add(server_name)
                         self.server_status[server_name] = "dead"
                         logger.info(f"Servidor caído detectado: {server_name} ({upstream_addr})")
                         
-                        # Enviar actualización de estado inmediata
+                        # Enviar actualización de estado
                         data = {
                             'server_ip': upstream_addr,
                             'server_name': server_name,
-                            'status': 000,  # Código especial para caído
+                            'status': 000,
                             'server_health': 'dead',
                             'timestamp': current_time,
                             'stats': self.stats.copy(),
@@ -222,7 +222,6 @@ class DashboardServer:
                         await self.broadcast(data)
     
     def redistribuir_segun_algoritmo(self, servidor_caído, peticiones_a_redistribuir, servidores_activos):
-        """Redistribuir peticiones analizando el patrón de distribución actual"""
         
         # Analizar el patrón de distribución real de las últimas peticiones
         patron_distribucion = self.analizar_patron_distribucion(servidores_activos)
