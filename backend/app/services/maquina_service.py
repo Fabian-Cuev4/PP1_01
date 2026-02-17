@@ -11,7 +11,7 @@ class MaquinaService:
     def __init__(self):
         self.dao = MaquinaDAO()
 
-    # Registra nueva máquina con validación completa
+    # Registra nueva máquina con validación completa y resiliencia Redis
     def registrar_maquina(self, datos: dict) -> tuple:
         # Validación de datos obligatorios
         if not all([datos.get("codigo_equipo"), datos.get("tipo_equipo"), 
@@ -21,8 +21,8 @@ class MaquinaService:
         # Normalización del código
         codigo = datos["codigo_equipo"].strip()
         
-        # Verificación de duplicados (case-insensitive)
-        if self._existe_codigo(codigo):
+        # Verificación de duplicados (case-insensitive) - con fallback Redis
+        if self._existe_codigo_con_redis(codigo):
             return None, f"El código '{codigo}' ya existe"
 
         # Normalización del tipo
@@ -43,19 +43,70 @@ class MaquinaService:
                                    datos["area"], datos["fecha"], 
                                    datos.get("usuario"))
 
-            # Guardado en base de datos
-            if self.dao.insertar(
-                maquina.codigo_equipo,
-                maquina.tipo_equipo,
-                maquina.estado_actual,
-                maquina.area,
-                maquina.fecha,
-                maquina.usuario
-            ):
-                redis_client.delete("siglab:maquinas:listar")
-                return {"mensaje": "Máquina registrada", "codigo": codigo}, None
+            # Preparar datos para Redis (consistentes con DB)
+            datos_maquina = {
+                "codigo": maquina.codigo_equipo,
+                "tipo": maquina.tipo_equipo,
+                "estado": maquina.estado_actual,
+                "area": maquina.area,
+                "fecha": maquina.fecha,
+                "usuario": maquina.usuario or ""
+            }
+
+            # ESTRATEGIA WRITE-THROUGH con RESILIENCIA
+            db_exitoso = False
+            redis_exitoso = False
+            
+            # 1️⃣ Intentar guardar en Base de Datos
+            try:
+                db_exitoso = self.dao.insertar(
+                    maquina.codigo_equipo,
+                    maquina.tipo_equipo,
+                    maquina.estado_actual,
+                    maquina.area,
+                    maquina.fecha,
+                    maquina.usuario
+                )
+            except Exception as db_error:
+                print(f"⚠️ Error DB: {str(db_error)}")
+                db_exitoso = False
+
+            # 2️⃣ Siempre intentar guardar en Redis (incluso si DB falla)
+            try:
+                # Guardar máquina individual en Redis
+                redis_client.setex(
+                    f"siglab:maquina:{codigo.lower()}",
+                    3600,  # 1 hora TTL para máquinas individuales
+                    json.dumps(datos_maquina)
+                )
+                
+                # Actualizar lista completa en Redis
+                self._actualizar_cache_redis_con_nueva_maquina(datos_maquina)
+                redis_exitoso = True
+                
+            except Exception as redis_error:
+                print(f"⚠️ Error Redis: {str(redis_error)}")
+                redis_exitoso = False
+
+            # 3️⃣ Lógica de resiliencia y respuesta
+            if db_exitoso and redis_exitoso:
+                # ✅ Éxito completo
+                print("✅ Máquina guardada en DB y Redis")
+                return {"mensaje": "Máquina registrada (DB + Redis)", "codigo": codigo}, None
+                
+            elif db_exitoso and not redis_exitoso:
+                # ⚠️ Solo DB (Redis caído)
+                print("⚠️ Máquina guardada solo en DB (Redis no disponible)")
+                return {"mensaje": "Máquina registrada (solo DB)", "codigo": codigo}, None
+                
+            elif not db_exitoso and redis_exitoso:
+                # 🔄 Solo Redis (DB caída) - Modo resiliencia
+                print("🔄 Máquina guardada solo en Redis (DB no disponible)")
+                return {"mensaje": "Máquina registrada (solo Redis - modo resiliencia)", "codigo": codigo}, None
+                
             else:
-                return None, "Error al guardar en base de datos"
+                # ❌ Falla completa
+                return None, "Error crítico: No se pudo guardar en DB ni Redis"
                 
         except ValueError as e:
             return None, str(e)
@@ -111,7 +162,7 @@ class MaquinaService:
         else:
             return False, "Error al eliminar la máquina"
 
-    # Busca máquinas con lógica de búsqueda flexible
+    # Busca máquinas con lógica de búsqueda flexible y resiliencia Redis
     def buscar_maquinas(self, termino: str = None) -> list:
         cache_key = "siglab:maquinas:listar"
 
@@ -124,8 +175,13 @@ class MaquinaService:
                 print("📦 Desde Redis")
                 return json.loads(maquinas_cache)
 
-            # 2️ Consultar base de datos
-            maquinas = self.dao.listar_todas()
+            # 2️ Consultar base de datos con fallback a Redis
+            try:
+                maquinas = self.dao.listar_todas()
+                print("🗄️ Desde MySQL")
+            except Exception as db_error:
+                print(f"⚠️ Error MySQL: {str(db_error)} - Intentando fallback Redis")
+                maquinas = self._obtener_maquinas_desde_redis_fallback()
             
             # 3️ Convertir fechas a string para JSON
             for maquina in maquinas:
@@ -133,14 +189,21 @@ class MaquinaService:
                     maquina['fecha'] = maquina['fecha'].strftime('%Y-%m-%d')
             
             # 4️ Guardar en Redis con TTL (60 segundos)
-            redis_client.setex(cache_key, 60, json.dumps(maquinas))
-            print("💾 Guardado en Redis")
+            try:
+                redis_client.setex(cache_key, 60, json.dumps(maquinas))
+                print("💾 Guardado en Redis")
+            except Exception as redis_error:
+                print(f"⚠️ No se pudo guardar en Redis: {str(redis_error)}")
 
             return maquinas
 
         # Si hay término, NO usamos cache
         termino_normalizado = termino.strip().lower()
-        todas = self.dao.listar_todas()
+        
+        try:
+            todas = self.dao.listar_todas()
+        except Exception:
+            todas = self._obtener_maquinas_desde_redis_fallback()
 
         # Convertir fechas para búsquedas con término
         for maquina in todas:
@@ -154,6 +217,79 @@ class MaquinaService:
                 filtradas.append(maquina)
 
         return filtradas
+
+    # Método auxiliar: Verificación de duplicados con fallback Redis
+    def _existe_codigo_con_redis(self, codigo: str) -> bool:
+        codigo_normalizado = codigo.strip().lower()
+        
+        # 1️⃣ Primero intentar verificar en Redis
+        try:
+            # Verificar en máquina individual
+            if redis_client.exists(f"siglab:maquina:{codigo_normalizado}"):
+                return True
+                
+            # Verificar en lista completa
+            lista_cache = redis_client.get("siglab:maquinas:listar")
+            if lista_cache:
+                maquinas = json.loads(lista_cache)
+                return any(str(m.get("codigo", "")).lower() == codigo_normalizado for m in maquinas)
+                
+        except Exception as redis_error:
+            print(f"⚠️ Error verificando en Redis: {str(redis_error)}")
+        
+        # 2️⃣ Fallback a Base de Datos
+        try:
+            return self._existe_codigo(codigo)
+        except Exception as db_error:
+            print(f"⚠️ Error verificando en DB: {str(db_error)}")
+            return False
+
+    # Método auxiliar: Actualizar caché Redis con nueva máquina
+    def _actualizar_cache_redis_con_nueva_maquina(self, nueva_maquina: dict):
+        try:
+            # Obtener lista actual
+            lista_actual = redis_client.get("siglab:maquinas:listar")
+            
+            if lista_actual:
+                maquinas = json.loads(lista_actual)
+                maquinas.append(nueva_maquina)
+            else:
+                maquinas = [nueva_maquina]
+            
+            # Actualizar caché
+            redis_client.setex("siglab:maquinas:listar", 60, json.dumps(maquinas))
+            print("🔄 Caché Redis actualizada con nueva máquina")
+            
+        except Exception as e:
+            print(f"⚠️ Error actualizando caché Redis: {str(e)}")
+
+    # Método auxiliar: Fallback para obtener máquinas desde Redis
+    def _obtener_maquinas_desde_redis_fallback(self) -> list:
+        print("🔄 Modo resiliencia: Obteniendo máquinas desde Redis")
+        
+        try:
+            # Intentar obtener lista completa
+            lista_cache = redis_client.get("siglab:maquinas:listar")
+            if lista_cache:
+                return json.loads(lista_cache)
+            
+            # Si no hay lista, reconstruir desde máquinas individuales
+            maquinas = []
+            for key in redis_client.scan_iter(match="siglab:maquina:*"):
+                datos_maquina = redis_client.get(key)
+                if datos_maquina:
+                    maquinas.append(json.loads(datos_maquina))
+            
+            if maquinas:
+                # Guardar lista reconstruida
+                redis_client.setex("siglab:maquinas:listar", 60, json.dumps(maquinas))
+                print("🔄 Lista reconstruida desde máquinas individuales")
+            
+            return maquinas
+            
+        except Exception as e:
+            print(f"❌ Error crítico en fallback Redis: {str(e)}")
+            return []
 
 
     # Verifica si existe código (case-insensitive)

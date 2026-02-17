@@ -3,13 +3,13 @@
 import http from 'k6/http';
 import { sleep } from 'k6';
 
-const BASE_URL = __ENV.BASE_URL || 'http://nginx_balancer:80';
+const BASE_URL = __ENV.BASE_URL || 'http://backend_siglab_simple:8000';
 
-// Variables configurables
-const MACHINES_PER_GROUP = 77;  // Máquinas por grupo
-const PAUSE_BETWEEN_MACHINES = 1;  // Segundos entre máquinas
-const REST_BETWEEN_GROUPS = 0;  // Segundos de reposo (reducido para prueba)
-const TOTAL_GROUPS = 1;  // Número de grupos
+// Variables configurables - PRUEBA DEMOSTRATIVA REDIS
+const MACHINES_PER_GROUP = 77;  // Reducido para demostración
+const PAUSE_BETWEEN_MACHINES = 0.5;  // Más rápido
+const REST_BETWEEN_GROUPS = 0;  // Sin reposo
+const TOTAL_GROUPS = 1;  // Un solo grupo
 
 // Contador global para numeración secuencial
 let machineCounter = 1;
