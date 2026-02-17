@@ -1,332 +1,356 @@
 # SIGLAB - Sistema de Gestión de Laboratorios
 
-Sistema web para gestionar máquinas (computadoras e impresoras) y sus mantenimientos en laboratorios de la Universidad Central del Ecuador.
+Sistema web distribuido para gestionar máquinas (computadoras e impresoras) y sus mantenimientos en laboratorios de la Universidad Central del Ecuador.
 
-## ¿Qué hace este sistema?
+## 🚀 Características Principales
 
-Este sistema permite:
-- **Registrar máquinas**: Agregar computadoras e impresoras al inventario
-- **Ver historial**: Consultar todos los mantenimientos realizados a cada máquina
-- **Agregar mantenimientos**: Registrar cuando se hace mantenimiento a una máquina
-- **Actualizar estado**: Cambiar el estado de una máquina (operativa, fuera de servicio, etc.)
-- **Eliminar máquinas**: Borrar máquinas y todos sus mantenimientos
-- **Generar reportes**: Ver reportes completos de todas las máquinas y sus mantenimientos
+- **Gestión Completa**: Registro, seguimiento y mantenimiento de equipos
+- **Arquitectura Distribuida**: 3 backends con load balancer Nginx
+- **Monitoreo en Tiempo Real**: Dashboard con visualización de carga
+- **Testing de Carga**: Pruebas automatizadas con k6
+- **Base de Datos Híbrida**: MySQL + MongoDB para diferentes propósitos
+- **Resiliente**: Failover automático y health checks
 
-## Tecnologías usadas
+## 🏗️ Arquitectura del Sistema
 
-### Backend (Servidor)
-- **Python 3.11**: Lenguaje de programación
-- **FastAPI**: Framework para crear la API (interfaz de comunicación)
-- **MySQL**: Base de datos para guardar máquinas y usuarios
-- **MongoDB**: Base de datos para guardar los mantenimientos
-- **Nginx Load Balancer**: Balanceo de carga con 4 algoritmos disponibles
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │   Dashboard     │    │   k6 Testing    │
+│   (React/Vite)  │    │   (WebSocket)   │    │   (Load Test)   │
+│   :18080        │    │   :18081        │    │   (Headless)    │
+└─────────┬───────┘    └─────────┬───────┘    └─────────────────┘
+          │                      │                      
+          │              ┌───────┴───────┐              
+          │              │   Nginx       │              
+          │              │ Load Balancer │              
+          │              │     :8888     │              
+          │              └───────┬───────┘              
+          │                      │                      
+          │        ┌─────────────┼─────────────┐        
+          │        │             │             │        
+          │  ┌─────▼─────┐ ┌─────▼─────┐ ┌─────▼─────┐  
+          │  │ Backend 1 │ │ Backend 2 │ │ Backend 3 │  
+          │  │ :8000     │ │ :8000     │ │ :8000     │  
+          └──┤ (FastAPI) ├─┤ (FastAPI) ├─┤ (FastAPI) ├──
+             └───────────┘ └───────────┘ └───────────┘
+                   │             │             │
+          ┌────────┴────────┐ ┌──┴────────────┴──┐
+          │   MySQL         │ │   MongoDB        │
+          │   :13306        │ │   :27018         │
+          └─────────────────┘ └──────────────────┘
+```
 
-### Frontend (Interfaz de usuario)
-- **HTML**: Estructura de las páginas
-- **CSS**: Estilos y diseño visual
-- **JavaScript**: Lógica y comunicación con el servidor
+## 🛠️ Tecnologías Utilizadas
 
-## Arquitectura
+### Backend
+- **Python 3.11**: Lenguaje principal
+- **FastAPI**: Framework web asíncrono
+- **MySQL**: Base de datos relacional (máquinas, usuarios)
+- **MongoDB**: Base de datos NoSQL (mantenimientos, logs)
+- **Redis**: Caché distribuida (TTL 60s)
 
-### Load Balancer (Nginx)
-- **4 algoritmos de balanceo**: Round Robin, Least Connections, IP Hash, Weighted Round Robin
-- **3 servidores backend**: Escalable y con failover automático
-- **Health checks**: Monitoreo continuo de disponibilidad
-- **Configuración dinámica**: Cambio de algoritmo sin reconstrucción completa
+### Frontend
+- **React**: Framework JavaScript moderno
+- **Vite**: Build tool rápido
+- **TailwindCSS**: Framework de estilos
+- **Chart.js**: Visualización de datos
 
-### Base de Datos
-- **MySQL**: Persistencia de datos estructurados (máquinas, usuarios)
-- **MongoDB**: Logs y mantenimientos (estructura flexible)
+### Infraestructura
+- **Nginx**: Load balancer con 4 algoritmos
+- **Docker**: Contenerización completa
+- **Docker Compose**: Orquestación de servicios
+- **k6**: Testing de carga y rendimiento
 
-## Cómo instalar y usar
+## 🚀 Inicio Rápido
 
-### Requisitos
-- Docker y Docker Compose
+### Requisitos Previos
+- Docker Desktop instalado
 - 4GB RAM mínima
 - 10GB espacio en disco
 
-### Iniciar el sistema
-```bash
-# Iniciar todos los servicios
-docker-compose --profile all up --build
+### Ejecución del Sistema
 
-# Iniciar solo con load testing
-docker-compose --profile load-test up --build
+```bash
+# Clonar el repositorio
+git clone <repository-url>
+cd PP1_01
+
+# Iniciar todos los servicios (producción)
+docker-compose --profile all up -d
+
+# Verificar estado
+docker-compose ps
+
+# Ver logs en tiempo real
+docker-compose logs -f
 ```
 
-### Acceder al sistema
-- **Frontend**: http://localhost:18080
-- **API Backend**: http://localhost:8888 (balanceado)
+### Acceso a los Servicios
+
+- **Aplicación Principal**: http://localhost:18080
+- **Dashboard de Monitoreo**: http://localhost:18081
+- **API Balanceada**: http://localhost:8888
 - **Health Check**: http://localhost:8888/health
 - **Estadísticas Nginx**: http://localhost:8080/nginx_status
 
-## Load Balancer
-
-### Algoritmos Disponibles
-1. **Round Robin**: Distribución equitativa en orden circular
-2. **Least Connections**: Envía al servidor con menos conexiones activas
-3. **IP Hash**: Mismo cliente siempre al mismo servidor (sesiones persistentes)
-4. **Weighted Round Robin**: Distribución según pesos asignados
-
-### Cambiar Algoritmo
-1. Editar `nginx/nginx.conf`
-2. Comentar upstream actual y descomentar el deseado
-3. Reiniciar: `docker restart nginx_balancer`
-
-### Escalabilidad
-```bash
-# Añadir más servidores backend
-docker-compose up --scale backend=4 -d
-```
-
-## Testing de Carga
-
-### Pruebas automatizadas con k6
-```bash
-# Ejecutar pruebas de saturación
-docker-compose --profile load-test up --build
-```
-
-### Métricas monitoreadas
-- Requests por segundo
-- Tiempo de respuesta
-- Tasa de errores
-- Distribución de carga entre servidores
-
-## Estructura del Proyecto
-
-```
-PP1_01/
-├── backend/              # Código FastAPI
-│   ├── main.py          # Entry point principal
-│   ├── routes/          # Endpoints de la API
-│   ├── services/        # Lógica de negocio
-│   ├── models/          # Modelos de datos
-│   └── dao/            # Acceso a bases de datos
-├── frontend/            # Interfaz web
-│   ├── index.html       # Página principal
-│   ├── styles.css       # Estilos
-│   └── script.js       # Lógica frontend
-├── nginx/              # Load balancer
-│   ├── nginx.conf       # Configuración principal
-│   └── README.md       # Documentación de algoritmos
-├── k6/                 # Pruebas de carga
-│   └── scripts/         # Scripts de testing
-└── docker-compose.yml    # Orquestación de contenedores
-```
-
-## Configuración Avanzada
-
-### Variables de Entorno
-- `MYSQL_ROOT_PASSWORD`: Contraseña MySQL
-- `REDIS_HOST`: Host de Redis
-- `MONGODB_URI`: URI de conexión MongoDB
-
-### Redes Docker
-- `siglab_network`: Comunicación interna servicios
-- `frontend_network`: Comunicación con frontend
-
-### Volúmenes Persistentes
-- `mysql_data`: Datos MySQL
-- `mongo_data`: Datos MongoDB
-
-## Monitoreo y Logs
-
-### Ver logs en tiempo real
-```bash
-# Logs del load balancer
-docker logs nginx_balancer -f
-
-# Logs de los backends
-docker logs pp1_01-backend-1 -f
-docker logs pp1_01-backend-2 -f
-docker logs pp1_01-backend-3 -f
-```
-
-### Métricas de rendimiento
-- **Nginx**: Requests por segundo, distribución de carga
-- **k6**: Latencia, throughput, errores
-- **Docker**: Consumo de recursos por contenedor
-
-### Requisitos
-- Tener instalado **Docker Desktop** (Windows/Mac) o Docker (Linux)
-
-### Pasos para iniciar
-
-1. **Abrir la terminal** en la carpeta del proyecto
-
-2. **Ejecutar este comando** para iniciar todos los servicios:
-```bash
-docker-compose up -d --build
-```
-
-3. **Esperar unos minutos** mientras se descargan e instalan todas las dependencias
-
-4. **Abrir el navegador** y ir a: **http://localhost:18080**
-
-5. **Iniciar sesión** con:
-   - Usuario: `admin`
-   - Contraseña: `admin123`
-
-## Estructura del proyecto
-
-```
-PP1_01/
-├── backend/              # Código del servidor (Python)
-│   ├── app/
-│   │   ├── daos/        # Acceso a las bases de datos
-│   │   ├── database/    # Configuración de MySQL y MongoDB
-│   │   ├── models/      # Modelos de datos (Máquina, Mantenimiento)
-│   │   ├── routes/      # Rutas de la API (endpoints)
-│   │   └── services.py  # Lógica de negocio
-│   └── main.py         # Archivo principal que inicia el servidor
-│
-├── frontend/            # Código de la interfaz (HTML, CSS, JS)
-│   ├── static/         # Archivos estáticos (CSS, JavaScript, imágenes)
-│   ├── templates/      # Páginas HTML
-│   └── nginx.conf      # Configuración del servidor web
-│
-└── docker-compose.yml  # Configuración de todos los servicios
-```
-
-## Cómo funciona
-
-1. **El usuario** abre el navegador y va a `http://localhost:18080`
-2. **Nginx** (servidor web) muestra la página de login
-3. **El usuario** ingresa sus credenciales
-4. **JavaScript** envía los datos al backend mediante una petición HTTP
-5. **FastAPI** (backend) verifica las credenciales en MySQL
-6. **Si es correcto**, el usuario puede ver y gestionar máquinas
-7. **Al agregar una máquina**, se guarda en MySQL
-8. **Al agregar un mantenimiento**, se guarda en MongoDB
-9. **Los reportes** combinan datos de ambas bases de datos
-
-## Guía rápida (preguntas comunes)
-
-### 1) Flujo completo (de punta a punta)
-
-Cuando el usuario hace una acción en la web, normalmente pasa esto:
-
-1. **Frontend (JavaScript)** hace un `fetch("/api/..." )`
-2. **Nginx (frontend)** recibe `/api/...` y lo reenvía al backend (reverse proxy)
-3. **Routes (FastAPI)** recibe la petición y valida datos (Pydantic)
-4. **Service (`services.py`)** aplica reglas y orquesta la operación
-5. **DAO (`daos/*.py`)** guarda/lee datos en MySQL o MongoDB
-6. **Database (`database/*.py`)** maneja la conexión/pool (encapsulado)
-
-### 2) ¿Qué diferencia hay entre `factory.py` y `Maquina.py`?
-
-- **`Maquina.py`** (clase base): define qué es una máquina (campos/estructura). Se hereda en `Computadora` e `Impresora`.
-- **`factory.py`** (fábrica): decide qué clase crear (Computadora o Impresora) según el `tipo_equipo`.
-
-Idea simple:
-- `Maquina` = el “molde”
-- `MaquinaFactory` = el “selector/constructor” que crea el objeto correcto
-
-### 3) ¿Se encapsulan las bases de datos?
-
-Sí, porque el proyecto NO abre conexiones en las rutas.
-
-- **MySQL**:
-  - `app/database/mysql.py` encapsula conexión + pool + creación de tablas
-  - Los DAOs usan `MySQLConnection.conectar()`
-- **MongoDB**:
-  - `app/database/mongodb.py` encapsula cliente + reintentos + `conectar()`/`cerrar()`
-  - `MantenimientoDAO` usa `MongoDB.conectar()`
-- **Orquestación**:
-  - `app/database/database_manager.py` centraliza `inicializar()` y `cerrar()`
-  - `main.py` lo llama en `startup`/`shutdown`
-
-### 4) ¿Qué es “reverse proxy” en este proyecto?
-
-En `frontend/nginx.conf` existe:
-
-- `location /api/ { proxy_pass http://backend:8000; }`
-
-Esto significa:
-
-- El navegador entra a **Frontend**: `http://localhost:18080`
-- Cuando el frontend llama `/api/...`, **Nginx** reenvía esa petición al contenedor **backend**
-- El navegador no necesita saber el puerto del backend
-
-### 5) ¿Para qué sirven los headers `X-Forwarded-*` y el `ProxyHeadersMiddleware`?
-
-Nginx agrega headers como:
-
-- `X-Forwarded-Proto` (http/https)
-- `X-Forwarded-Host` y `X-Forwarded-Port` (host/puerto real)
-- `X-Forwarded-For` (IP del cliente)
-
-El `ProxyHeadersMiddleware` en `backend/main.py` sirve para que FastAPI use esa información “real” cuando el backend está detrás de Nginx.
-
-Nota: para el CRUD básico normalmente no es obligatorio, pero es correcto tenerlo en este proyecto porque sí hay reverse proxy.
-
-### 6) ¿Para qué sirve `Cache-Control: no-cache` en `/api/mantenimiento/listar/{codigo}`?
-
-En algunos endpoints se envía:
-
-- `Cache-Control: no-cache, no-store, must-revalidate`
-
-Sirve para que el navegador NO muestre una respuesta vieja (cacheada) y siempre pida el historial actualizado.
-
-## Apuntes (para ir agregando)
-
-En esta sección puedes ir anotando dudas/respuestas del proyecto.
-
-- Tema:
-  - Explicación:
-
-## Comandos útiles
-
-**Ver los logs del servidor:**
-```bash
-docker-compose logs -f backend
-```
-
-**Detener todos los servicios:**
-```bash
-docker-compose stop
-```
-
-**Iniciar los servicios de nuevo:**
-```bash
-docker-compose start
-```
-
-**Eliminar todo y empezar de cero:**
-```bash
-docker-compose down
-```
-
-## Usuarios por defecto
-
-Al iniciar el sistema por primera vez, se crea automáticamente un usuario administrador:
+### Credenciales por Defecto
 - **Usuario**: `admin`
 - **Contraseña**: `admin123`
 
-## Puertos utilizados
+## 📊 Dashboard de Monitoreo
 
-- **18080**: Frontend (página web)
-- **18000**: Backend (API)
-- **13306**: MySQL (base de datos)
-- **27018**: MongoDB (base de datos)
+El sistema incluye un dashboard en tiempo real que muestra:
 
-## Características principales
+- **Distribución de Carga**: Visualización de peticiones por backend
+- **Estado de Servidores**: Salud y disponibilidad
+- **Métricas en Tiempo Real**: Requests por segundo, tasa de errores
+- **Alertas Visuales**: Indicadores de problemas
 
-- ✅ **Encriptación de contraseñas**: Las contraseñas se guardan de forma segura usando bcrypt
-- ✅ **Asociación de usuarios**: Cada máquina y mantenimiento está asociado al usuario que lo creó
-- ✅ **Validaciones**: El sistema valida que los datos sean correctos antes de guardarlos
-- ✅ **Manejo de errores**: Muestra mensajes claros cuando algo sale mal
+Características del dashboard:
+- Auto-reset después de 7s de inactividad
+- Detección automática de nuevos servidores
+- WebSocket para actualizaciones en vivo
+- Integración con logs de Nginx
 
-## Notas importantes
+## ⚖️ Load Balancer
 
-- Si cambias código JavaScript, limpia la caché del navegador (Ctrl+Shift+Suprimir)
-- Los datos se guardan en contenedores Docker, si los eliminas se pierden los datos
-- Para desarrollo, puedes modificar los archivos y recargar la página
+Nginx configura el balanceo de carga con múltiples algoritmos:
 
-## Soporte
+### Algoritmos Disponibles
+1. **Round Robin**: Distribución equitativa (por defecto)
+2. **Least Connections**: Servidor con menos conexiones activas
+3. **IP Hash**: Mismo cliente siempre al mismo servidor
+4. **Weighted Round Robin**: Distribución según capacidades
 
-Si tienes problemas:
-1. Revisa los logs con `docker-compose logs -f backend`
-2. Verifica que todos los servicios estén corriendo con `docker-compose ps`
-3. Reinicia los servicios con `docker-compose restart`
+### Configuración Actual
+- **Algoritmo**: Weighted Round Robin
+- **Pesos**: Backend-1 (3), Backend-2 (2), Backend-3 (3)
+- **Failover**: Detección automática de servidores caídos
+- **Health Checks**: Verificación cada 30s
+
+### Cambiar Algoritmo
+```bash
+# Editar configuración
+vim nginx/nginx.conf
+
+# Reiniciar Nginx
+docker-compose restart nginx
+```
+
+## 🧪 Testing de Carga
+
+Suite de pruebas automatizadas con k6:
+
+```bash
+# Ejecutar pruebas de saturación
+docker-compose --profile load-test up --build k6-saturator
+
+# Monitorear resultados
+docker-compose logs -f k6-saturator
+```
+
+### Métricas Evaluadas
+- **Throughput**: Requests por segundo
+- **Latencia**: Tiempos de respuesta (P95 < 500ms)
+- **Error Rate**: Tasa de fallos (< 0.1%)
+- **Distribución**: Balanceo entre backends
+
+## 📁 Estructura del Proyecto
+
+```
+PP1_01/
+├── backend/                 # API FastAPI
+│   ├── app/
+│   │   ├── daos/           # Data Access Objects
+│   │   ├── database/       # Configuración DB
+│   │   ├── dtos/           # Data Transfer Objects
+│   │   ├── routes/         # Endpoints API
+│   │   └── services/       # Lógica de negocio
+│   ├── main.py             # Entry point
+│   └── requirements.txt    # Dependencias
+├── frontend/               # Aplicación React
+│   ├── src/
+│   │   ├── components/     # Componentes UI
+│   │   ├── pages/          # Páginas principales
+│   │   └── App.jsx         # App principal
+│   ├── package.json        # Dependencias npm
+│   └── vite.config.js      # Configuración Vite
+├── dashboard/              # Dashboard monitoreo
+│   ├── server.py           # Servidor WebSocket
+│   ├── index.html          # Interfaz web
+│   └── requirements.txt    # Dependencias Python
+├── nginx/                  # Load balancer
+│   ├── nginx.conf          # Configuración principal
+│   └── Dockerfile          # Imagen Nginx
+├── k6/                     # Testing de carga
+│   ├── maquina-saturator.js # Script principal
+│   └── Dockerfile          # Imagen k6
+└── docker-compose.yml      # Orquestación completa
+```
+
+## 🔧 Configuración Avanzada
+
+### Variables de Entorno
+```bash
+# MySQL
+MYSQL_HOST=mysql
+MYSQL_USER=root
+MYSQL_PASSWORD=Clubpengui1
+MYSQL_DATABASE=proyecto_maquinas
+
+# MongoDB
+MONGO_HOST=mongodb
+MONGO_PORT=27017
+MONGO_DATABASE=mantenimientos
+
+# Redis
+REDIS_HOST=redis
+REDIS_PORT=6379
+```
+
+### Escalabilidad
+```bash
+# Escalar backends
+docker-compose up --scale backend-1=2 --scale backend-2=2 --scale backend-3=2 -d
+
+# Añadir nuevo backend
+# 1. Editar nginx.conf para incluir nuevo servidor
+# 2. Reiniciar nginx
+docker-compose restart nginx
+```
+
+## 📈 Monitoreo y Logs
+
+### Ver Logs Específicos
+```bash
+# Logs del load balancer
+docker-compose logs -f nginx
+
+# Logs de backends
+docker-compose logs -f backend-1
+docker-compose logs -f backend-2
+docker-compose logs -f backend-3
+
+# Logs del dashboard
+docker-compose logs -f dashboard
+
+# Logs de bases de datos
+docker-compose logs -f mysql
+docker-compose logs -f mongodb
+```
+
+### Métricas Importantes
+- **Disponibilidad**: > 99.9%
+- **Tiempo Respuesta**: P95 < 500ms
+- **Tasa Error**: < 0.1%
+- **Concurrencia**: 100+ usuarios simultáneos
+
+## 🔄 Ciclo de Vida de Desarrollo
+
+### Desarrollo Local
+```bash
+# Modo desarrollo con hot reload
+docker-compose --profile all up --build
+
+# Ver cambios en tiempo real
+# Frontend: Hot reload automático
+# Backend: Recarga automática con cambios
+```
+
+### Producción
+```bash
+# Despliegue producción
+docker-compose --profile all up -d --build
+
+# Verificación salud
+curl http://localhost:8888/health
+```
+
+### Testing
+```bash
+# Tests unitarios (backend)
+docker-compose exec backend-1 pytest
+
+# Tests de carga
+docker-compose --profile load-test up --build k6-saturator
+
+# Tests E2E (futuro)
+# npm run test:e2e
+```
+
+## 🚨 Troubleshooting
+
+### Problemas Comunes
+
+#### 1. "host not found" en Nginx
+```bash
+# Limpiar redes Docker
+docker network prune -f
+
+# Reiniciar servicios
+docker-compose down
+docker-compose --profile all up -d
+```
+
+#### 2. Dashboard no muestra datos
+```bash
+# Verificar logs de Nginx
+docker exec nginx_balancer tail -f /var/log/nginx/balanceo_siglab.log
+
+# Reiniciar dashboard
+docker-compose restart dashboard
+```
+
+#### 3. Conexiones rechazadas
+```bash
+# Verificar puertos en uso
+netstat -tulpn | grep :18080
+
+# Reiniciar servicios específicos
+docker-compose restart frontend
+```
+
+### Comandos de Mantenimiento
+```bash
+# Limpiar sistema completo
+docker-compose down --volumes --remove-orphans
+docker system prune -f
+
+# Reconstruir imágenes
+docker-compose build --no-cache
+
+# Backup de datos
+docker exec mysql_siglab mysqldump -u root -pClubpengui1 proyecto_maquinas > backup.sql
+```
+
+## 🤝 Contribución
+
+### Flujo de Trabajo
+1. Fork del repositorio
+2. Crear rama feature/nombre-feature
+3. Commits descriptivos
+4. Pull request con pruebas
+
+### Estándares de Código
+- **Python**: PEP 8, type hints
+- **JavaScript**: ESLint, Prettier
+- **Docker**: Multi-stage builds
+- **Documentación**: Markdown claro y actualizado
+
+## 📝 Licencia
+
+Proyecto desarrollado para la Universidad Central del Ecuador.
+Departamento de Ingeniería de Sistemas.
+
+## 📞 Soporte
+
+Para problemas o consultas:
+1. Verificar logs específicos del servicio
+2. Reviar documentación de cada componente
+3. Crear issue en el repositorio
+
+---
+
+**Versión**: 2.0.0  
+**Última Actualización**: 2026  
+**Arquitectura**: Microservicios con Load Balancer
